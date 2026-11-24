@@ -1,0 +1,443 @@
+keys,en
+ATTR_BRAWN,Brawn
+ATTR_BRAWN_DESC,The crane lifts 4 + Brawn.
+ATTR_DEXTERITY,Dexterity
+ATTR_DEXTERITY_DESC,Craft skills.
+ATTR_EMPATHY,Empathy
+ATTR_EMPATHY_DESC,Community and interior skills.
+ATTR_INGENUITY,Ingenuity
+ATTR_INGENUITY_DESC,Design skills.
+ATTR_LEADERSHIP,Leadership
+ATTR_LEADERSHIP_DESC,Cooperative skills.
+ATTR_RESILIENCE,Resilience
+ATTR_RESILIENCE_DESC,Practical skills and tools.
+ATTR_UNDERSTANDING,Understanding
+ATTR_UNDERSTANDING_DESC,Technical skills.
+BACKGROUND_APPRENTICE,Apprentice
+BACKGROUND_APPRENTICE_DESC,A generalist: +5 to every skill and 2 more skill points per level.
+BACKGROUND_ARCHITECT,Architect
+BACKGROUND_ARCHITECT_DESC,"Creative layouts: +20 Architecture, +10 Interior design."
+BACKGROUND_ARTIST,Artist
+BACKGROUND_ARTIST_DESC,"Colour and ornament: +20 Fine arts, +10 Interior design."
+BACKGROUND_BRICKLAYER,Bricklayer
+BACKGROUND_BRICKLAYER_DESC,"Stone and brick: +20 Masonry, +10 Structural engineering."
+BACKGROUND_CARPENTER,Carpenter
+BACKGROUND_CARPENTER_DESC,"Timber and furniture: +20 Carpentry, +10 Restoration."
+BACKGROUND_ELECTRICIAN,Electrician
+BACKGROUND_ELECTRICIAN_DESC,"Technical systems: +20 Electrical engineering, +10 Crane operation."
+BACKGROUND_ENGINEER,Engineer
+BACKGROUND_ENGINEER_DESC,"Bridges and towers: +20 Structural engineering, +10 Metalworking."
+BACKGROUND_GARDENER,Gardener
+BACKGROUND_GARDENER_DESC,"Parks and gardens: +20 Landscaping, +10 Ecology."
+BACKGROUND_MECHANIC,Mechanic
+BACKGROUND_MECHANIC_DESC,"Machinery: +20 Crane operation, +10 Metalworking."
+BACKGROUND_PLUMBER,Plumber
+BACKGROUND_PLUMBER_DESC,"Water systems: +20 Plumbing, +10 Recycling."
+BACKGROUND_RESTORER,Restorer
+BACKGROUND_RESTORER_DESC,"Existing structures: +20 Restoration, +10 Recycling."
+BUTTON_BACK,Back
+BUTTON_CONTINUE,Continue
+BUTTON_SAVE_AND_EXIT,Save and exit
+CALIBRATION_DONE,"Done! Lean to move the hook; lift and lower your right hand to place, your left hand to open the catalogue."
+CALIBRATION_HOLD_STILL,Hold still for a moment…
+CALIBRATION_MODE_KNEES,"Put the camera in front of you, a bit to the side, so that it sees your shoulders, elbows, wrists and hips. Kneel with your hands on the floor."
+CALIBRATION_MODE_PLANK,"Put the camera in front of you, a bit to the side, so that it sees your shoulders, elbows, wrists and hips. Rest on your hands; never lift both hands at once."
+CALIBRATION_MODE_SEATED,"Sit facing the camera with your hands on a table or your knees, so that it sees your shoulders, elbows and wrists."
+CALIBRATION_MODE_STANDING,"Stand facing the camera with your hands on a table or a chair back, so that it sees your shoulders, elbows and wrists."
+CALIBRATION_MOVE_FURTHER,"A little further, if it is comfortable; or skip this step."
+CALIBRATION_NOT_VISIBLE,"The camera does not see your shoulders, elbows and wrists well; move into the picture."
+CALIBRATION_NO_CONSENT,The camera is off. Allow it in the settings first.
+CALIBRATION_RESTART,Start again
+CALIBRATION_SKIP,Skip this step
+CALIBRATION_SKIPPED,Without the neutral posture the body controls stay off; the keyboard and the mouse work as always.
+CALIBRATION_STATUS_FAILED,The camera does not work; the keyboard and the mouse do.
+CALIBRATION_STATUS_OFF,The camera is off.
+CALIBRATION_STATUS_RUNNING,The camera sees you.
+CALIBRATION_STATUS_STARTING,Starting the camera…
+CALIBRATION_STEP_DOWN,"Lower your body a little, as far as comfortable, and stay there for a moment."
+CALIBRATION_STEP_LEFT,Shift your weight comfortably to the left and stay there for a moment.
+CALIBRATION_STEP_NEUTRAL,Take your comfortable neutral posture and stay there for a moment.
+CALIBRATION_STEP_RIGHT,Shift your weight comfortably to the right and stay there for a moment.
+CALIBRATION_STEP_UP,"Raise your body a little, as far as comfortable, and stay there for a moment."
+CALIBRATION_TITLE,Calibrate the body controls
+CATEGORY_ACCESS,Access
+CATEGORY_FURNITURE,Furniture
+CATEGORY_NATURE,Nature
+CATEGORY_RECREATION,Recreation
+CATEGORY_STRUCTURE,Structure
+CATEGORY_TOOLS,Tools
+CATEGORY_UTILITIES,Utilities
+CITY_BUILDER_SUMMARY,"{name}, level {level} ({rank}) · XP {xp} of {next} for the next level · karma {karma} ({reputation})"
+CITY_CHARACTER_SHEET,Character sheet
+CITY_CONTINUE,Continue building
+CITY_LOCKED_UNTIL,Opens after: {missions}
+CITY_NEEDS,What is needed:
+CITY_REPAIR,Repair
+CITY_REQUESTED_BY,Asked by {names}
+CITY_REVISIT,Visit and edit
+CITY_REWARD_AND_SIZE,Reward: {reward} · about {placements} placements
+CITY_START,Start
+CITY_TITLE,The cooperative's projects
+CITY_WISHES,Wishes (optional):
+COLOUR_NEEDS_PERK,Other colours come with the perk The Colourist.
+COMPLETE_CONTINUE,See the results
+COMPLETE_THANKS,{names}: “{thanks}”
+COMPLETE_TITLE,Moving in!
+CREATE_ATTRIBUTES,Attributes
+CREATE_BACKGROUND,Background
+CREATE_ERROR_ATTRIBUTE_RANGE,Every attribute must be between 1 and 10.
+CREATE_ERROR_ATTRIBUTE_TOTAL,Spend exactly 40 attribute points.
+CREATE_ERROR_BACKGROUND,Choose a background.
+CREATE_ERROR_NAME,Give your builder a name.
+CREATE_ERROR_SPECIALIST,Choose the skill of the specialist.
+CREATE_ERROR_TOO_MANY_TRAITS,Choose at most two traits.
+CREATE_ERROR_TRAIT,This trait is not available.
+CREATE_LOOK_CLOTHING,Clothes
+CREATE_LOOK_HAIR,Hair
+CREATE_LOOK_SKIN,Skin
+CREATE_NAME,Name
+CREATE_NAME_PLACEHOLDER,Your builder's name
+CREATE_POINTS_LEFT,Points left to spend: {count}
+CREATE_PRONOUNS,Pronouns (optional)
+CREATE_PRONOUNS_PLACEHOLDER,"e.g., she/her, they/them"
+CREATE_RESET,Start over
+CREATE_SKILLS,Skills
+CREATE_TITLE,Create your builder
+CREATE_TRAITS,"Traits (choose up to {count}, optional)"
+CREATE_UNLOCKED,Advanced parts you can use: {parts}
+CREATE_UNLOCKED_NONE,none yet; every basic part is always yours
+CREDITS_TEXT,"Baugenossen is made by Dinamika Games and its contributors, under the MIT License.
+
+Made with Godot Engine. The body tracking uses RTMO and RTMPose by OpenMMLab (Apache License 2.0) through ONNX Runtime (MIT); the camera runs only on this computer and nothing is recorded or sent.
+
+The pictures are placeholder drawings made in code. See THIRD_PARTY_NOTICES.md for all the licenses."
+ERROR_CANNOT_MIRROR,{part} can not be mirrored.
+ERROR_CROSSES_PART,It would cut through another part.
+ERROR_LOCKED,{part} is locked; see the character sheet.
+ERROR_NOTHING_THERE,There is nothing to pick here.
+ERROR_NOT_OFFERED,This project does not use {part}.
+ERROR_OUT_OF_BOUNDS,{part} does not fit on the site here.
+ERROR_OVERHANG,overhangs more than 2 cells; finish it with a wall or a beam below.
+ERROR_OVERLAP,Something is already there.
+ERROR_OVERWEIGHT,{part} weighs {mass}; your crane lifts {capacity}.
+ERROR_PROTECTED,This part belongs to the site and stays.
+ERROR_TOP_LANDING,the stairs need a floor at their top landing.
+ERROR_UNKNOWN_PART,Unknown part.
+ERROR_UNSUPPORTED,"{part} needs support: put it on the ground, a floor, a wall or a beam."
+GAME_SUBTITLE,A City Built Together
+GESTURE_MODE_KNEES,"On the knees, hands on the floor"
+GESTURE_MODE_PLANK,Supported plank (hands on the floor)
+GESTURE_MODE_SEATED,Seated
+GESTURE_MODE_STANDING,Standing
+HINT_DISTINCT_ROOMS,each needs a room of its own
+HINT_NOT_INDOORS,it must be inside a closed room
+HINT_NO_ROOM,no closed room yet: close every wall and the roof
+HINT_OPEN_CATALOGUE,"Choose a part in the catalogue below (Tab, or lift and lower your left hand)."
+HINT_ROOM_MISSING_THINGS,a room still lacks something
+HINT_ROOM_NO_ENTRANCE,the room has no way in
+HINT_ROOM_TOO_SMALL,the room is too small
+HINT_TOO_HIGH,the construction is too high
+HINT_UNREACHABLE,"nobody can reach it: add a door, stairs or a way"
+HINT_ZONES_NOT_CONNECTED,the places are not connected
+HINT_ZONE_MUST_STAY_FREE,this place must stay free
+HINT_ZONE_UNREACHABLE,nobody can get there yet
+HUD_CHECKLIST,Checklist
+HUD_COLOUR,Colour
+HUD_MIRROR,Mirror
+HUD_MOVE,Move
+HUD_PAUSE,Pause
+HUD_REDO,Redo
+HUD_REMOVE,Remove
+HUD_REVIEW,Review
+HUD_UNDO,Undo
+HUD_WISHES,Wishes
+INPUT_BODY,Body: {tracking}
+INPUT_BODY_UNCALIBRATED,Body: not calibrated (keys work)
+INPUT_KEYBOARD,Keyboard and mouse
+ITEM_BACK_WALL,Back wall
+ITEM_BACK_WALL_DESC,"The wall at the back of a room (2 × 6 cells), for the look."
+ITEM_BEAM_STEEL,Steel beam
+ITEM_BEAM_STEEL_DESC,A long beam of 6 cells.
+ITEM_BEAM_WOOD,Wooden beam
+ITEM_BEAM_WOOD_DESC,"A beam of 4 cells; carries floors and roofs, fixed to a wall or on support."
+ITEM_BED_SINGLE,Bed
+ITEM_BED_SINGLE_DESC,A bed for one person.
+ITEM_BENCH_BASIC,Bench
+ITEM_BENCH_BASIC_DESC,A bench for two.
+ITEM_CHAIR_BASIC,Chair
+ITEM_CHAIR_BASIC_DESC,A seat for one.
+ITEM_DOOR_WOOD,Wooden door
+ITEM_DOOR_WOOD_DESC,"A door of 4 cells; closed against the weather, open for people."
+ITEM_FLOOR_WOOD,Wooden floor
+ITEM_FLOOR_WOOD_DESC,A floor of 2 cells; people walk on it. Rests on walls or beams.
+ITEM_FLOWER_BED,Flower bed
+ITEM_FLOWER_BED_DESC,Flowers on 2 cells.
+ITEM_GRASS_PATCH,Grass
+ITEM_GRASS_PATCH_DESC,Grass on 2 cells of ground.
+ITEM_LADDER_BASIC,Ladder
+ITEM_LADDER_BASIC_DESC,A ladder up one storey.
+ITEM_LAMP_BASIC,Lamp
+ITEM_LAMP_BASIC_DESC,A standing lamp.
+ITEM_ROOF_FLAT,Flat roof
+ITEM_ROOF_FLAT_DESC,A roof of 2 cells; keeps the weather out. Rests on walls or beams.
+ITEM_SINK_BASIC,Sink
+ITEM_SINK_BASIC_DESC,A sink for washing.
+ITEM_SOFA_BASIC,Sofa
+ITEM_SOFA_BASIC_DESC,A comfortable seat for three.
+ITEM_STAIRS_BASIC,Stairs
+ITEM_STAIRS_BASIC_DESC,Stairs up one storey (6 × 6 cells). They need a floor at the top.
+ITEM_STOVE_BASIC,Stove
+ITEM_STOVE_BASIC_DESC,A stove for cooking.
+ITEM_TABLE_BASIC,Table
+ITEM_TABLE_BASIC_DESC,A table.
+ITEM_TOILET_BASIC,Toilet
+ITEM_TOILET_BASIC_DESC,A toilet.
+ITEM_TREE_LARGE,Large tree
+ITEM_TREE_LARGE_DESC,A grown tree with a wide crown.
+ITEM_TREE_SMALL,Small tree
+ITEM_TREE_SMALL_DESC,A young tree giving shade.
+ITEM_WALL_SHORT,Short wall
+ITEM_WALL_SHORT_DESC,"A wall of 2 cells, e.g., above a door."
+ITEM_WALL_STONE,Stone wall
+ITEM_WALL_STONE_DESC,A sturdy stone wall one storey high.
+ITEM_WALL_WOOD,Wooden wall
+ITEM_WALL_WOOD_DESC,A wall one storey (6 cells) high; keeps the weather out.
+ITEM_WINDOW_BASIC,Window
+ITEM_WINDOW_BASIC_DESC,A window (2 × 2 cells) over the back wall; brings daylight.
+ITEM_WINDOW_LARGE,Large window
+ITEM_WINDOW_LARGE_DESC,A wide window (4 × 2 cells).
+LANGUAGE_EN,English
+LOCKED_NEEDS,{part} is locked: it needs {needs}.
+MENU_CALIBRATION,Calibrate the body controls
+MENU_CONTINUE,Continue
+MENU_CREDITS,Credits
+MENU_NEW_GAME,New game
+MENU_QUIT,Quit
+MENU_SETTINGS,Settings
+MISSION_FIRST_HOME,The First Home
+MISSION_FIRST_HOME_BRIEF,"Tomás and Amina need a weatherproof home: somewhere to sleep, cook, eat, wash and use the toilet, all under one roof. One storey or two: it is up to you."
+MISSION_FIRST_HOME_THANKS,"A home of our own, and it is dry and warm. Thank you!"
+MISSION_GARDEN,A Garden for Everyone
+MISSION_GARDEN_BRIEF,"Leo and Ida would like a garden for the whole neighbourhood, with seats, trees and plenty of green, that everyone can walk to."
+MISSION_GARDEN_THANKS,The neighbours already meet here every evening!
+MISSION_PLACE_TO_SIT,A Place to Sit
+MISSION_PLACE_TO_SIT_BRIEF,"Vera walks to the market every day and would love a pleasant spot to rest on the way: somewhere two people can sit, under a tree, with a bit of green."
+MISSION_PLACE_TO_SIT_THANKS,What a lovely spot. Come and sit with me sometime!
+MISSION_WORKSHOP,The Neighbourhood Workshop
+MISSION_WORKSHOP_BRIEF,"Karim and Noor want a workshop where neighbours repair and make things together: two rooms, each with a table, a seat and a lamp."
+MISSION_WORKSHOP_THANKS,Two rooms full of ideas. We will fix the whole street's bicycles here!
+OBJ_GARDEN_FLOWER_BEDS,{required} flower beds ({current} of {required})
+OBJ_GARDEN_GARDEN_REACHABLE,Everyone can walk into the garden
+OBJ_GARDEN_GREEN,{required} cells of green ({current} of {required})
+OBJ_GARDEN_SEATS,Seats for {required} people ({current} of {required})
+OBJ_GARDEN_SEATS_EAST,Seats in the east ({current} of {required})
+OBJ_GARDEN_SEATS_WEST,Seats in the west ({current} of {required})
+OBJ_GARDEN_SUPPORTED,Everything stands safely
+OBJ_GARDEN_TREES,{required} trees ({current} of {required})
+OBJ_GARDEN_TWO_SEATING_AREAS,Seats in the west and in the east ({current} of {required})
+OBJ_HOME_BEDS,"Beds for {required} indoors, within reach ({current} of {required})"
+OBJ_HOME_GARDEN,A bench and green outside ({current} of {required})
+OBJ_HOME_GARDEN_BENCH,A bench outside ({current} of {required})
+OBJ_HOME_GARDEN_GREEN,{required} cells of green ({current} of {required})
+OBJ_HOME_ROOM,A closed room of at least 24 cells with a way in ({current} of {required})
+OBJ_HOME_SEATS,Seats for {required} indoors ({current} of {required})
+OBJ_HOME_SINK,A sink indoors ({current} of {required})
+OBJ_HOME_STOVE,A stove indoors ({current} of {required})
+OBJ_HOME_SUPPORTED,Everything stands safely
+OBJ_HOME_TABLE,A table indoors ({current} of {required})
+OBJ_HOME_TOILET,A toilet indoors ({current} of {required})
+OBJ_HOME_TWO_BEDROOMS,Two separate bedrooms ({current} of {required})
+OBJ_HOME_WINDOWS,{required} windows to the rooms ({current} of {required})
+OBJ_SIT_FLOWER_BEDS,{required} flower beds ({current} of {required})
+OBJ_SIT_GREEN,{required} cells of green ({current} of {required})
+OBJ_SIT_SEATS,Seats for {required} people ({current} of {required})
+OBJ_SIT_SUPPORTED,Everything stands safely
+OBJ_SIT_TREE,A tree ({current} of {required})
+OBJ_WORKSHOP_GARDEN,A bench and green outside ({current} of {required})
+OBJ_WORKSHOP_GARDEN_BENCH,A bench outside ({current} of {required})
+OBJ_WORKSHOP_GARDEN_GREEN,{required} cells of green ({current} of {required})
+OBJ_WORKSHOP_ROOMS,"Two rooms of at least 18 cells, each with a table, a seat and a lamp ({current} of {required})"
+OBJ_WORKSHOP_SUPPORTED,Everything stands safely
+PAUSE_BODY_RESUME_HINT,"To go on, hold your neutral posture, then lift and lower your right hand, or press P."
+PAUSE_RECENTRE,Re-centre the body controls here
+PAUSE_RESUME,Resume
+PAUSE_SAVE_AND_LEAVE,Save and go to the projects
+PAUSE_SAVE_AND_QUIT,Save and quit
+PAUSE_TITLE,Paused
+PAUSE_TRACKING_LOST,"The camera lost sight of you, so everything stopped. Take your time."
+PERK_AVAILABLE,available
+PERK_BUY,Take
+PERK_COLOURIST,The Colourist
+PERK_COLOURIST_DESC,Choose the colours of the parts (C).
+PERK_ERROR_NOT_IMPLEMENTED,coming later
+PERK_ERROR_NO_TOKEN,needs a perk token
+PERK_ERROR_OWNED,yours
+PERK_ERROR_REQUIREMENTS,requirements not met yet
+PERK_ERROR_UNKNOWN,unknown
+PERK_GOLDEN_HANDS,Golden Hands
+PERK_GOLDEN_HANDS_DESC,Alignment guides and the coordinates of the preview.
+PERK_GREEN_THUMB,Green Thumb
+PERK_GREEN_THUMB_DESC,Rare plants.
+PERK_JACK_OF_ALL_TRADES,Jack of All Trades
+PERK_JACK_OF_ALL_TRADES_DESC,"+5 to every skill, once."
+PERK_LIGHT_BRINGER,Light Bringer
+PERK_LIGHT_BRINGER_DESC,Large glass structures.
+PERK_LIVING_ROOFS,Living Roofs
+PERK_LIVING_ROOFS_DESC,Roof gardens.
+PERK_MASTER_CRANE_OPERATOR,Master Crane Operator
+PERK_MASTER_CRANE_OPERATOR_DESC,Lift connected groups at once.
+PERK_MASTER_OF_ARCHES,Master of Arches
+PERK_MASTER_OF_ARCHES_DESC,Wide arches.
+PERK_MENTOR,Mentor
+PERK_MENTOR_DESC,+10% XP on related missions.
+PERK_NOTHING_GOES_TO_WASTE,Nothing Goes to Waste
+PERK_NOTHING_GOES_TO_WASTE_DESC,Full material recovery.
+PERK_OWNED,yours
+PERK_PEOPLE_FIRST,People First
+PERK_PEOPLE_FIRST_DESC,Reveal more personal wishes.
+PERK_PREFABRICATOR,The Prefabricator
+PERK_PREFABRICATOR_DESC,Save connected parts as modules.
+PERK_SECOND_LIFE,Second Life
+PERK_SECOND_LIFE_DESC,Heritage repair parts.
+PERK_TREE_WHISPERER,The Tree Whisperer
+PERK_TREE_WHISPERER_DESC,Parts built into trees.
+PERK_UNDERGROUND_PIONEER,Underground Pioneer
+PERK_UNDERGROUND_PIONEER_DESC,Underground parts.
+PERK_VERTICAL_DREAMER,Vertical Dreamer
+PERK_VERTICAL_DREAMER_DESC,High-rise parts.
+PREVIEW_VALID,"{part} fits here: press Space, click, or lift and lower your right hand."
+RANK_APPRENTICE,Apprentice
+RANK_BUILDER,Builder
+RANK_CITY_BUILDER,City Builder
+RANK_CRAFTSPERSON,Craftsperson
+RANK_GRANDMASTER,Grandmaster
+RANK_JOURNEYMAN,Journeyman
+RANK_LIVING_LEGEND,Living Legend
+RANK_MASTER_BUILDER,Master Builder
+REMOVE_HINT,Move the hook onto a part to remove it.
+REMOVE_TARGET,Remove {part}: press Space or click.
+REPUTATION_COMMUNITY_BUILDER,Community Builder
+REPUTATION_HELPING_HAND,Helping Hand
+REPUTATION_LIVING_LEGEND,Living Legend
+REPUTATION_NEWCOMER,Newcomer
+REPUTATION_PILLAR,Pillar of the Community
+REPUTATION_TRUSTED_NEIGHBOUR,Trusted Neighbour
+REQUIREMENT_LINE,{name} {minimum} (you have {current})
+RESIDENT_AMINA,Amina
+RESIDENT_IDA,Ida
+RESIDENT_KARIM,Karim
+RESIDENT_LEO,Leo
+RESIDENT_NOOR,Noor
+RESIDENT_TOMAS,Tomás
+RESIDENT_VERA,Vera
+RESULTS_ALREADY_REWARDED,The residents thank you again; the rewards of this project were already given.
+RESULTS_ANOTHER_PROJECT,Choose another project
+RESULTS_LEVEL_UP,You reached level {level} ({rank})!
+RESULTS_PRACTICE,Practice: +1 in {skills}
+RESULTS_REVISIT,Back to this site
+RESULTS_TITLE,Well built!
+RESULTS_UNSPENT,"Unspent: {skill_points} skill points, {perk_tokens} perk tokens, {attribute_points} attribute points"
+REVIEW_BACK,Back to building
+REVIEW_COMPLETE,Hand over to the residents
+REVIEW_NOT_YET,Some needs are still open; you can keep building as long as you like.
+REVIEW_RESUBMIT,Hand over again
+REVIEW_TITLE,Review
+REWARD_XP_KARMA,{xp} XP and {karma} karma
+SAVE_ERROR_CORRUPT,The save is damaged and no backup could be read. It is kept as it is; a new game sets it aside.
+SAVE_ERROR_LOCKED,The save on disk can not be overwritten (see the message when loading).
+SAVE_ERROR_UNKNOWN_VERSION,The save comes from a newer version of the game; it is left untouched.
+SAVE_ERROR_VERIFY,Saving failed: the written file could not be read back. Your progress is still here; try again.
+SAVE_ERROR_WRITE,Saving failed. Your progress is still here; try again.
+SAVE_RECOVERED_FROM_BACKUP,"The last save was damaged, so the one before it was loaded."
+SCALE_100,Interface size 100%
+SCALE_125,Interface size 125%
+SCALE_150,Interface size 150%
+SCALE_75,Interface size 75%
+SETTINGS_AUDIO,Sound
+SETTINGS_CAMERA_ALLOW,Allow the camera
+SETTINGS_CAMERA_CONSENT,"The body controls use the camera. The pictures are processed on this computer only, in memory; nothing is recorded, saved or sent. The keyboard and the mouse keep working. Allow the camera?"
+SETTINGS_CAMERA_DECLINE,Not now
+SETTINGS_DEAD_ZONE,Dead zone
+SETTINGS_DISPLAY,Display
+SETTINGS_GESTURE_MODE,Posture
+SETTINGS_HIGH_CONTRAST,High contrast
+SETTINGS_INPUT,Controls
+SETTINGS_INPUT_BODY,"Body, with the camera"
+SETTINGS_INPUT_KEYBOARD,Keyboard and mouse
+SETTINGS_KEYS,Keys: A/D/W/S or the arrows move the hook · Space places · Tab opens the catalogue · X removes · G moves a part · Q mirrors · C changes the colour · Ctrl+Z undo · Ctrl+Y redo · Enter reviews · P or Esc pauses · +/− and the wheel zoom · I/J/K/L or the middle mouse button pan · M mutes · Home re-centres the body controls
+SETTINGS_MIRROR,Mirror the camera picture
+SETTINGS_MUSIC,Music (work songs and journeymen's songs)
+SETTINGS_REDUCED_MOTION,Reduced motion
+SETTINGS_SENSITIVITY,Sensitivity
+SETTINGS_SOUND,Sound effects
+SHEET_ANY_SKILL,Any skill
+SHEET_LEVEL,Level
+SHEET_PERKS,Perks
+SHEET_SKILL_LINE,{name}: {value} ({rank})
+SHEET_SUMMARY,"{pronouns} · {background} · traits: {traits}
+Level {level} ({rank}) · XP {xp} of {next} · karma {karma} ({reputation}) · the crane lifts {capacity}"
+SHEET_UNLOCKED,unlocked
+SHEET_UNLOCKS,Advanced parts
+SITE_FLAT,The flat plot
+SITE_MEADOW,The meadow
+SKILL_ARCHITECTURE,Architecture
+SKILL_CARPENTRY,Carpentry
+SKILL_COMMUNITY_ENGAGEMENT,Community engagement
+SKILL_CRANE_OPERATION,Crane operation
+SKILL_ECOLOGY,Ecology
+SKILL_ELECTRICAL_ENGINEERING,Electrical engineering
+SKILL_FINE_ARTS,Fine arts
+SKILL_GLASSWORKING,Glassworking
+SKILL_INTERIOR_DESIGN,Interior design
+SKILL_LANDSCAPING,Landscaping
+SKILL_MASONRY,Masonry
+SKILL_METALWORKING,Metalworking
+SKILL_PLUMBING,Plumbing
+SKILL_RANK_APPRENTICE,Apprentice
+SKILL_RANK_CRAFTSPERSON,Craftsperson
+SKILL_RANK_EXPERT,Expert
+SKILL_RANK_JOURNEYMAN,Journeyman
+SKILL_RANK_MASTER,Master
+SKILL_RANK_NOVICE,Novice
+SKILL_RECYCLING,Recycling
+SKILL_RESTORATION,Restoration
+SKILL_STRUCTURAL_ENGINEERING,Structural engineering
+STATE_BUILD,building
+STATE_CALIBRATION,calibrating
+STATE_CATALOGUE,catalogue
+STATE_COMPLETE,complete
+STATE_GESTURE_PENDING,gesture…
+STATE_PAUSED,paused
+STATE_REVIEW,review
+STATUS_AVAILABLE,open
+STATUS_COMPLETED,completed
+STATUS_IN_PROGRESS,in progress
+STATUS_LOCKED,not yet open
+STATUS_NEEDS_REPAIR,needs repair
+TOOL_MOVE,Moving: {part}
+TOOL_PLACE,Carrying: {part}
+TOOL_REMOVE,Removing
+TRACKING_FROZEN,hold on…
+TRACKING_LOST,tracking lost
+TRACKING_OK,tracking
+TRAIT_AUTODIDACT,Autodidact
+TRAIT_AUTODIDACT_DESC,(coming later)
+TRAIT_MODERNIST,Modernist
+TRAIT_MODERNIST_DESC,"+15 Metalworking and Glassworking, −10 Carpentry"
+TRAIT_NATURALIST,Naturalist
+TRAIT_NATURALIST_DESC,"+20 Ecology, −10 Metalworking"
+TRAIT_PERFECTIONIST,Perfectionist
+TRAIT_PERFECTIONIST_DESC,(coming later)
+TRAIT_SPECIALIST,Specialist
+TRAIT_SPECIALIST_DESC,"+20 to a chosen skill, −5 to all others"
+TRAIT_TRADITIONALIST,Traditionalist
+TRAIT_TRADITIONALIST_DESC,"+15 Carpentry and Masonry, −10 Electrical engineering"
+TUTORIAL_MOVE,"Move the hook (A, D, W, S, the arrows or the mouse)"
+TUTORIAL_PLACE,Place the part (Space or a click)
+TUTORIAL_REMOVE,"Remove a part (X, then Space)"
+TUTORIAL_SELECT,Choose a part in the catalogue (Tab or a click)
+TUTORIAL_TITLE,How to build:
+TUTORIAL_UNDO,Undo (Ctrl+Z)
+ZONE_EAST,the east
+ZONE_GARDEN,the garden
+ZONE_WEST,the west

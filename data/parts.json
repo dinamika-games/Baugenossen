@@ -1,0 +1,757 @@
+{
+  "categories": [
+    {
+      "id": "structure",
+      "name_key": "CATEGORY_STRUCTURE"
+    },
+    {
+      "id": "access",
+      "name_key": "CATEGORY_ACCESS"
+    },
+    {
+      "id": "furniture",
+      "name_key": "CATEGORY_FURNITURE"
+    },
+    {
+      "id": "utilities",
+      "name_key": "CATEGORY_UTILITIES"
+    },
+    {
+      "id": "nature",
+      "name_key": "CATEGORY_NATURE"
+    },
+    {
+      "id": "recreation",
+      "name_key": "CATEGORY_RECREATION"
+    },
+    {
+      "id": "tools",
+      "name_key": "CATEGORY_TOOLS"
+    }
+  ],
+  "parts": [
+    {
+      "id": "floor_wood",
+      "name_key": "ITEM_FLOOR_WOOD",
+      "description_key": "ITEM_FLOOR_WOOD_DESC",
+      "category_id": "structure",
+      "layer": "edge_h",
+      "footprint": [
+        2,
+        0
+      ],
+      "mass": 2,
+      "tags": [
+        "floor",
+        "walkable",
+        "weather_seal"
+      ],
+      "support_rule": "span",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "floor_wood",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1
+    },
+    {
+      "id": "wall_wood",
+      "name_key": "ITEM_WALL_WOOD",
+      "description_key": "ITEM_WALL_WOOD_DESC",
+      "category_id": "structure",
+      "layer": "edge_v",
+      "footprint": [
+        0,
+        6
+      ],
+      "mass": 3,
+      "tags": [
+        "wall",
+        "structural",
+        "weather_seal"
+      ],
+      "support_rule": "wall",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "wall_wood",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "wall_short",
+      "name_key": "ITEM_WALL_SHORT",
+      "description_key": "ITEM_WALL_SHORT_DESC",
+      "category_id": "structure",
+      "layer": "edge_v",
+      "footprint": [
+        0,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "wall",
+        "structural",
+        "weather_seal"
+      ],
+      "support_rule": "wall",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "wall_short",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "roof_flat",
+      "name_key": "ITEM_ROOF_FLAT",
+      "description_key": "ITEM_ROOF_FLAT_DESC",
+      "category_id": "structure",
+      "layer": "edge_h",
+      "footprint": [
+        2,
+        0
+      ],
+      "mass": 2,
+      "tags": [
+        "roof",
+        "weather_seal"
+      ],
+      "support_rule": "span",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "roof_flat",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "door_wood",
+      "name_key": "ITEM_DOOR_WOOD",
+      "description_key": "ITEM_DOOR_WOOD_DESC",
+      "category_id": "access",
+      "layer": "edge_v",
+      "footprint": [
+        0,
+        4
+      ],
+      "mass": 2,
+      "tags": [
+        "door",
+        "weather_seal",
+        "traversable"
+      ],
+      "support_rule": "wall",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "door_wood",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "back_wall",
+      "name_key": "ITEM_BACK_WALL",
+      "description_key": "ITEM_BACK_WALL_DESC",
+      "category_id": "structure",
+      "layer": "background",
+      "footprint": [
+        2,
+        6
+      ],
+      "mass": 1,
+      "tags": [
+        "enclosure_visual"
+      ],
+      "support_rule": "none",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "back_wall",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "window_basic",
+      "name_key": "ITEM_WINDOW_BASIC",
+      "description_key": "ITEM_WINDOW_BASIC_DESC",
+      "category_id": "structure",
+      "layer": "window",
+      "footprint": [
+        2,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "daylight"
+      ],
+      "support_rule": "none",
+      "craft_skill": "glassworking",
+      "material_id": "wood",
+      "visual_id": "window_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1
+    },
+    {
+      "id": "stairs_basic",
+      "name_key": "ITEM_STAIRS_BASIC",
+      "description_key": "ITEM_STAIRS_BASIC_DESC",
+      "category_id": "access",
+      "layer": "volume",
+      "footprint": [
+        6,
+        6
+      ],
+      "mass": 3,
+      "tags": [
+        "traversal"
+      ],
+      "support_rule": "stairs",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "stairs_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [
+        "mirror"
+      ],
+      "requirements": [],
+      "colour_variants": 1,
+      "interaction_offsets": [],
+      "landings": [
+        [
+          0,
+          0
+        ],
+        [
+          5,
+          6
+        ]
+      ]
+    },
+    {
+      "id": "bed_single",
+      "name_key": "ITEM_BED_SINGLE",
+      "description_key": "ITEM_BED_SINGLE_DESC",
+      "category_id": "furniture",
+      "layer": "volume",
+      "footprint": [
+        3,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "sleep_capacity:1"
+      ],
+      "support_rule": "base",
+      "craft_skill": "interior_design",
+      "material_id": "wood",
+      "visual_id": "bed_single",
+      "blocked_cells": [],
+      "allowed_transforms": [
+        "mirror"
+      ],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "table_basic",
+      "name_key": "ITEM_TABLE_BASIC",
+      "description_key": "ITEM_TABLE_BASIC_DESC",
+      "category_id": "furniture",
+      "layer": "volume",
+      "footprint": [
+        2,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "table"
+      ],
+      "support_rule": "base",
+      "craft_skill": "interior_design",
+      "material_id": "wood",
+      "visual_id": "table_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "chair_basic",
+      "name_key": "ITEM_CHAIR_BASIC",
+      "description_key": "ITEM_CHAIR_BASIC_DESC",
+      "category_id": "furniture",
+      "layer": "volume",
+      "footprint": [
+        1,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "seat_capacity:1"
+      ],
+      "support_rule": "base",
+      "craft_skill": "interior_design",
+      "material_id": "wood",
+      "visual_id": "chair_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [
+        "mirror"
+      ],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "sink_basic",
+      "name_key": "ITEM_SINK_BASIC",
+      "description_key": "ITEM_SINK_BASIC_DESC",
+      "category_id": "utilities",
+      "layer": "volume",
+      "footprint": [
+        2,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "hygiene"
+      ],
+      "support_rule": "base",
+      "craft_skill": "plumbing",
+      "material_id": "wood",
+      "visual_id": "sink_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1
+    },
+    {
+      "id": "toilet_basic",
+      "name_key": "ITEM_TOILET_BASIC",
+      "description_key": "ITEM_TOILET_BASIC_DESC",
+      "category_id": "utilities",
+      "layer": "volume",
+      "footprint": [
+        1,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "toilet"
+      ],
+      "support_rule": "base",
+      "craft_skill": "plumbing",
+      "material_id": "wood",
+      "visual_id": "toilet_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [
+        "mirror"
+      ],
+      "requirements": [],
+      "colour_variants": 1
+    },
+    {
+      "id": "stove_basic",
+      "name_key": "ITEM_STOVE_BASIC",
+      "description_key": "ITEM_STOVE_BASIC_DESC",
+      "category_id": "utilities",
+      "layer": "volume",
+      "footprint": [
+        2,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "cooking"
+      ],
+      "support_rule": "base",
+      "craft_skill": "electrical_engineering",
+      "material_id": "wood",
+      "visual_id": "stove_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1
+    },
+    {
+      "id": "lamp_basic",
+      "name_key": "ITEM_LAMP_BASIC",
+      "description_key": "ITEM_LAMP_BASIC_DESC",
+      "category_id": "utilities",
+      "layer": "decor",
+      "footprint": [
+        1,
+        1
+      ],
+      "mass": 1,
+      "tags": [
+        "lighting"
+      ],
+      "support_rule": "base",
+      "craft_skill": "electrical_engineering",
+      "material_id": "wood",
+      "visual_id": "lamp_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "bench_basic",
+      "name_key": "ITEM_BENCH_BASIC",
+      "description_key": "ITEM_BENCH_BASIC_DESC",
+      "category_id": "recreation",
+      "layer": "volume",
+      "footprint": [
+        3,
+        2
+      ],
+      "mass": 1,
+      "tags": [
+        "seat_capacity:2",
+        "bench"
+      ],
+      "support_rule": "base",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "bench_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [
+        "mirror"
+      ],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "flower_bed",
+      "name_key": "ITEM_FLOWER_BED",
+      "description_key": "ITEM_FLOWER_BED_DESC",
+      "category_id": "nature",
+      "layer": "decor",
+      "footprint": [
+        2,
+        1
+      ],
+      "mass": 1,
+      "tags": [
+        "planted_area"
+      ],
+      "support_rule": "base",
+      "craft_skill": "landscaping",
+      "material_id": "wood",
+      "visual_id": "flower_bed",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 3
+    },
+    {
+      "id": "tree_small",
+      "name_key": "ITEM_TREE_SMALL",
+      "description_key": "ITEM_TREE_SMALL_DESC",
+      "category_id": "nature",
+      "layer": "decor",
+      "footprint": [
+        3,
+        5
+      ],
+      "mass": 1,
+      "tags": [
+        "tree",
+        "shade"
+      ],
+      "support_rule": "base",
+      "craft_skill": "landscaping",
+      "material_id": "wood",
+      "visual_id": "tree_small",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1
+    },
+    {
+      "id": "grass_patch",
+      "name_key": "ITEM_GRASS_PATCH",
+      "description_key": "ITEM_GRASS_PATCH_DESC",
+      "category_id": "nature",
+      "layer": "surface",
+      "footprint": [
+        2,
+        1
+      ],
+      "mass": 1,
+      "tags": [
+        "green_area"
+      ],
+      "support_rule": "base",
+      "craft_skill": "landscaping",
+      "material_id": "wood",
+      "visual_id": "grass_patch",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1
+    },
+    {
+      "id": "ladder_basic",
+      "name_key": "ITEM_LADDER_BASIC",
+      "description_key": "ITEM_LADDER_BASIC_DESC",
+      "category_id": "access",
+      "layer": "volume",
+      "footprint": [
+        1,
+        6
+      ],
+      "mass": 1,
+      "tags": [
+        "vertical_access",
+        "traversal"
+      ],
+      "support_rule": "ladder",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "ladder_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1,
+      "interaction_offsets": [],
+      "landings": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          6
+        ]
+      ]
+    },
+    {
+      "id": "beam_wood",
+      "name_key": "ITEM_BEAM_WOOD",
+      "description_key": "ITEM_BEAM_WOOD_DESC",
+      "category_id": "structure",
+      "layer": "volume",
+      "footprint": [
+        4,
+        1
+      ],
+      "mass": 3,
+      "tags": [
+        "support",
+        "structural"
+      ],
+      "support_rule": "beam",
+      "craft_skill": "carpentry",
+      "material_id": "wood",
+      "visual_id": "beam_wood",
+      "blocked_cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ]
+      ],
+      "allowed_transforms": [],
+      "requirements": [],
+      "colour_variants": 1,
+      "interaction_offsets": []
+    },
+    {
+      "id": "wall_stone",
+      "name_key": "ITEM_WALL_STONE",
+      "description_key": "ITEM_WALL_STONE_DESC",
+      "category_id": "structure",
+      "layer": "edge_v",
+      "footprint": [
+        0,
+        6
+      ],
+      "mass": 4,
+      "tags": [
+        "wall",
+        "structural",
+        "weather_seal"
+      ],
+      "support_rule": "wall",
+      "craft_skill": "masonry",
+      "material_id": "stone",
+      "visual_id": "wall_stone",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "masonry",
+          "minimum": 40
+        }
+      ],
+      "colour_variants": 3
+    },
+    {
+      "id": "window_large",
+      "name_key": "ITEM_WINDOW_LARGE",
+      "description_key": "ITEM_WINDOW_LARGE_DESC",
+      "category_id": "structure",
+      "layer": "window",
+      "footprint": [
+        4,
+        2
+      ],
+      "mass": 2,
+      "tags": [
+        "daylight"
+      ],
+      "support_rule": "none",
+      "craft_skill": "glassworking",
+      "material_id": "glass",
+      "visual_id": "window_large",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "glassworking",
+          "minimum": 40
+        }
+      ],
+      "colour_variants": 1
+    },
+    {
+      "id": "tree_large",
+      "name_key": "ITEM_TREE_LARGE",
+      "description_key": "ITEM_TREE_LARGE_DESC",
+      "category_id": "nature",
+      "layer": "decor",
+      "footprint": [
+        5,
+        8
+      ],
+      "mass": 2,
+      "tags": [
+        "tree",
+        "shade"
+      ],
+      "support_rule": "base",
+      "craft_skill": "landscaping",
+      "material_id": "wood",
+      "visual_id": "tree_large",
+      "blocked_cells": [],
+      "allowed_transforms": [],
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "landscaping",
+          "minimum": 40
+        }
+      ],
+      "colour_variants": 1
+    },
+    {
+      "id": "sofa_basic",
+      "name_key": "ITEM_SOFA_BASIC",
+      "description_key": "ITEM_SOFA_BASIC_DESC",
+      "category_id": "furniture",
+      "layer": "volume",
+      "footprint": [
+        4,
+        2
+      ],
+      "mass": 2,
+      "tags": [
+        "seat_capacity:3"
+      ],
+      "support_rule": "base",
+      "craft_skill": "interior_design",
+      "material_id": "wood",
+      "visual_id": "sofa_basic",
+      "blocked_cells": [],
+      "allowed_transforms": [
+        "mirror"
+      ],
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "interior_design",
+          "minimum": 40
+        }
+      ],
+      "colour_variants": 3
+    },
+    {
+      "id": "beam_steel",
+      "name_key": "ITEM_BEAM_STEEL",
+      "description_key": "ITEM_BEAM_STEEL_DESC",
+      "category_id": "structure",
+      "layer": "volume",
+      "footprint": [
+        6,
+        1
+      ],
+      "mass": 4,
+      "tags": [
+        "support",
+        "structural"
+      ],
+      "support_rule": "beam",
+      "craft_skill": "metalworking",
+      "material_id": "steel",
+      "visual_id": "beam_steel",
+      "blocked_cells": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          5,
+          0
+        ]
+      ],
+      "allowed_transforms": [],
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "metalworking",
+          "minimum": 40
+        }
+      ],
+      "colour_variants": 1,
+      "interaction_offsets": []
+    }
+  ]
+}

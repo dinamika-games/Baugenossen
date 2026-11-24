@@ -1,0 +1,157 @@
+{
+  "_comment": "The music of the game (see THIRD_PARTY_NOTICES.md): work songs and the songs of the journeymen on their Wanderschaft, plus two rags. dev/music/fetch_music.py downloads each MIDI file from Wikimedia Commons (checking that it is still under its license) into assets/music/<slug>.mid; dev/music/render_music.py renders it into assets/music/<slug>.ogg. repeat plays a short song several times.",
+  "songs": [
+    {
+      "slug": "london_bridge",
+      "title": "London Bridge Is Falling Down",
+      "about": "An English nursery song about building a bridge again and again: with wood and clay, bricks and mortar, iron and steel",
+      "credit": "Melody traditional; set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3ALondon_Bridge_Is_Falling_Down_%28pg%29.mid",
+      "commons": "File:London Bridge Is Falling Down (pg).mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "es_klappert_die_muehle",
+      "title": "Es klappert die Mühle am rauschenden Bach",
+      "about": "A German song of the mill and the miller at work, day and night",
+      "credit": "Melody traditional; set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AEs_klappert_die_M%C3%BChle_am_rauschenden_Bach.mid",
+      "commons": "File:Es klappert die Mühle am rauschenden Bach.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "polly_wolly_doodle",
+      "title": "Polly Wolly Doodle",
+      "about": "A cheerful American song of the 1880s",
+      "credit": "Melody traditional; set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3APolly_Wolly_Doodle_%28pg%29.mid",
+      "commons": "File:Polly Wolly Doodle (pg).mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "auf_du_junger_wandersmann",
+      "title": "Auf, du junger Wandersmann",
+      "about": "The song of the journeymen setting out on their Wanderschaft, the years of travel from master to master (19th century)",
+      "credit": "Melody of the 19th century; set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AAuf%2C_du_junger_Wandersmann.mid",
+      "commons": "File:Auf, du junger Wandersmann.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "das_wandern",
+      "title": "Das Wandern ist des Müllers Lust",
+      "about": "The journeyman miller's wandering song, on a poem of Wilhelm Müller",
+      "credit": "Melody after Carl Friedrich Zöllner (1844); set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3ADas_Wandern_ist_des_M%C3%BCllers_Lust.mid",
+      "commons": "File:Das Wandern ist des Müllers Lust.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "wer_recht_in_freuden",
+      "title": "Wer recht in Freuden wandern will",
+      "about": "A wandering song on a poem of Emanuel Geibel",
+      "credit": "Melody by Franz Gustav Klauer (1840); set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AWer_recht_in_Freuden_wandern_will.mid",
+      "commons": "File:Wer recht in Freuden wandern will.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "muss_i_denn",
+      "title": "Muss i denn zum Städtele hinaus",
+      "about": "The Swabian song of the journeyman leaving his town and his sweetheart",
+      "credit": "Melody traditional; set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AMuss_i_denn_zum_St%C3%A4dtele_hinaus.mid",
+      "commons": "File:Muss i denn zum Städtele hinaus.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "im_krug_zum_gruenen_kranze",
+      "title": "Im Krug zum grünen Kranze",
+      "about": "A journeyman's song: two wanderers meet at the inn and share their wine",
+      "credit": "Melody traditional (volkstümlich); set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AIm_Krug_zum_gr%C3%BCnen_Kranze.mid",
+      "commons": "File:Im Krug zum grünen Kranze.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "wem_gott_will",
+      "title": "Wem Gott will rechte Gunst erweisen",
+      "about": "The good-fellow's wandering song on a poem of Joseph von Eichendorff",
+      "credit": "Melody by Friedrich Theodor Fröhlich (1833); set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AWem_Gott_will_rechte_Gunst_erweisen.mid",
+      "commons": "File:Wem Gott will rechte Gunst erweisen.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "wohlauf_die_luft",
+      "title": "Wohlauf, die Luft geht frisch und rein",
+      "about": "A wandering song on a poem of Joseph Victor von Scheffel",
+      "credit": "Melody by Valentin Eduard Becker (1861); set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AWohlauf%2C_die_Luft_geht_frisch_und_rein.mid",
+      "commons": "File:Wohlauf, die Luft geht frisch und rein.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "muede_kehrt_ein_wandersmann",
+      "title": "Müde kehrt ein Wandersmann zurück",
+      "about": "The wanderer comes home in the evening",
+      "credit": "Melody traditional, 19th century; set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AM%C3%BCde_kehrt_ein_Wandersmann_zur%C3%BCck.mid",
+      "commons": "File:Müde kehrt ein Wandersmann zurück.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "winter_ade",
+      "title": "Winter, ade",
+      "about": "A spring song: the winter goes, the road opens",
+      "credit": "Melody traditional; set and sequenced by Peter Gerloff (Rabanus Flavus)",
+      "license": "CC0",
+      "page": "https://commons.wikimedia.org/wiki/File%3AWinter%2C_ade.mid",
+      "commons": "File:Winter, ade.mid",
+      "format": "midi",
+      "repeat": 2
+    },
+    {
+      "slug": "the_entertainer",
+      "title": "The Entertainer",
+      "about": "Scott Joplin's ragtime (1902)",
+      "credit": "Scott Joplin (1868-1917); typeset and sequenced by the contributors to the Mutopia Project",
+      "license": "Public domain",
+      "page": "https://commons.wikimedia.org/wiki/File%3AJoplin_-_The_Entertainer.mid",
+      "commons": "File:Joplin - The Entertainer.mid",
+      "format": "midi"
+    },
+    {
+      "slug": "maple_leaf_rag",
+      "title": "Maple Leaf Rag",
+      "about": "Scott Joplin's ragtime (1899)",
+      "credit": "Scott Joplin (1868-1917); typeset and sequenced by the contributors to the Mutopia Project",
+      "license": "Public domain",
+      "page": "https://commons.wikimedia.org/wiki/File%3AJoplin_-_Maple_Leaf_Rag.mid",
+      "commons": "File:Joplin - Maple Leaf Rag.mid",
+      "format": "midi"
+    }
+  ]
+}

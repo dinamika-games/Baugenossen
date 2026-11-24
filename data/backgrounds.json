@@ -1,0 +1,113 @@
+{
+  "backgrounds": [
+    {
+      "id": "apprentice",
+      "name_key": "BACKGROUND_APPRENTICE",
+      "description_key": "BACKGROUND_APPRENTICE_DESC",
+      "skill_bonuses": {
+        "*": 5
+      },
+      "extra_points_per_level": 2
+    },
+    {
+      "id": "carpenter",
+      "name_key": "BACKGROUND_CARPENTER",
+      "description_key": "BACKGROUND_CARPENTER_DESC",
+      "skill_bonuses": {
+        "carpentry": 20,
+        "restoration": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "architect",
+      "name_key": "BACKGROUND_ARCHITECT",
+      "description_key": "BACKGROUND_ARCHITECT_DESC",
+      "skill_bonuses": {
+        "architecture": 20,
+        "interior_design": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "engineer",
+      "name_key": "BACKGROUND_ENGINEER",
+      "description_key": "BACKGROUND_ENGINEER_DESC",
+      "skill_bonuses": {
+        "structural_engineering": 20,
+        "metalworking": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "gardener",
+      "name_key": "BACKGROUND_GARDENER",
+      "description_key": "BACKGROUND_GARDENER_DESC",
+      "skill_bonuses": {
+        "landscaping": 20,
+        "ecology": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "artist",
+      "name_key": "BACKGROUND_ARTIST",
+      "description_key": "BACKGROUND_ARTIST_DESC",
+      "skill_bonuses": {
+        "fine_arts": 20,
+        "interior_design": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "bricklayer",
+      "name_key": "BACKGROUND_BRICKLAYER",
+      "description_key": "BACKGROUND_BRICKLAYER_DESC",
+      "skill_bonuses": {
+        "masonry": 20,
+        "structural_engineering": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "electrician",
+      "name_key": "BACKGROUND_ELECTRICIAN",
+      "description_key": "BACKGROUND_ELECTRICIAN_DESC",
+      "skill_bonuses": {
+        "electrical_engineering": 20,
+        "crane_operation": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "plumber",
+      "name_key": "BACKGROUND_PLUMBER",
+      "description_key": "BACKGROUND_PLUMBER_DESC",
+      "skill_bonuses": {
+        "plumbing": 20,
+        "recycling": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "mechanic",
+      "name_key": "BACKGROUND_MECHANIC",
+      "description_key": "BACKGROUND_MECHANIC_DESC",
+      "skill_bonuses": {
+        "crane_operation": 20,
+        "metalworking": 10
+      },
+      "extra_points_per_level": 0
+    },
+    {
+      "id": "restorer",
+      "name_key": "BACKGROUND_RESTORER",
+      "description_key": "BACKGROUND_RESTORER_DESC",
+      "skill_bonuses": {
+        "restoration": 20,
+        "recycling": 10
+      },
+      "extra_points_per_level": 0
+    }
+  ]
+}

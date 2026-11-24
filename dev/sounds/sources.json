@@ -1,0 +1,19 @@
+{
+  "_comment": "The sound effects of the game, each cut from a CC0 recording on Freesound (see THIRD_PARTY_NOTICES.md); dev/sounds/cut_sounds.py downloads the high-quality previews (checking that each is still under CC0) and cuts them into assets/sounds/. start and end are in seconds of the recording; a loop is cross-faded seamlessly at its seam; effects are those of sox. The cut points were chosen from the onsets of the loudness envelopes.",
+  "sounds": [
+    {"name": "place_wood", "freesound": 707864, "author": "L.i.Z.e.L.l.E_+", "title": "Hammer on Wood", "start": 0.24, "end": 0.56},
+    {"name": "place_stone", "freesound": 540913, "author": "Rosa-Orenes256", "title": "Big bricks falling sound.wav", "start": 0.0, "end": 0.55},
+    {"name": "place_metal", "freesound": 505955, "author": "jedg", "title": "Hammer metallic.wav", "start": 1.93, "end": 2.4},
+    {"name": "place_plant", "freesound": 505139, "author": "mitchanary", "title": "Foot_grass_4.wav", "start": 0.0, "end": 0.26},
+    {"name": "remove", "freesound": 776016, "author": "ethernel0", "title": "POP SFX Neutral", "start": 0.23, "end": 0.45},
+    {"name": "invalid", "freesound": 553297, "author": "sukondi", "title": "Knock on Door/Wood | Knocking 3 Times on Wood.mp3", "start": 0.28, "end": 0.48, "effects": ["lowpass", "2500"]},
+    {"name": "click", "freesound": 671105, "author": "adh.dreaming", "title": "Classic Click", "start": 0.0, "end": 0.08},
+    {"name": "catalogue", "freesound": 667180, "author": "MBPL", "title": "Turned page", "start": 0.0, "end": 0.3},
+    {"name": "undo", "freesound": 878248, "author": "Qvantor", "title": "UI Hover Micro Swish", "start": 0.0, "end": 0.16},
+    {"name": "cheer", "freesound": 848423, "author": "qubodup", "title": "Cheers and Yays", "start": 0.1, "end": 3.6},
+    {"name": "level_up", "freesound": 717771, "author": "1bob", "title": "victory chime", "start": 0.0, "end": 0.8},
+    {"name": "reward", "freesound": 541985, "author": "Rob_Marion", "title": "GASP_Chimes_Success_4.wav", "start": 0.0, "end": 0.9},
+    {"name": "crane", "freesound": 438133, "author": "craigsmith", "title": "G16-09-Factory-Overhead Crane.wav", "start": 35.0, "end": 38.0, "loop": true},
+    {"name": "ambience_birds", "freesound": 523372, "author": "nickmaysoundmusic", "title": "Woods_ambience_summer_UK_birds_light_wind_through_trees", "start": 84.0, "end": 96.0, "loop": true}
+  ]
+}

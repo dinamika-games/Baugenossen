@@ -1,0 +1,210 @@
+{
+  "perks": [
+    {
+      "id": "golden_hands",
+      "name_key": "PERK_GOLDEN_HANDS",
+      "description_key": "PERK_GOLDEN_HANDS_DESC",
+      "requirements": [
+        {
+          "type": "attribute",
+          "id": "D",
+          "minimum": 7
+        }
+      ],
+      "implemented": true
+    },
+    {
+      "id": "green_thumb",
+      "name_key": "PERK_GREEN_THUMB",
+      "description_key": "PERK_GREEN_THUMB_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "landscaping",
+          "minimum": 40
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "master_of_arches",
+      "name_key": "PERK_MASTER_OF_ARCHES",
+      "description_key": "PERK_MASTER_OF_ARCHES_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "masonry",
+          "minimum": 50
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "nothing_goes_to_waste",
+      "name_key": "PERK_NOTHING_GOES_TO_WASTE",
+      "description_key": "PERK_NOTHING_GOES_TO_WASTE_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "recycling",
+          "minimum": 40
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "prefabricator",
+      "name_key": "PERK_PREFABRICATOR",
+      "description_key": "PERK_PREFABRICATOR_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "architecture",
+          "minimum": 50
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "tree_whisperer",
+      "name_key": "PERK_TREE_WHISPERER",
+      "description_key": "PERK_TREE_WHISPERER_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "ecology",
+          "minimum": 60
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "vertical_dreamer",
+      "name_key": "PERK_VERTICAL_DREAMER",
+      "description_key": "PERK_VERTICAL_DREAMER_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "structural_engineering",
+          "minimum": 60
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "light_bringer",
+      "name_key": "PERK_LIGHT_BRINGER",
+      "description_key": "PERK_LIGHT_BRINGER_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "glassworking",
+          "minimum": 50
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "living_roofs",
+      "name_key": "PERK_LIVING_ROOFS",
+      "description_key": "PERK_LIVING_ROOFS_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "ecology",
+          "minimum": 40
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "underground_pioneer",
+      "name_key": "PERK_UNDERGROUND_PIONEER",
+      "description_key": "PERK_UNDERGROUND_PIONEER_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "structural_engineering",
+          "minimum": 40
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "colourist",
+      "name_key": "PERK_COLOURIST",
+      "description_key": "PERK_COLOURIST_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "fine_arts",
+          "minimum": 40
+        }
+      ],
+      "implemented": true
+    },
+    {
+      "id": "second_life",
+      "name_key": "PERK_SECOND_LIFE",
+      "description_key": "PERK_SECOND_LIFE_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "restoration",
+          "minimum": 60
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "master_crane_operator",
+      "name_key": "PERK_MASTER_CRANE_OPERATOR",
+      "description_key": "PERK_MASTER_CRANE_OPERATOR_DESC",
+      "requirements": [
+        {
+          "type": "skill",
+          "id": "crane_operation",
+          "minimum": 70
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "people_first",
+      "name_key": "PERK_PEOPLE_FIRST",
+      "description_key": "PERK_PEOPLE_FIRST_DESC",
+      "requirements": [
+        {
+          "type": "attribute",
+          "id": "E",
+          "minimum": 8
+        }
+      ],
+      "implemented": false
+    },
+    {
+      "id": "jack_of_all_trades",
+      "name_key": "PERK_JACK_OF_ALL_TRADES",
+      "description_key": "PERK_JACK_OF_ALL_TRADES_DESC",
+      "requirements": [
+        {
+          "type": "level",
+          "minimum": 10
+        }
+      ],
+      "implemented": true
+    },
+    {
+      "id": "mentor",
+      "name_key": "PERK_MENTOR",
+      "description_key": "PERK_MENTOR_DESC",
+      "requirements": [
+        {
+          "type": "any_skill",
+          "minimum": 100
+        }
+      ],
+      "implemented": false
+    }
+  ]
+}
