@@ -1,9 +1,9 @@
 extends "res://tests/godot/godot_test.gd"
-## Play the tutorial with the body, as a player does (DESIGN.md, 12): a
-## synthetic body leans and rises to move the hook and lifts its hands to open
-## the catalogue and to place; a helper picks the parts with the mouse. Check
-## that neither the keys nor the mouse move the hook, that the mission is
-## completed, rewarded and saved, and that the results follow.
+## Play the tutorial with the body, as a player does (DESIGN.md, 12): the
+## crane calibrates itself while the body holds still, then a synthetic body
+## picks blocks from the row with short dips, leans to move the hook and places
+## with push-ups. Check that neither the keys nor the mouse move the hook, that
+## the mission is completed and saved, and that the results follow.
 
 const GameFixture := preload("res://tests/godot/game_fixture.gd")
 const STEP := 1.0 / 60.0
@@ -15,15 +15,14 @@ var body := SyntheticPoseProvider.new()
 func _run() -> void:
     GameFixture.new(self, "body_loop")
     var game: Node = root.get_node("Game")
-    var settings: Node = root.get_node("Settings")
-    settings.set_value("calibration", _calibrate())
     game.pose_provider = body
-    game.session.new_game(GameFixture.new_character(game.content))
+    game.session.new_game()
     game.mission_id = "place_to_sit"
     site = load(game.SCREENS["build_site"]).instantiate()
     root.add_child(site)
-    await _frames(40)
+    await _frames(180)
     check_equal(site.dispatcher.state, InputDispatcher.BUILD, "the site is ready to build")
+    check(site.pose.calibration.has("h"), "the crane learned the posture by itself")
 
     var start: Vector2 = site.hook
     await _key(KEY_RIGHT, 0.5)
@@ -35,26 +34,25 @@ func _run() -> void:
     await _frames(5)
     check(site.hook.distance_to(start) < 0.01, "nor does the mouse")
 
-    await _lift("left")
-    check_equal(
-        site.dispatcher.state, InputDispatcher.CATALOGUE, "the left hand opens the catalogue"
-    )
-    site.hud.part_clicked.emit("bench_basic")
     # NOTE (mristin):
-    # After a choice, the hook waits for the neutral posture (half a second).
-    await _frames(45)
-    check_equal(site.carried, "bench_basic", "a helper picks the bench with the mouse")
-    await _move_hook_to(Vector2(6.5, 0.0))
-    await _lift("right")
-    check_equal(site.grid.instances.size(), 1, "the right hand places the bench")
-
-    site.hud.part_clicked.emit("tree_small")
-    await _frames(45)
-    await _move_hook_to(Vector2(12.5, 0.0))
-    await _lift("right")
-    site.hud.part_clicked.emit("grass_patch")
-    await _frames(45)
-    await _lift("right")
+    # The row is random; the test lays it out, and stops it from moving on.
+    site.queue.shift_seconds = 1.0e9
+    site.queue.slots.assign(
+        ["grass_patch", "bench_basic", "tree_small", "grass_patch", "bench_basic"]
+    )
+    site._choose_slot(0)
+    check_equal(site.carried, "grass_patch", "the hook carries the first block")
+    await _short_dip()
+    check_equal(site.carried, "bench_basic", "a short dip takes the next block")
+    check_equal(site.grid.instances.size(), 0, "without placing")
+    await _move_hook_to(6.5)
+    await _dip()
+    check_equal(site.grid.instances.size(), 1, "a push-up places the bench where it lands")
+    check_equal(site.carried, "tree_small", "and the next block of the row comes up")
+    await _move_hook_to(12.5)
+    await _dip()
+    check_equal(site.carried, "grass_patch", "the grass comes next")
+    await _dip()
     check_equal(site.grid.instances.size(), 3, "the tree and the grass are placed")
     check(site.report.can_submit(), "the tutorial is solved")
 
@@ -63,10 +61,9 @@ func _run() -> void:
     await _tap(KEY_SPACE)
     check_equal(site.dispatcher.state, InputDispatcher.COMPLETE, "Space hands it over")
     await _frames(240)
-    var character: Character = game.session.character
-    check(character.has_completed("place_to_sit") and character.xp == 20, "completed, 20 XP")
+    check(game.session.progress.has_completed("place_to_sit"), "completed")
     var saved := GameSession.new(game.content, game.session.repository)
-    check(saved.continue_game() and saved.character.has_completed("place_to_sit"), "and saved")
+    check(saved.continue_game() and saved.progress.has_completed("place_to_sit"), "and saved")
     await _tap(KEY_SPACE)
     await _frames(3)
     check_equal(
@@ -76,53 +73,34 @@ func _run() -> void:
     )
 
 
-## Calibrate with the synthetic body: leaning is a shift, rising a rise.
-func _calibrate() -> Dictionary:
-    var calibration := PoseCalibration.new()
-    var postures := {
-        "neutral": [0.0, 0.0],
-        "left": [-0.06, 0.0],
-        "right": [0.06, 0.0],
-        "up": [0.0, 0.12],
-        "down": [0.0, -0.12]
-    }
-    var probe := SyntheticPoseProvider.new()
-    for attempt in range(20):
-        if calibration.done():
-            break
-        var posture: Array = postures[calibration.current_step()]
-        probe.shift = posture[0]
-        probe.rise = posture[1]
-        for i in range(90):
-            probe.advance(1.0 / 30.0)
-            if calibration.feed(PoseMeasure.measure(probe.latest_frame()), probe.time):
-                break
-    return calibration.values
-
-
-## Lean and rise until the hook is near the target, then hold neutral.
-func _move_hook_to(target: Vector2) -> void:
+## Lean until the hook is over the column, then hold neutral.
+func _move_hook_to(x: float) -> void:
     for i in range(1200):
-        var delta: Vector2 = target - site.hook
-        if absf(delta.x) < 0.3 and absf(delta.y) < 0.3:
+        var delta: float = x - site.hook.x
+        if absf(delta) < 0.3:
             break
-        body.shift = clampf(delta.x * 0.03, -0.06, 0.06) if absf(delta.x) >= 0.3 else 0.0
-        body.rise = clampf(delta.y * 0.04, -0.12, 0.12) if absf(delta.y) >= 0.3 else 0.0
+        # NOTE (mristin):
+        # The shoulders moving right in the camera's picture are a lean to the
+        # player's left: the hook goes left.
+        body.shift = clampf(-delta * 0.03, -0.06, 0.06)
         await _frames(1)
     body.shift = 0.0
-    body.rise = 0.0
     await _frames(60)
 
 
-## Lift a hand and lower it again: one gesture.
-func _lift(side: String) -> void:
-    if side == "right":
-        body.lift_right = 0.25
-    else:
-        body.lift_left = 0.25
-    await _frames(24)
-    body.lift_right = 0.0
-    body.lift_left = 0.0
+## A short dip: down a little and up again.
+func _short_dip() -> void:
+    body.rise = -0.12
+    await _frames(30)
+    body.rise = 0.0
+    await _frames(40)
+
+
+## A push-up: down and up again.
+func _dip() -> void:
+    body.rise = -0.2
+    await _frames(30)
+    body.rise = 0.0
     await _frames(40)
 
 

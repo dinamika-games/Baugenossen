@@ -287,5 +287,11 @@ static func draw_person(
         body
     )
     var head := feet + Vector2(0, -height * 0.88)
+    if str(look.get("gender", "")) == "female":
+        # NOTE (mristin):
+        # Long hair, behind the head, down to the shoulders.
+        canvas.draw_rect(
+            Rect2(head + Vector2(-cell * 0.27, -cell * 0.1), Vector2(cell * 0.54, cell * 0.5)), hair
+        )
     canvas.draw_circle(head, cell * 0.24, skin)
     canvas.draw_arc(head, cell * 0.25, PI, TAU, 12, hair, cell * 0.12)

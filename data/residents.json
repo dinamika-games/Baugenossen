@@ -2,49 +2,49 @@
   "residents": [
     {
       "id": "vera",
-      "name_key": "RESIDENT_VERA",
+      "name": "Vera",
       "skin": 2,
       "hair": 1,
       "clothing": 3
     },
     {
       "id": "tomas",
-      "name_key": "RESIDENT_TOMAS",
+      "name": "Tomás",
       "skin": 0,
       "hair": 3,
       "clothing": 0
     },
     {
       "id": "amina",
-      "name_key": "RESIDENT_AMINA",
+      "name": "Amina",
       "skin": 4,
       "hair": 0,
       "clothing": 2
     },
     {
       "id": "leo",
-      "name_key": "RESIDENT_LEO",
+      "name": "Leo",
       "skin": 1,
       "hair": 2,
       "clothing": 1
     },
     {
       "id": "ida",
-      "name_key": "RESIDENT_IDA",
+      "name": "Ida",
       "skin": 3,
       "hair": 4,
       "clothing": 4
     },
     {
       "id": "karim",
-      "name_key": "RESIDENT_KARIM",
+      "name": "Karim",
       "skin": 5,
       "hair": 0,
       "clothing": 5
     },
     {
       "id": "noor",
-      "name_key": "RESIDENT_NOOR",
+      "name": "Noor",
       "skin": 2,
       "hair": 2,
       "clothing": 2

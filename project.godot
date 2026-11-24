@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+Languages="*res://scenes/languages/languages.gd"
 Vision="*res://scenes/vision/vision.tscn"
 Settings="*res://scenes/settings/settings.gd"
 Game="*res://scenes/session/game.gd"
@@ -39,7 +40,6 @@ project/assembly_name="Baugenossen"
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://translations/translations.en.translation")
 locale/fallback="en"
 
 [rendering]

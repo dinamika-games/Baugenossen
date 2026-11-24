@@ -13,9 +13,3 @@ func _init(tree: SceneTree, name: String) -> void:
     settings.load_settings()
     var game: Node = tree.root.get_node("Game")
     game.session = GameSession.new(game.content, SaveRepository.new(directory.path_join("saves")))
-
-
-static func new_character(content: ContentDb) -> Character:
-    var character := Character.create_default(content)
-    character.name = "Test Builder"
-    return character

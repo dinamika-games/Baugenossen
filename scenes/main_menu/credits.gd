@@ -6,9 +6,9 @@ extends Control
 
 func _ready() -> void:
     var column := Ui.screen(self, get_node("/root/Settings").get_value("high_contrast"))
-    column.add_child(Ui.label(tr("MENU_CREDITS"), Ui.TITLE_SIZE))
-    column.add_child(Ui.label(tr("CREDITS_TEXT"), Ui.FONT_SIZE, true))
-    var back := Ui.button(tr("BUTTON_BACK"), func() -> void: _game.go("main_menu"))
+    column.add_child(Ui.label(tr("Credits"), Ui.TITLE_SIZE))
+    column.add_child(Ui.label(Texts.of("CREDITS_TEXT"), Ui.FONT_SIZE, true))
+    var back := Ui.button(tr("Back"), func() -> void: _game.go("main_menu"))
     column.add_child(back)
     back.grab_focus.call_deferred()
 

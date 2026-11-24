@@ -100,30 +100,31 @@ static func panel(child: Control) -> PanelContainer:
     return result
 
 
-## A full-screen paper background with a centred, scrollable column.
-static func screen(root: Control, high_contrast := false) -> VBoxContainer:
+## A full-screen paper background with a column, which never scrolls: every
+## screen fits on one screen (see tests/godot/test_screens.gd); behind the
+## column, the player sees themselves dimly
+## in the camera picture, so that they see where their hand is (see
+## [CameraView]; in the menus only the hands count, so no skeleton).
+static func screen(root: Control, high_contrast := false, mirror := true) -> VBoxContainer:
     root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     root.theme = make_theme(high_contrast)
     var background := ColorRect.new()
     background.color = Color.WHITE if high_contrast else PAPER
     background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     root.add_child(background)
+    if mirror:
+        var camera := CameraView.new()
+        camera.cover = true
+        camera.picture_alpha = 0.3
+        camera.show_skeleton = false
+        camera.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+        root.add_child(camera)
     var margin := MarginContainer.new()
     margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     for side in ["left", "right", "top", "bottom"]:
         margin.add_theme_constant_override("margin_" + side, 32)
     root.add_child(margin)
-    var scroll := ScrollContainer.new()
-    scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-    margin.add_child(scroll)
     var column := vbox(14)
     column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    scroll.add_child(column)
+    margin.add_child(column)
     return column
-
-
-## The text of a key with English plural forms: KEY_ONE for 1, else KEY_OTHER.
-static func plural(key: String, count: int) -> String:
-    return TranslationServer.translate(key + ("_ONE" if count == 1 else "_OTHER")).format(
-        {"count": count}
-    )

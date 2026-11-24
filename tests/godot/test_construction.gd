@@ -287,10 +287,6 @@ func _test_mass_and_locks() -> void:
     weak.capacity = 2
     var result := Placement.validate(grid, content.part("wall_wood"), Vector2i(1, 0), false, weak)
     check_equal(result.reason_key, "ERROR_OVERWEIGHT", "a weak crane can not lift a wall")
-    var locked := Placement.Context.new()
-    locked.unlocked = {"wall_wood": true}
-    result = Placement.validate(grid, content.part("wall_stone"), Vector2i(1, 0), false, locked)
-    check_equal(result.reason_key, "ERROR_LOCKED", "a locked part can not be placed")
     var offered := Placement.Context.new()
     offered.offered = ["bench_basic"]
     result = Placement.validate(grid, content.part("wall_wood"), Vector2i(1, 0), false, offered)

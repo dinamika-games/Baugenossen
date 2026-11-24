@@ -1,31 +1,29 @@
 # Baugenossen — A City Built Together
 
-**Game design and implementation specification, v0.1**  
+**Game design and implementation specification, v0.2**  
 **Audience:** Claude Code and human contributors  
 **Language:** English (including source identifiers, content and documentation)  
 **Target:** Godot 4.x, GDScript, desktop, open-source project
 
 ## 0. Instructions for the implementation agent
 
-Read this entire document before implementing. Inspect the existing repository, project settings, dependencies and available pose-tracking code before changing anything. Preserve established conventions and working integrations. If starting from an empty repository, use the architecture below. Implement milestones in order, keeping the project playable and tests passing after each milestone. Do not silently invent additional game systems. Record deviations and unresolved questions in `docs/DECISIONS.md`. Use placeholder vector/rectangle art until the core mechanics work. Do not require a webcam for development or tests. Do not claim tests passed unless actually run. The numbers in this specification are initial balancing defaults, not empirically validated values.
+Read this entire document before implementing. Inspect the existing repository, project settings, dependencies and available pose-tracking code before changing anything. Preserve established conventions and working integrations. If starting from an empty repository, use the architecture below. Implement milestones in order, keeping the project playable and tests passing after each milestone. Do not silently invent additional game systems. Keep this document the single description of the game: when the design changes, change it here, and record the open questions in section 13. Use placeholder vector/rectangle art until the core mechanics work. Do not require a webcam for the tests: they drive a synthetic body. Do not claim tests passed unless actually run. The numbers in this specification are initial balancing defaults, not empirically validated values.
 
 ## 1. Vision and non-negotiable requirements
 
-Baugenossen is a nonviolent, mission-based, motion-controlled 2D construction sandbox RPG. It combines a cross-sectional view of buildings, the freedom to construct them element by element, and the character development of a classic role-playing game. The player works for a housing cooperative. Future residents and community members request useful things: houses, parks, bridges, schools, workshops, gardens and public spaces. The player designs and constructs them, rather than buying a predefined building. Residents have secure ownership or collective control through the cooperative; buildings are never speculative assets, sold for profit or used to extract rent in the game. Karma is gratitude and trust, not money.
+Baugenossen is a nonviolent, mission-based, motion-controlled 2D construction game, played with push-ups. It is very simple: five blocks wait in a row, the player picks the one they want and puts it where they want, in a cross-sectional view of the buildings. There is no character to build and no RPG: the game is the building. The player works for a housing cooperative. Future residents and community members request useful things: houses, parks, bridges, schools, workshops, gardens and public spaces. The player designs and constructs them, rather than buying a predefined building. Residents have secure ownership or collective control through the cooperative; buildings are never speculative assets, sold for profit or used to extract rent in the game.
 
 Design source: [Dinamika Games Manifesto](https://github.com/dinamika-games), consulted 2026-11-24. Apply its emphasis on movement, cooperation, nonviolent challenges, open-ended rules and sessions that are easy to stop. No ads, loot boxes, streak pressure, leaderboards, competitive scoring or monetization. No combat. No city management simulation (taxes, zoning, rent, traffic, elections, stock market). The city grows through completed projects, not passive economic optimization.
 
 ### Core loop
 
-1. Create a builder character; choose attributes, background and optional traits.
-2. Accept a construction request from named residents.
-3. Inspect the site, requirements, optional wishes and available parts.
-4. Select a component (wall, floor, furniture, etc.) from a catalogue.
-5. Operate a crane using body movement, preview a grid-snapped position, and place the component.
-6. Repeat, remove or rearrange components freely; inspect live objective feedback.
-7. Submit the construction when mandatory objectives are satisfied.
-8. Watch residents use the result; receive XP, karma and any skill progression.
-9. Allocate earned skill points/perks and select a new project. Stop or save at any point.
+1. Accept a construction request from named residents.
+2. Inspect the site and the checklist (the needs and the optional wishes).
+3. Pick a block from the row of five with a short dip; move the crane by leaning; see where the block lands.
+4. Place it with a push-up. A new block comes into the row; now and then the oldest block leaves it (first in, first out).
+5. Repeat; a helper may remove, move or undo with the keyboard and the mouse; inspect live objective feedback.
+6. Submit the construction when mandatory objectives are satisfied.
+7. Watch residents use the result, and select a new project. Stop or save at any point.
 
 Every mission specifies a problem, not a blueprint. No image matching or scoring against a canonical layout. At least two meaningfully different valid designs should be possible for each ordinary mission. Tutorials may suggest one design but should not require it unless teaching a single action.
 
@@ -35,17 +33,17 @@ Every mission specifies a problem, not a blueprint. No image matching or scoring
 
 Use a true 2D orthographic side elevation/cutaway, not isometric or 3D. Interior rooms and inhabitants are visible like a dollhouse. X increases rightwards, grid Y increases upwards; rendering converts Y to Godot's downward screen coordinates. Each grid cell is initially 32 px, representing roughly half a metre; a standard storey is 6 cells high. MVP site is 40×24 cells above a flat ground row at y=0. Coordinates outside the grid are invalid. Camera pan and zoom must not affect saved geometry. Future sites support terrain, underground and water via explicit cell properties, not a new coordinate system.
 
-Show crane mast, horizontal trolley, cable and hook. The hook carries a ghost of the currently selected part. The crane is a visual representation of input, not a physical simulation: no swinging load, inertia, collisions while transporting or punishment for dropping a block. Default crane reach covers the whole site; character upgrades expand load capacity, not essential accessibility.
+Show crane mast, horizontal trolley, cable and hook. The hook runs along the top of the site and moves only sideways; the carried part drops onto the levels below it (every height in the column under the hook at which it can be placed, from the top down) and the ghost shows where it lands. The crane is a visual representation of input, not a physical simulation: no swinging load, inertia, collisions while transporting or punishment for dropping a block. Default crane reach covers the whole site; character upgrades expand load capacity, not essential accessibility.
 
 ### 2.2 Grid layers and components
 
 Distinguish occupancy from boundaries. Use cell-centred volumes for furniture and obstacles, horizontal edges for floors/ceilings, vertical edges for walls and doors, and a separate background layer for back walls and windows. Use integer grid coordinates for authoritative state. An edge is canonical: H(x,y) separates (x,y-1) and (x,y); V(x,y) separates (x-1,y) and (x,y). A segment spanning N cells occupies N consecutive edges. Ground is an implicit support surface H(x,0). Floor at y=k supports objects whose bottom is y=k. No two parts may occupy the same exclusive slot; different layers can coexist. A window in the background does not block movement. A door occupies vertical boundary slots, is weather-sealing when closed and traversable when opened. Stairs occupy reserved cells and add a traversal link between landings. Roofs use horizontal or stepped boundary segments in MVP; curved geometry later.
 
-Component definition fields: stable `id`, `name_key`, `description_key`, `category_id`, `layer`, `footprint`, `edge_offsets`, `blocked_cells`, `support_points`, `interaction_offsets`, `tags`, `mass`, `material_id`, `requirements` (skill/attribute/perk), `visual_id`, `allowed_transforms`. Instance: unique ID, definition ID, anchor (x,y), transform, optional colour variant. Do not serialize translated names or scene node pointers. All coordinates derived from definitions. Horizontal mirroring only for asymmetric furniture in MVP; no arbitrary rotation. Keep definitions data-driven.
+Component definition fields: stable `id`, `name`, `description` (English, translated when shown), `category_id`, `layer`, `footprint`, `edge_offsets`, `blocked_cells`, `support_points`, `interaction_offsets`, `tags`, `mass`, `material_id`, `requirements` (skill/attribute/perk), `visual_id`, `allowed_transforms`. Instance: unique ID, definition ID, anchor (x,y), transform, optional colour variant. Do not serialize translated names or scene node pointers. All coordinates derived from definitions. Horizontal mirroring only for asymmetric furniture in MVP; no arbitrary rotation. Keep definitions data-driven.
 
 ### 2.3 Initial catalogue
 
-All listed basic pieces are available to every character, regardless of stats, to guarantee a solvable tutorial. Dimensions in cells/edge units; weights are abstract units.
+All listed pieces are available from the start (a mission may offer only some of them). Dimensions in cells/edge units; weights are abstract units.
 
 | ID | Slot / size | Mass | Tags / effect |
 |---|---|---:|---|
@@ -55,7 +53,7 @@ All listed basic pieces are available to every character, regardless of stats, t
 | roof_flat | H × 2 | 2 | roof, weather_seal |
 | door_wood | V × 4 | 2 | door, weather_seal, traversable |
 | back_wall | background 2×6 | 1 | enclosure_visual |
-| window_basic | background 2×2 | 1 | daylight; replaces background in its footprint |
+| window_basic | window 2×2 | 1 | daylight; over the back wall |
 | stairs_basic | volume 6×6 | 3 | traversal, two landing anchors |
 | bed_single | volume 3×2 | 1 | sleep_capacity:1 |
 | table_basic | volume 2×2 | 1 | table |
@@ -71,147 +69,67 @@ All listed basic pieces are available to every character, regardless of stats, t
 | ladder_basic | traversal 1×6 | 1 | vertical_access |
 | beam_wood | structural volume 4×1 | 3 | support |
 
-For window replacement implement an explicit atomic replacement command, or reject conflicts with a clear instruction to remove background first. In MVP furnishings use reserved footprint for placement; walking collision uses `blocked_cells` separately so tables, chairs and beds can be approached. Decorative overlays must never accidentally block navigation. Roof, floor and walls may be assembled from multiple segments. Advanced catalogue is unlocked by skills below; use placeholder art and definitions only when the corresponding mechanics exist.
+Windows live in their own slot (`window`) over the back wall and conflict only with other windows: a 2×2 window can not replace a part of a 2×6 back wall without a filler part. Removing a window shows the back wall again. In MVP furnishings use reserved footprint for placement; walking collision uses `blocked_cells` separately so tables, chairs and beds can be approached. Decorative overlays must never accidentally block navigation; in the MVP no furniture blocks walking either (people walk past tables and beds in the cutaway and use them from their bottom row), only beams. A door is 4 cells high; a wall with a door is a door plus a short wall of 2 above it. An edge may not cut through a volume (a wall through a bed, a floor through stairs), nor a volume be placed around an existing edge. Stairs are 6×6 cells; their landings are the bottom-left cell and the cell one storey up above their last column (mirrored: the other way round); ladders link their foot to the cell one storey up. Roof, floor and walls may be assembled from multiple segments. Advanced parts are unlocked by attributes (section 4.1): stone wall and steel beam (Strength 7), large tree (Hands 7), large window (Ideas 7), sofa for three (Heart 7); each uses mechanics which exist. The art is placeholder vector drawings per `visual_id` until the painted sprites replace them, with the same footprints.
 
 ### 2.4 Placement and editing
 
-Catalogue selection sets `carried_part_id`. Hook moves continuously but preview snaps to nearest valid grid anchor. Green outline for valid, red outline plus localized reason for invalid (out of bounds, overlap, unsupported, locked, protected, overweight). A confirm action commits one atomic command; invalid confirm leaves the world unchanged. Keep selected part for repeated placements. No resource loss for mistakes. Remove tool selects an instance; moving is an atomic remove/place transaction. Undo/redo includes additions, removals, replacements and moves, with a bounded history of 100 commands. New edit after undo clears redo. Initial site objects may be marked protected. Do not allow deleting terrain, protected items or mission boundaries. Design may be unfinished; missing enclosing walls are allowed during construction.
+**The row of blocks** (`BlockQueue`): five blocks wait in a row at the bottom of the screen, oldest first. A short dip (or Up/Down, or a click of a helper) chooses the next one, and the hook carries it. Placing a block takes it from the row, and a new block comes in at the end. Every 15 s the oldest block leaves and a new one comes in (first in, first out; a bar under the oldest block shows how soon), so that the choice changes while the player builds, a little like falling-block games, but with a bigger choice and no hurry: nothing is lost and nothing fails when a block leaves. The new blocks are drawn at random from the parts which the mission offers: the structure more often, and 4 times more often the parts with the tags which the unmet objectives ask for (a home gets its stove before long).
+
+The hook moves continuously sideways along the top of the site; the block drops: it lands at the first height, from the top down, at which it can be placed in the column under the hook (so the furniture goes in before the roof, as on a real site). The remove and the move tool of a helper point at the top part of the column the same way. Green outline for valid, red outline plus localized reason for invalid (out of bounds, overlap, unsupported, protected). A confirm action commits one atomic command; invalid confirm leaves the world unchanged. Keep selected part for repeated placements. No resource loss for mistakes. Remove tool selects an instance; moving is an atomic remove/place transaction. Undo/redo includes additions, removals and moves, with a bounded history of 100 commands, which is not saved (it starts empty whenever a site opens). New edit after undo clears redo. Initial site objects may be marked protected. Do not allow deleting terrain, protected items or mission boundaries. Design may be unfinished; missing enclosing walls are allowed during construction.
 
 ### 2.5 Simplified structural rules
 
-Not an engineering simulator. For MVP validate all new non-background parts have a support chain to terrain or existing anchored structural parts; furniture rests on floor/ground, walls rest on support at their base, floors/roofs attach to supporting walls or beams (allow basic overhang of 2 cells). Stairs need both landings before mission submission; allow placement with lower support while building. Recompute support graph after any edit; do not auto-collapse anything or injure residents. Removing a supporting part may leave a warning and an unsupported design; submission is blocked until fixed. A cycle of floating elements is not support. Later add material-specific spans (wood 6, stone 8, steel 12 cells as game abstractions) and load checks. Explain every invalid result to the player.
+Not an engineering simulator. For MVP validate all new non-background parts have a support chain to terrain or existing anchored structural parts; furniture rests on floor/ground, walls rest on support at their base, floors/roofs attach to supporting walls or beams (allow basic overhang of 2 cells): a contiguous run of floor or roof edges at one height is anchored where it rests on top of a supported wall or on a beam; the edges between the outermost anchors are supported (no span limit in the MVP), and up to 2 cells beyond. Farther edges are connected but overhanging: the player may build a span from one side (placing is allowed, with a warning), but nothing can stand on them and the submission is blocked until the span is closed. Stairs need both landings before mission submission; allow placement with lower support while building. Recompute support graph after any edit; do not auto-collapse anything or injure residents. Removing a supporting part may leave a warning and an unsupported design; submission is blocked until fixed. A cycle of floating elements is not support. Later add material-specific spans (wood 6, stone 8, steel 12 cells as game abstractions) and load checks. Explain every invalid result to the player.
 
 ## 3. Body controls and input architecture
 
 ### 3.1 Unified semantic actions
 
-All inputs emit the same normalized commands, regardless of backend: `move_hook(Vector2)`, `select_part(id)`, `confirm`, `cancel`, `open_catalogue`, `toggle_remove`, `undo`, `redo`, `pause`, `resume`, `pan_camera`, `zoom_camera`, `submit_mission`. Do not couple game rules to pose estimation. Keyboard/mouse fallback is complete and available permanently, not a debug-only mode.
+All inputs emit the same normalized commands, regardless of backend: `move_hook(Vector2)`, `next_block`, `previous_block`, `select_slot(index)`, `confirm`, `cancel`, `open_catalogue`, `toggle_remove`, `undo`, `redo`, `pause`, `resume`, `pan_camera`, `zoom_camera`, `submit_mission`. Do not couple game rules to pose estimation.
 
-| Action | Keyboard/mouse | Proposed body input |
+**The player plays with push-ups only: leaning moves the hook, a short dip picks the next block, a push-up places it.** The hands stay on the floor while building. The keyboard and the mouse never move the hook; they help with everything else (placing, choosing a block, removing, undo, pause, the camera of the view), e.g., for a helper next to the player. Without a camera, the build site says so.
+
+| Action | Body | Keyboard/mouse (helper) |
 |---|---|---|
-| Hook horizontal velocity | A/D or left/right | Shift torso weight left/right |
-| Hook vertical velocity | W/S or up/down | Raise/lower torso relative to calibrated neutral |
-| Place selected component | Space / confirm button | Deliberate right-hand lift and return |
-| Open catalogue | Tab | Deliberate left-hand lift |
-| Navigate catalogue | Mouse/arrows | Raised left hand as cursor (optional) |
-| Select catalogue item | Click/Enter | Dwell on item, then return hand; no simultaneous hand lifts |
-| Cancel | Escape | Cancel target dwell or keyboard/helper |
-| Remove/undo/redo | X / Ctrl+Z / Ctrl+Y | Catalogue tools (or helper) |
-| Pause | P / Escape menu | Rest posture or tracking lost; accessible pause button |
+| Hook horizontal velocity | Lean the torso left/right over the arms | — |
+| Hook vertical | None: the block drops and lands | — |
+| Next block of the row | A short dip (half a push-up, and back up) | Up/Down, a click on the block |
+| Place the block (or remove the pointed part) | A full dip (a push-up) | Space, left click |
+| Cancel | — | Escape, right click |
+| Remove/move/undo/redo | — | X / G / Ctrl+Z / Ctrl+Y and the buttons |
+| Pause | Tracking lost; the pause button | P / Escape |
+| Menus | The hand cursor (section 7) | Mouse |
+| Music / sound effects | — | M / S |
+| Quit | — | Escape twice within 2 s |
 
-Control mapping is a proposed implementation choice, subject to testing. Never require lifting both hands in a push-up position. Never infer body weight or true force from camera images; use calibrated visual proxies. Offer keyboard, supported plank, knees-down and seated gesture modes. Do not make real physical strength, speed or endurance affect XP, karma or RPG attributes. No mandatory hold durations, timed punishments or exercise streaks.
+Control mapping is a proposed implementation choice, subject to testing. Never require lifting a hand in the push-up position. Never infer body weight or true force from camera images; use calibrated visual proxies. The player plays in the push-up position: a supported plank, or, easier, on the knees with the hands on the floor; never standing or seated. Do not make real physical strength, speed or endurance affect the game. No mandatory hold durations, timed punishments or exercise streaks.
 
 ### 3.2 Pose provider
 
-Interface `PoseProvider`: `start()`, `stop()`, `latest_frame()`; frame includes monotonic timestamp, image dimensions, keypoints with confidence (shoulders, elbows, wrists, hips at minimum), optional model-provided visibility, mirror flag. Reuse Dinamika Games pose pipeline if available; inspect its API/license/platform support first. Otherwise add an adapter to a suitable local estimator only after keyboard slice is stable. Never fabricate tracking results. Use local processing; do not upload or store camera frames by default. Explicit consent before opening camera; close on exit. Handle missing camera/permissions/model gracefully.
+Interface `PoseProvider`: `start()`, `stop()`, `latest_frame()`; frame includes monotonic timestamp, image dimensions, keypoints with confidence (shoulders, elbows, wrists, hips at minimum), mirror flag. The vision runs locally in C# through ONNX Runtime on background threads: RTMO-t finds the person, RTMPose-t (17 COCO key points) follows them, and the hand detector YOLOX-Body-Head-Hand finds the raised hands for the hand cursor of the menus (it runs only while a screen shows the cursor). Never fabricate tracking results. The camera starts with the game (not in headless runs; `--no-camera` forbids it); its pictures stay in memory and are never saved, recorded or sent. Handle a missing camera, permission or model gracefully. A synthetic provider (a made-up body) drives the tests.
+
+**The pose log.** With `-- --log-pose[=<lines a second>]`, the build site logs the pose (also while it calibrates itself) and what the controls make of it as JSON lines (the key points with their confidence, the measures, the smoothed signal, the hook velocity, the gesture phases, the input state and the events; numbers only, never pictures). `dev/pose/analyze_pose_log.py` summarizes a log (tracking losses, low-confidence joints, gestures started vs. completed, hook movement while a gesture is pending, key point jumps) and writes a CSV. We log instead of recording frames, which are too heavy for the disk; the log finds most bugs.
 
 ### 3.3 Calibration and signals
 
-Camera angle is empirical: begin with front-oblique position where wrists, shoulders, elbows and hips are visible. Guide user to adjust framing. Collect neutral supported posture, comfortable left/right lean and comfortable raised/lowered positions; user may skip physical actions and use fallback. Horizontal proxy = shoulder midpoint relative to wrist midpoint, normalized by calibrated shoulder width and sign adjusted for mirroring. Vertical proxy = calibrated combination of elbow angle and shoulder-to-wrist projected distance (choose most reliable during test; never assume image vertical equals body height). Normalize using user-specific positive/negative extrema. Apply EMA smoothing (alpha 0.2 at 30 Hz, time-adjusted), dead zone 0.15, clamp to [-1,1]. Hook velocity = sign(s) * max(0,(abs(s)-0.15)/0.85)^1.5 * max_speed; initial max_speed 10 cells/s. Zero in neutral; clamp world position. Recenter calibration from explicit action, not continuously while user leans.
+Camera angle is empirical: the camera in front of the player, a bit to the side, seeing the shoulders and the elbows (and, deep in a push-up, still the elbows: the first pose logs showed them at the bottom edge). The camera does not see the hands on the floor (they are at the bottom edge of the picture or below it), so the controls rest on the shoulders and the elbows only:
 
-Hand lift detector uses calibrated wrist displacement relative to shoulders plus elbow/visibility checks; threshold and hysteresis configurable. Initial gesture qualification 200 ms, return to neutral 150 ms, cooldown 350 ms. These are debounce defaults, not exercise targets. Detect one event per lift; no repeats from held hand. Freeze hook during gesture recognition to prevent placement drift; capture target and validate on commit. In catalogue mode freeze crane; map active hand position to UI coordinates with calibration, dwell 650 ms, visible dwell progress; returning hand completes selection, then require stable neutral before resuming movement. Confidence below 0.6 for required joints or frames older than 250 ms: freeze immediately; after 500 ms show paused tracking overlay. Reacquisition requires stable neutral and explicit resume; never trigger queued placement. Prefer conservative false-negative behavior.
+- **Lean** = the shoulder midpoint relative to the elbow midpoint, horizontally, in shoulder widths, sign adjusted for mirroring (about ±0.25 when leaning, in the logs).
+- **Dip** = how far the lower elbow is below the shoulders, in shoulder widths: about 0.8 with straight arms, down to 0.2–0.5 in a push-up (the lower elbow, so that a lifted arm does not look like a dip). It is measured against a baseline of the straight arms which follows the player's posture (up at once, down over 4 s, not during a dip), since the straight-arm posture drifts while playing. A short dip is 0.45 of the range (0.4 shoulder widths) and back up; a full dip 0.75. A lean lowers the shoulders a little, too (0.2–0.3 of the range), which is not a dip.
+- **Lifts** = each elbow's height relative to its shoulder, relative to the other elbow (a lifted arm lifts its elbow; the body's own movement lifts both alike).
+- A key point counts from confidence 0.4 (the logs showed well-placed shoulders at 0.5); an unsure elbow is mirrored from the other one across the shoulders.
+
+**There is no calibration screen: the body controls calibrate themselves.** On every visit of a build site, the hook waits until the camera sees the player holding still for 2 s in the push-up position (or on the knees); the median posture becomes neutral, the lean gets a range of ±0.25 shoulder widths to full speed, and the dip a range of 0.4. These come from the first pose logs; tune them with more. "Learn my posture again" (in the pause, or Home) calibrates anew. Apply EMA smoothing to the lean (alpha 0.2 at 30 Hz, time-adjusted), dead zone 0.15, clamp to [-1,1]. Hook velocity = sign(s) * max(0,(abs(s)-0.15)/0.85)^1.5 * max_speed; initial max_speed 10 cells/s. Zero in neutral; the hook stands still during a dip and a lift. Recentre the calibration only on an explicit action, never continuously while the player leans. `dev/pose/replay_pose_log.gd` replays a pose log through the controls, to tune them on real movements.
+
+Hand lift detector: threshold and hysteresis configurable (0.6 and 0.3 shoulder widths). Initial gesture qualification 200 ms, return to neutral 150 ms, cooldown 350 ms; no dip counts while a hand is lifted. These are debounce defaults, not exercise targets. Detect one event per lift; no repeats from held hand. Freeze hook during gesture recognition to prevent placement drift; capture target and validate on commit. In catalogue mode freeze crane; map active hand position to UI coordinates with calibration, dwell 650 ms, visible dwell progress; returning hand completes selection, then require stable neutral before resuming movement. A required joint below confidence 0.4 or frames older than 250 ms: freeze immediately; after 500 ms show paused tracking overlay. Reacquisition requires stable neutral and explicit resume (the pause button, P, or, after 0.5 s of neutral, a full dip, which then only resumes); never trigger queued placement. In the catalogue, the raised hand's offset from its shoulder (the wrist, which comes into the picture when raised, else the elbow; ±2 shoulder widths across, ±1.5 up and down) points at the entries. Prefer conservative false-negative behavior.
 
 ### 3.4 Input state machine
 
-States: `CALIBRATION`, `BUILD`, `CATALOGUE`, `GESTURE_PENDING`, `PAUSED`, `REVIEW`, `COMPLETE`. Only BUILD accepts movement and construction commits; REVIEW is read-only until edit/resume. Pause cancels pending gesture, freezes hook and dwell, preserves project. Catalogue selection returns to BUILD after neutral rearm. Handle keyboard and gesture events through a single dispatcher; simultaneous confirms in one tick produce at most one command. A helper can use mouse to browse parts while the active player controls crane; later formalize local cooperation without requiring a second camera.
+States: `CALIBRATION`, `BUILD`, `CATALOGUE`, `GESTURE_PENDING`, `PAUSED`, `REVIEW`, `COMPLETE`. Only BUILD accepts movement and construction commits; REVIEW is read-only until edit/resume. Pause cancels pending gesture, freezes hook and dwell, preserves project. The catalogue state is left from the first versions, for the tests of the hand gestures; the build site does not use it. Handle keyboard and gesture events through a single dispatcher; simultaneous confirms in one tick produce at most one command. A helper can click a block of the row while the active player controls the crane; later formalize local cooperation without requiring a second camera.
 
-## 4. Character creation and RPG rules
+## 4. Progress
 
-The avatar is a fictional builder, independent of the real player's fitness. Choose name, pronouns (optional), appearance (skin/hair/clothing palettes), background, attributes and up to two optional traits. No attribute has a penalty tied to real body shape or age. Character creation can be reset before first mission.
-
-### 4.1 BUILDER attributes
-
-Seven integer attributes, each 1–10, total 40 at creation. Default B=6,U=6,I=6,L=5,D=6,E=6,R=5. No permanent class restrictions.
-
-| ID | Name | Effect |
-|---|---|---|
-| B | Brawn | Crane capacity = 4 + B abstract mass units |
-| U | Understanding | Base technical skills and technical unlocks |
-| I | Ingenuity | Base design skills and inventive perks |
-| L | Leadership | Base cooperative skills; optional helper/module capabilities later |
-| D | Dexterity | Base craft skills and advanced placement tools |
-| E | Empathy | Base community/interior skills; reveals optional preferences |
-| R | Resilience | Base practical skills and advanced tool capabilities; no forced real-world endurance |
-
-All basic parts mass ≤4, so every legal build can use them. Do not degrade basic control responsiveness for low Dexterity. No hidden stamina meter that forces physical exertion; Resilience is an RPG prerequisite, not a fitness score. Every five character levels grant one attribute point, maximum 10 per attribute; store earned points until spent.
-
-### 4.2 Skills
-
-Skill range 0–100. Initial skill = clamp(5 + 2*A + 2*B + background bonus + trait modifiers, 0,100), where A/B are the two indicated attributes. Store initial base and earned investment separately; attribute increase raises related skill base by 2, capped at 100, without destroying invested points. Skill IDs are stable snake_case.
-
-| Skill | Attributes | Example unlocks at 40 / 60 / 80 |
-|---|---|---|
-| Crane operation | D,B | alignment guides / group lifting / heavy modules |
-| Masonry | B,U | stone walls / arches / large masonry spans |
-| Carpentry | D,U | timber frames / wooden bridges / engineered timber |
-| Architecture | I,U | shaped roofs / module templates / custom assemblies |
-| Structural engineering | U,I | support overlay / cantilevers / long-span structures |
-| Electrical engineering | U,D | lights variants / elevators / solar systems |
-| Plumbing | U,D | showers / irrigation / water reuse |
-| Landscaping | I,E | mature trees / ponds / terraced gardens |
-| Metalworking | B,D | steel beams / trusses / large steel spans |
-| Glassworking | I,D | large windows / glass roofs / glazed facades |
-| Interior design | I,E | furniture sets / flexible interiors / custom finishes |
-| Restoration | R,D | repair tools / heritage elements / adaptive reuse |
-| Recycling | R,U | reclaimed parts / material recovery / reusable assemblies |
-| Fine arts | I,D | murals / mosaics / custom ornaments |
-| Ecology | U,E | habitats / green roofs / wetland systems |
-| Community engagement | E,L | extra wishes / cooperative assistance / community commissions |
-
-Skill ranks: Novice 0–19; Apprentice 20–39; Journeyman 40–59; Craftsperson 60–79; Expert 80–99; Master 100. Each skill unlock is an explicit requirement on a component/tool/perk, never a hard-coded string comparison. Universal catalogue is exempt. Unlocks expand creativity, not basic mission solvability. Locked entries visible with explanation and preview. Use 10 discretionary skill points per new character level; 1 point = 1 skill unit. No investment beyond cap. Do not silently spend points. Skill practice: on first completion of a mission, award +1 to each of up to three craft skills with the most qualifying unique final components (minimum 3 distinct instances); stable skill-ID tie break. Never award points for repeated place/remove, undo/redo or idling. Editing completed missions grants no repeat XP or practice. MVP may omit practice until progression phase; if omitted label it as not implemented.
-
-### 4.3 Backgrounds
-
-| Background | Initial bonuses | Character flavour |
-|---|---|---|
-| Apprentice | +5 all skills | Generalist; +2 discretionary points per level |
-| Carpenter | +20 Carpentry, +10 Restoration | Timber and furniture |
-| Architect | +20 Architecture, +10 Interior design | Creative layouts |
-| Engineer | +20 Structural engineering, +10 Metalworking | Bridges and towers |
-| Gardener | +20 Landscaping, +10 Ecology | Parks and gardens |
-| Artist | +20 Fine arts, +10 Interior design | Colour and ornament |
-| Bricklayer | +20 Masonry, +10 Structural engineering | Stone and brick |
-| Electrician | +20 Electrical engineering, +10 Crane operation | Technical systems |
-| Plumber | +20 Plumbing, +10 Recycling | Water systems |
-| Mechanic | +20 Crane operation, +10 Metalworking | Machinery |
-| Restorer | +20 Restoration, +10 Recycling | Existing structures |
-
-Backgrounds provide bonuses and flavour, not exclusive items: any character can eventually unlock anything by meeting requirements. Apprentice is deliberately generous; revisit balance in playtesting.
-
-### 4.4 Optional traits
-
-Select zero, one or two. Apply additively at creation; clamp final skill value. Traits affect fictional capabilities only. Initial implemented traits: Traditionalist (+15 Carpentry, +15 Masonry, -10 Electrical engineering); Modernist (+15 Metalworking, +15 Glassworking, -10 Carpentry); Naturalist (+20 Ecology, -10 Metalworking); Specialist (+20 selected skill, -5 all others). Additional future traits: Perfectionist (+20% XP from optional objectives, -10% base mission XP); Autodidact (+1 extra practice point on qualifying missions, -10 initial discretionary points, only enable when initial point budget exists). Do not present unimplemented traits as selectable.
-
-### 4.5 XP, levels, karma
-
-Start level 1, XP 0, karma 0. Cumulative XP needed for level L = 100*(L-1)*L/2. Example: level 2=100, level 3=300, level 4=600, level 5=1000. Process multiple level-ups if a reward crosses several thresholds. Grant 10 skill points (12 Apprentice) at each level gained; 1 perk token at each multiple of 3; 1 attribute point at each multiple of 5. No max level initially. Rank labels at thresholds: 1 Apprentice, 5 Journeyman, 10 Craftsperson, 15 Builder, 20 Master Builder, 30 City Builder, 40 Grandmaster, 50 Living Legend. Rank is cosmetic.
-
-Karma is non-spendable trust. Reputation thresholds: 0 Newcomer; 100 Helping Hand; 500 Trusted Neighbour; 1500 Pillar of the Community; 5000 Community Builder; 15000 Living Legend. Mandatory completion grants fixed XP and karma; each fulfilled optional wish adds its own fixed reward. No negative karma for abandoning or editing. Reward claims keyed by mission ID and objective ID; atomic save prevents duplication. A completed mission may be revisited; first-time optional wishes can grant their karma/XP once, but do not repeat base reward or practice. Optional goals never block the next mandatory mission unless explicitly stated. All early missions unlock via prerequisite completion, not a narrow character build.
-
-### 4.6 Perks
-
-Perks cost one token, are unique, and require the following. Implement only when the effect exists. No token is consumed on invalid purchase.
-
-| ID / Name | Requirement | Effect |
-|---|---|---|
-| golden_hands / Golden Hands | D≥7 | Additional alignment guides and snap preview options |
-| green_thumb / Green Thumb | Landscaping≥40 | Rare plant catalogue |
-| master_of_arches / Master of Arches | Masonry≥50 | Wide arches |
-| nothing_goes_to_waste / Nothing Goes to Waste | Recycling≥40 | Full material recovery when finite material missions exist |
-| prefabricator / The Prefabricator | Architecture≥50 | Save connected selections as reusable modules |
-| tree_whisperer / The Tree Whisperer | Ecology≥60 | Tree-integrated building parts |
-| vertical_dreamer / Vertical Dreamer | Structural engineering≥60 | Advanced high-rise components |
-| light_bringer / Light Bringer | Glassworking≥50 | Large glass structures |
-| living_roofs / Living Roofs | Ecology≥40 | Roof gardens |
-| underground_pioneer / Underground Pioneer | Structural engineering≥40 | Underground components (where site permits) |
-| colourist / The Colourist | Fine arts≥40 | Custom colour palette |
-| second_life / Second Life | Restoration≥60 | Heritage repair components |
-| master_crane_operator / Master Crane Operator | Crane operation≥70 | Lift existing connected groups as a transaction |
-| people_first / People First | E≥8 | Reveal additional optional personal wishes |
-| jack_of_all_trades / Jack of All Trades | Level≥10 | +5 all skills, once |
-| mentor / Mentor | Any skill=100 | +10% XP on related future missions |
-
-The MVP does not need all 16 perks; implement Golden Hands (guide overlay), Colourist (palette variants), and Jack of All Trades (progression logic) first. A hidden or disabled future perk must not consume tokens. Module creation later validates every contained component and support on placement; modules do not bypass skill or mass constraints. Module placement is one undoable transaction.
+There is no character, no XP, no karma, no levels, no attributes and no perks: the first versions had them, and they made the game too complicated for a game played with push-ups. The cooperative's progress is the completed missions and the fulfilled wishes (`Progress`, saved). A mission opens when its prerequisites are completed. A completed mission may be revisited and edited; its completion counts once. Every part is available from the start; a mission may offer only some of them (the tutorial: the bench, the tree and the grass).
 
 ## 5. Mission evaluation
 
@@ -233,21 +151,24 @@ Build a navigation graph of walkable standing cells with floor support, clearanc
 - `green_area(minimum_cells)`; count unique planted ground cells, not stacked decorations.
 - `preserve_instances(ids)`; protected starting components unchanged.
 - `max_height(cells)`, `forbidden_occupancy(zone_id)`, `no_unsupported_parts()`.
+- `all_of(objectives[])`: a composite, for the wishes which combine conditions (e.g., an outdoor bench and four green cells).
 - Future: `daylight`, `wheelchair_access`, `material_budget`, `water_clearance`, `habitat`, `heritage_preservation`. Do not activate missions until all their predicates are implemented.
 
-Mission definition: `id`, `title_key`, `brief_key`, `site_id`, `requester_ids`, `prerequisite_ids`, `min_karma` (default 0), `available_catalogue_ids` (optional restrictions), `mandatory_objectives`, `optional_objectives`, `base_xp`, `base_karma`, `completion_dialogue_key`, `npc_spawn_defs`. Objectives have stable IDs, predicate parameters, text keys and optional reward values. Invalid or unknown predicate type fails content loading with a developer diagnostic, never silently passes.
+`usable_tag_count` takes, besides `tag`, `minimum` and `zone`: `indoors`, `outdoors`, `reachable` (default true; false for trees, flowers and windows) and `count_instances` (count parts instead of summing capacities like `seat_capacity:2`). \"Windows facing enclosed cells\" counts windows with a cell inside a room. `preserve_instances` refers to the IDs of the site's protected initial parts, numbered 1, 2, … in the order of the site's `initial_instances`. Each objective has its own text key per mission (`OBJ_<MISSION>_<ID>`), since the same ID means different things in different missions.
+
+Mission definition: `id`, `title_key`, `brief_key`, `site_id`, `requester_ids`, `prerequisite_ids`, `available_catalogue_ids` (optional restrictions: the parts which the row of blocks offers), `mandatory_objectives`, `optional_objectives`, `completion_dialogue_key`, `npc_spawn_defs`. Objectives have stable IDs, predicate parameters and text keys. Invalid or unknown predicate type fails content loading with a developer diagnostic, never silently passes.
 
 ### 5.3 Initial missions (MVP)
 
 All initial tasks use only universal parts. Explicit completion button, enabled once valid. No time limit. Site geometry may be reused between missions, but each site has separate saved state.
 
-**M01 — A Place to Sit** (tutorial; 20 XP, 20 karma). A neighbour wants a pleasant spot to rest. Flat 20×12 site. Mandatory: 1 reachable bench (2 seats), 1 tree, 2 cells of green area, no unsupported parts. Optional: 2 flower beds (+5 XP, +5 karma). Teach catalogue, hook movement, preview, place, remove and undo. This is a suggested small tutorial, not a mandatory blueprint.
+**M01 — A Place to Sit** (tutorial). A neighbour wants a pleasant spot to rest. Flat 20×12 site. Mandatory: reachable seats for 2 (a bench or two chairs), 1 tree, 2 cells of green area, no unsupported parts. Optional: 2 flower beds (+5 XP, +5 karma). Teach catalogue, hook movement, preview, place, remove and undo. This is a suggested small tutorial, not a mandatory blueprint.
 
-**M02 — The First Home** (100 XP, 100 karma; after M01). Two residents need a weatherproof home. Site 40×24. Mandatory: at least one accessible enclosed room of ≥24 cells; two reachable beds inside enclosed rooms; one reachable table and two seats, stove, sink and toilet, all inside accessible enclosed rooms; no unsupported components. Optional: two distinct sleeping rooms (+20 XP, +20 karma), two windows facing enclosed cells (+10/+10), outdoor bench and four green cells (+10/+10). No requirement for separate kitchens/bathrooms in this simplified first mission. A single-storey house and a two-storey house with stairs should both be valid. Starting entry is at left ground edge; ground is walkable unless blocked. Ensure enough plot space for both designs. Residents move in after submission and use reachable fixtures.
+**M02 — The First Home** (after M01). Two residents need a weatherproof home. Site 40×24. Mandatory: at least one accessible enclosed room of ≥24 cells; two reachable beds inside enclosed rooms; one reachable table and two seats, stove, sink and toilet, all inside accessible enclosed rooms; no unsupported components. Optional: two distinct sleeping rooms (+20 XP, +20 karma), two windows facing enclosed cells (+10/+10), outdoor bench and four green cells (+10/+10). No requirement for separate kitchens/bathrooms in this simplified first mission. A single-storey house and a two-storey house with stairs should both be valid. Starting entry is at left ground edge; ground is walkable unless blocked. Ensure enough plot space for both designs. Residents move in after submission and use reachable fixtures.
 
-**M03 — A Garden for Everyone** (100 XP, 100 karma; after M02). Mandatory: 4 accessible seats, 12 unique green cells, 2 trees, reachable garden zone; optional 4 flower beds (+20/+20), seating in two separate zones (+10/+10). Different seating and planting layouts accepted. Do not require ponds until available.
+**M03 — A Garden for Everyone** (after M02). Mandatory: 4 accessible seats, 12 unique green cells, 2 trees, reachable garden zone; optional 4 flower beds (+20/+20), seating in two separate zones (+10/+10). Different seating and planting layouts accepted. Do not require ponds until available.
 
-**M04 — The Neighbourhood Workshop** (150 XP, 120 karma; after M03). Mandatory: 2 distinct reachable enclosed rooms ≥18 cells each, each with a table, seat and lamp; no unsupported parts. Optional garden/bench (+20/+20). Use existing furniture definitions; later add workbenches.
+**M04 — The Neighbourhood Workshop** (after M03). Mandatory: 2 distinct reachable enclosed rooms ≥18 cells each, each with a table, seat and lamp; no unsupported parts. Optional garden/bench (+20/+20). Use existing furniture definitions; later add workbenches.
 
 ### 5.4 Campaign backlog (not part of first vertical slice)
 
@@ -278,68 +199,66 @@ For each future mission create actual content records, objective tests and at le
 
 ## 6. Residents, rewards and persistent world
 
-Residents are fictional NPCs with stable IDs, name keys, appearance, preferences and dialogue. Request cards describe the people and the practical problem in plain English. Optional wishes are always inspectable once revealed; Empathy/Community engagement may expose extra wishes but never hide mandatory requirements. MVP uses simple authored dialogue, no generative AI. Upon completion, spawn residents at entry, navigate to usable fixtures, play idle/use animations, and display a short thank-you. NPCs never permanently obstruct construction. If a saved project becomes invalid after editing, show its current unmet requirements; allow recovery without losing historical karma. Do not animate NPCs using invalid unreachable fixtures. No injury simulation.
+Residents are fictional NPCs with stable IDs, name keys, appearance, preferences and dialogue. Request cards describe the people and the practical problem in plain English. Optional wishes are always inspectable once revealed; Wishes never hide mandatory requirements. MVP uses simple authored dialogue, no generative AI. Upon completion, spawn residents at entry, navigate to usable fixtures, play idle/use animations, and display a short thank-you. NPCs never permanently obstruct construction. If a saved project becomes invalid after editing, show its current unmet requirements; allow recovery without losing the completion. Do not animate NPCs using invalid unreachable fixtures. No injury simulation.
 
-Persistent city map: initially a simple illustrated list/map of projects (available, in progress, completed, needs repair). All sites persist. Later show a continuous side-scrolling city if useful, but do not require it for MVP. Site revisits support editing. Character progression and claimed rewards are global; site geometry, undo session and camera are local. Session end: after a mission show results and explicit options to save and exit, revisit or choose another project. No automatically starting the next mission. Pause any time.
+Persistent city map: a list of the projects (locked, available, in progress, completed, needs repair: a completed site edited into an invalid state; nothing is taken back). All sites persist. Later show a continuous side-scrolling city if useful, but do not require it for MVP. Site revisits support editing. The progress is global; site geometry, undo session and camera are local. Session end: after a mission show results and explicit options to save and exit, revisit or choose another project. No automatically starting the next mission. Pause any time.
 
-Local cooperation: first version permits a second person to handle catalogue or planning using mouse while builder operates the crane, with one shared project. Later add explicit architect/operator roles, turn taking and optional role swapping. No individual competitive scoring. Do not require networking or multiple webcams.
+Local cooperation: the first version permits a second person to click the blocks of the row, remove and undo with the mouse while the builder operates the crane with the body, with one shared project. Later add explicit architect/operator roles, turn taking and optional role swapping. No individual competitive scoring. Do not require networking or multiple webcams.
 
 ## 7. Interface and art direction
 
-- Main menu: New game, Continue, Settings, Credits, Quit.
-- Character creation: name and avatar, seven attributes with remaining points, background, traits, derived skills preview; validate exactly 40 attribute points before continue.
-- Site selection: request, difficulty/estimated number of placements (not a fitness target), requirements and rewards.
-- Build HUD: site viewport, crane, selected part/ghost, bottom catalogue with category tabs (Structure, Access, Furniture, Utilities, Nature, Recreation, Tools), left/right mission checklist, pause and undo. Show a clear tracking status and current input mode.
-- Review: mandatory/optional objectives, highlight unmet locations, return to editing or complete. No submission if invalid.
-- Results: resident response, earned XP/karma, level changes, unspent points, save/exit.
-- Character sheet: attributes, skills, background, traits, perks, next-level XP, karma/reputation. Explain all locked unlocks.
-- Settings: input source, calibration, camera mirror, sensitivity/dead zone, sound/music, zoom/UI scale, language, reduced motion, high contrast. Always keep fallback controls usable.
+- The game runs full screen (`--windowed` for a window). There is no settings screen: the camera starts with the game, M switches the music, S the sound effects, Escape twice within 2 s quits, and the rest is chosen on the command line (`--high-contrast`, `--reduced-motion`, `--no-mirror`, `--sensitivity=`, `--dead-zone=`, `--mute`, `--no-music`). The calibration is remembered.
+- **The hand cursor.** In the menus, a raised hand moves a cursor (the hand detector finds it; the shoulders tell where a resting hand is, which does not count). The cursor glides, sticks to the button under it (drawn towards its middle, leaving only beyond its edge), and clicks after the hand holds still for 2 s while a ring fills around the button; it clicks once until the hand leaves. No screen scrolls: everything fits on one screen of 1280×720, in every language (a test checks it). Choices are big ◀/▶ choosers, never drop-down lists, which a hand can not open. The build site switches the cursor off while building: the hands stay on the floor there.
+- **The player sees themselves**: the mirrored camera picture dimly behind every menu (without the skeleton: only the hands count there), and as an inset on the build site with the key points (green: sure, red: unsure).
+- Main menu: big signboard buttons (a cream board in a wooden frame with nail heads; the main one orange; they grow a little under the mouse): Continue, New game, Credits, Quit.
+- New game goes straight to the city map. City map: the projects as compact cards on one screen (title, state, residents, problem); the needs and the wishes are on the build site's checklist.
+- Build HUD: site viewport, crane, selected part/ghost, the camera inset, the row of five big blocks at the bottom (the chosen one framed, a bar under the oldest one), right mission checklist, undo/redo/remove/review and an always visible pause button. Show a clear tracking status and current input state.
+- Review: mandatory/optional objectives with hints, highlight unmet locations, return to editing or complete. No submission if invalid.
+- Results: resident response and the wishes fulfilled; then another project, back to the site, or save and exit. Nothing starts automatically.
 
-Art: warm hand-drawn 2D cutaway, readable silhouettes, visible residents and interiors. Side-view perspective consistent across parts. Use separate transparent sprites and grid footprint metadata; no baked English text into assets. Placeholder assets are acceptable for initial development. Valid/invalid state must be indicated by icon/text as well as colour. UI must scale to 1280×720 and larger without overlapping the site or hiding pause. Keep catalogue navigable with large targets and dwell. Music and effects optional; no stressful timer sounds. Use original or compatibly licensed assets and record provenance.
+Art: warm hand-drawn 2D cutaway, readable silhouettes, visible residents and interiors. Side-view perspective consistent across parts. Use separate transparent sprites and grid footprint metadata; no baked English text into assets. Placeholder vector art is used until the sprites arrive. Valid/invalid state must be indicated by icon/text as well as colour. UI must scale to 1280×720 and larger without overlapping the site or hiding pause.
+
+Sound: CC0 effects cut from recordings on Freesound (`dev/sounds/sources.json`), and music rendered from CC0 and public-domain MIDI files on Wikimedia Commons with instruments synthesized in code (`dev/music/sources.json`): work songs and the songs of the journeymen on their Wanderschaft, plus two rags. No stressful timer sounds; an invalid placement is a soft knock. Record the provenance of every asset in THIRD_PARTY_NOTICES.md.
 
 ## 8. Localization
 
-English is the canonical source language. All text visible to players uses Godot `tr()` or equivalent translation lookup. Use stable keys such as `ATTR_BRAWN`, `SKILL_CARPENTRY`, `ITEM_FLOOR_WOOD`, `MISSION_FIRST_HOME_BRIEF`, `ERROR_UNSUPPORTED`, `OBJECTIVE_TAG_COUNT`. Store content in language-neutral JSON and translations in UTF-8 CSV (`keys,en` initially). No German-only names except brand Baugenossen; English subtitle A City Built Together. Support locale selection even if English is the only shipped locale. Use parameterized format placeholders, not concatenated sentences. Plural handling for quantities; test long translations/pseudo-localization and Unicode player names. Never use display text as ID. Store locale separately from game data.
+English is the source language; the translations use gettext, as the other texts of the game: every visible text in the code is a whole English sentence in `tr("...")`, with named placeholders (`{part}`), never glued together from pieces and never used as an ID. The content (`data/*.json`) holds its texts in English (`name`, `description`, `title`, `brief`, `thanks`, `text`), translated when shown. The messages which the game passes around by an ID (the reasons of the placement, the hints, the messages of the saves, the ranks, the input states) keep their stable IDs and get their English texts from one table, `Texts.MESSAGES`.
 
-## 9. Suggested technical architecture
+`dev/translations/extract.py` collects all of them into `translations/messages.pot` and merges it into `translations/<code>.po` for every language listed in `translations/languages.json` (the only place to add a language); `dev/translations/check.py` fails on a translation which breaks a placeholder, and reports what is still to review. A new translation stays marked fuzzy until a native speaker reviewed it in the game; the game shows it anyway. The language is chosen on the main menu (or `--lang=<code>`) and remembered apart from the game data. German is the first translation.
 
-Godot 4.x stable version compatible with existing repository; pin exact version in README after inspection. GDScript typed where practical. Separate pure game model from nodes. Do not introduce a database, cloud service or mandatory external runtime. Prefer built-in Godot facilities; if using ONNX/native extension, document platform/version and graceful fallback. Target desktop Windows, Linux and macOS; verify actual platform support rather than promise it.
+The grammar (`Grammar`) fills the placeholders and lets a translation:
+
+- agree a word with a number: `{count|Sitz|Sitze}` picks the form by the plural rule of the language (one/other; one/few/many for Slavic languages; French counts zero as one);
+- follow the builder's gender: `{builder|Baumeister|Baumeisterin}` picks the form for a constructor or a constructrice, in every text.
+
+No German-only names except the brand Baugenossen; English subtitle A City Built Together. Test long translations and Unicode player names.
+
+## 9. Technical architecture
+
+Godot 4.6.2 (.NET): GDScript for the game, C# for the vision. GDScript typed where practical. Separate pure game model from nodes. Do not introduce a database, cloud service or mandatory external runtime. Prefer built-in Godot facilities; if using ONNX/native extension, document platform/version and graceful fallback. Target desktop Windows, Linux and macOS; verify actual platform support rather than promise it.
 
 ```text
-project.godot
-README.md
-CLAUDE.md
-docs/BAUGENOSSEN_SPEC.md
-docs/DECISIONS.md
+project.godot, Baugenossen.csproj, Baugenossen.sln
+README.md, CONTRIBUTING.md, CLAUDE.md, DESIGN.md, THIRD_PARTY_NOTICES.md
+data/                     # parts, missions, sites, residents (JSON, English texts)
+translations/             # languages.json, messages.pot, <code>.po (gettext)
 scenes/
-  main_menu.tscn
-  character_creation.tscn
-  city_map.tscn
-  build_site.tscn
-  character_sheet.tscn
-  mission_results.tscn
-scripts/
-  domain/          # grid, part definitions, placement, commands, support, rooms, navigation
-  progression/     # character, attributes, skills, traits, perks, rewards
-  missions/        # mission records, predicates, evaluator, lifecycle
-  input/           # semantic dispatcher, keyboard, pose adapter, calibration, gestures
-  presentation/    # crane, camera, renderers, UI, NPCs
-  persistence/     # save schema, validation, migration
-content/
-  parts.json
-  skills.json
-  backgrounds.json
-  traits.json
-  perks.json
-  missions.json
-  sites.json
-  residents.json
-  translations.csv
-assets/
-tests/
+  construction/           # grid, part definitions, placement, commands, support, rooms, navigation, the row of blocks
+  missions/               # objectives, site analysis, evaluator, texts
+  progression/            # the cooperative's progress and its rules
+  languages/              # languages, grammar, the texts with an ID
+  input/                  # dispatcher, keyboard helpers, pose providers, measures, auto-calibration, controller, pose log
+  session/                # save repository, game session, the Game autoload
+  vision/                 # C#: camera, RTMO, RTMPose, YOLOX (core/ without Godot)
+  hand_cursor/, sound/, settings/, content/, art/, ui/
+  main_menu/, city_map/, build_site/, mission_results/
+assets/                   # sounds/ and music/
+dev/                      # pre-commit checks, sound and music pipelines, pose log analysis, screenshots
+tests/godot/              # Godot tests (headless)
+tests/Baugenossen.Tests/  # .NET tests of the vision core
 ```
 
-Suggested domain API (names illustrative): `WorldGrid.can_place(def_id, anchor, transform) -> PlacementResult`; `WorldGrid.apply(command) -> Result`; `CommandHistory.execute/undo/redo`; `SupportEvaluator.evaluate(world) -> SupportReport`; `RoomDetector.detect(world) -> Array[Room]`; `NavigationGraph.build(world, mobility_mode)`; `MissionEvaluator.evaluate(mission, world) -> MissionReport`; `Progression.award_once(reward_id, xp, karma)`; `UnlockEvaluator.is_unlocked(requirements, character)`; `SaveRepository.load/save`. UI observes domain change signals and renders snapshots. Scene nodes never own authoritative grid, mission or progression state. Deterministic iteration order when ties matter. Validate all content IDs and references at startup. Use stable IDs rather than engine instance IDs in saves.
+Suggested domain API (names illustrative): `WorldGrid.can_place(def_id, anchor, transform) -> PlacementResult`; `WorldGrid.apply(command) -> Result`; `CommandHistory.execute/undo/redo`; `SupportEvaluator.evaluate(world) -> SupportReport`; `RoomDetector.detect(world) -> Array[Room]`; `NavigationGraph.build(world, mobility_mode)`; `MissionEvaluator.evaluate(mission, world) -> MissionReport`; `Progression.complete_mission(progress, mission, report)`; `BlockQueue.take/advance`; `SaveRepository.load/save`. UI observes domain change signals and renders snapshots. Scene nodes never own authoritative grid, mission or progression state. Deterministic iteration order when ties matter. Validate all content IDs and references at startup. Use stable IDs rather than engine instance IDs in saves.
 
 Example mission fragment (illustrative JSON shape; implement validators):
 
@@ -350,14 +269,12 @@ Example mission fragment (illustrative JSON shape; implement validators):
   "brief_key": "MISSION_FIRST_HOME_BRIEF",
   "site_id": "flat_40_24",
   "prerequisite_ids": ["place_to_sit"],
-  "base_xp": 100,
-  "base_karma": 100,
   "mandatory_objectives": [
     {"id": "beds", "type": "usable_tag_count", "tag": "sleep_capacity", "minimum": 2, "indoors": true},
     {"id": "room", "type": "enclosed_room_count", "minimum": 1, "minimum_area": 24, "accessible": true}
   ],
   "optional_objectives": [
-    {"id": "green_space", "type": "green_area", "minimum_cells": 4, "xp": 10, "karma": 10}
+    {"id": "green_space", "type": "green_area", "minimum_cells": 4}
   ]
 }
 ```
@@ -366,40 +283,48 @@ The fragment is not the full mission; implement all M02 predicates listed in sec
 
 ## 10. Persistence and integrity
 
-Save to `user://` JSON with schema version and revision. Store character base attributes, background, traits, invested skills, earned unspent points/tokens, perks, XP, karma, claimed reward IDs, completed mission IDs, site instances and settings. Keep derived stats reproducible. Validate all IDs, coordinates, data types and caps on load. Unknown version: preserve original file, show informative error, do not overwrite. Migrate old versions explicitly. Use temp file then replacement/rename, keep last known-good backup and verify errors. Reward and mission-completion update in same saved snapshot; if saving fails retain pending in-memory transaction and report, not duplicate. Autosave after valid committed edits (debounced) and progression changes, on pause and explicit quit; no camera frames or telemetry. Save incomplete missions. Undo need not persist across restart, clearly document that choice. Use tests with temporary directories.
+Save to `user://` JSON with schema version and revision. Store the completed mission IDs, the fulfilled wishes and the site instances (schema version 2; versions 0 and 1 had a character, whose completed missions migrate). Keep derived stats reproducible. Validate all IDs, coordinates, data types and caps on load. Unknown version: preserve original file, show informative error, do not overwrite. Migrate old versions explicitly. Use temp file then replacement/rename, keep last known-good backup and verify errors. The mission completion and its site are saved in the same snapshot; if saving fails retain it in memory and report. Autosave after valid committed edits (debounced) and progression changes, on pause and explicit quit; no camera frames or telemetry. Save incomplete missions. Undo need not persist across restart, clearly document that choice. Use tests with temporary directories.
 
 ## 11. Implementation milestones and acceptance criteria
 
 ### M0 — Bootstrap
 Inspect repo, select engine version, establish code layout, input actions, placeholder art, README with run/test commands. Headless boot succeeds. Add test harness (existing project harness or lightweight GDScript runner exiting nonzero on failure). Keep project offline runnable.
 
-### M1 — Keyboard playable construction
-Implement grid layers, catalogue, hook preview, placement, removal, move, undo/redo, support checking, camera and HUD. Universal parts only. Acceptance: place at least 10 different part types, build a two-storey cutaway, reject overlap and bounds violations without mutation, undo and redo, navigate catalogue and pause without webcam. Render deterministic part positions. No mission reward yet.
+### M1 — Playable construction
+Implement grid layers, catalogue, hook preview, placement, removal, move, undo/redo, support checking, camera and HUD. Universal parts only. Acceptance: place at least 10 different part types, build a two-storey cutaway, reject overlap and bounds violations without mutation, undo and redo, navigate catalogue and pause; the tests need no webcam. Render deterministic part positions. No mission reward yet.
 
 ### M2 — First complete mission loop
 Implement room detection, navigation, objective engine, M01 and M02, basic residents, review and results, persistence. Acceptance: two distinct M02 layouts (single-storey and multi-storey) pass; an open roof, inaccessible bed and unsupported roof fail with specific feedback. Completing M01 unlocks M02; both persist after restart; no duplicate reward when resubmitted. Player can quit from results or mid-build.
 
-### M3 — RPG
-Implement character creation, backgrounds, initial skills, traits, XP, karma, level-up and spend interfaces, unlock predicates, first functional perks. Add M03/M04 and a handful of actual advanced variants. Acceptance: two legal character builds have different initial unlocked advanced parts yet both complete every initial mission. Validate attribute budget, skill caps, perk prerequisites, tokens, multiple level-ups, reward idempotency. All claimed effects actually work. Keep future perks disabled until implemented.
+### M3 — Simplification
+The first versions had a character (attributes, perks, XP, karma, levels) and a catalogue opened by lifting a hand; both were removed in favour of the row of five blocks and the push-ups only (section 4). Old saves migrate: their completed missions stay.
 
 ### M4 — Motion controls
-Inspect and integrate existing pose provider or implement suitable adapter. Add calibration, smoothing, input state machine, gesture recognition and accessible fallbacks. Use synthetic pose sequences before webcam testing. Acceptance: hold neutral with no motion, left/right and raise/lower move intended axes, one gesture produces exactly one placement, loss of tracking freezes within stale-frame threshold, reacquisition cannot auto-place, catalogue cannot accidentally place, keyboard remains functional. Test real camera positioning across users/devices; record measured false-trigger rates and tuning decisions. Do not assume gesture approach works before real-world trials.
+Inspect and integrate existing pose provider or implement suitable adapter. Add calibration, smoothing, input state machine, gesture recognition and accessible fallbacks. Use synthetic pose sequences before webcam testing. Acceptance: hold neutral with no motion, left/right move the hook, a short dip takes the next block and one push-up produces exactly one placement, loss of tracking freezes within stale-frame threshold, reacquisition cannot auto-place, the keyboard and the mouse never move the hook. Test real camera positioning across users/devices; record measured false-trigger rates and tuning decisions. Do not assume gesture approach works before real-world trials.
 
 ### M5 — Polish and expanded campaign
 Improve original art, animation, accessibility, localization and content. Add at least one new construction mechanic and associated objective tests before its mission. Optional local co-op roles. Validate platform exports and document actual supported cameras/OS versions. End each session with explicit stopping point.
 
 ## 12. Required tests
 
-Unit tests: edge canonicalization; coordinate transforms; multi-cell footprint; compatible layers; invalid placement atomicity; support chain vs floating cycle; remove support warning; undo/redo roundtrip and branching; protected instances; window replacement; stair links; closed-door room seal vs navigation; roof gaps; separate regions; accessible fixtures; no double-count in distinct-room matching; green area unique coverage; objective unknown-type rejection; locked part check; attribute allocation; skill formula; skill/attribute caps; level thresholds; background and trait modifiers; perk prerequisites; practice award once; reward idempotency; save roundtrip/migration/corruption fallback; localization key coverage.
+Unit tests: edge canonicalization; coordinate transforms; multi-cell footprint; compatible layers; invalid placement atomicity; support chain vs floating cycle; remove support warning; undo/redo roundtrip and branching; protected instances; window replacement; stair links; closed-door room seal vs navigation; roof gaps; separate regions; accessible fixtures; no double-count in distinct-room matching; green area unique coverage; objective unknown-type rejection; the row of blocks (take, first in first out, offered and wanted parts); completion counted once; save roundtrip/migration/corruption fallback; localization key coverage.
 
-Integration tests: M01 complete from clean state; M02 two valid layouts and invalid variations; save/reload incomplete site; resume complete mission without duplicate rewards; change locale without altering IDs; keyboard-only full loop; synthetic pose sequence (neutral, lean, lift, hold, return, tracking drop, resume); concurrent keyboard/pose confirm deduplicated. Content test validates all active missions are solvable using allowed capabilities and sample layouts. Test expected values, not just absence of crashes.
+Integration tests: M01 complete from clean state; M02 two valid layouts and invalid variations; save/reload incomplete site; resume complete mission without counting it twice; change locale without altering IDs; keyboard-only full loop; synthetic pose sequence (neutral, lean, short dip, push-up, tracking drop, resume); concurrent keyboard/pose confirm deduplicated. Content test validates all active missions are solvable using allowed capabilities and sample layouts. Test expected values, not just absence of crashes.
 
-Manual tests: camera setup, different body proportions and lighting, mirrored feed, reduced-range posture, seated/fallback mode, rest/pause, input latency, no unintended crane movement when selecting, long UI translations, readability, resident paths, large builds. Prefer comfort over maximum exercise intensity. Record what has and has not been tested.
+Manual tests: camera setup, different body proportions and lighting, mirrored feed, reduced-range posture, the plank and the knees, rest/pause, input latency, no unintended crane movement when selecting, long UI translations, readability, resident paths, large builds. Prefer comfort over maximum exercise intensity. Record what has and has not been tested.
 
 ## 13. Out of scope and open decisions
 
-Not required: real structural engineering, material economics, fluid/heat/electrical simulations, procedurally generated quests, multiplayer networking, 3D building depth, real-money economy, combat, generative NPC dialogue, competitive fitness metrics. Parks are represented as side-view walkable landscapes, not top-down plans. Real-world weight shift is only a pose proxy; camera angle, vertical signal and hand gestures need prototyping. Initial skill balance, perks, mission rewards, grid dimensions and art are design proposals. The initial tutorial is deliberately a small park feature rather than a house to teach placement; change if playtests favour a house-first tutorial. Persistent sites use separate scenes first. The choice of Godot/GDScript follows existing Dinamika project patterns but must be confirmed against the actual repository. No implementation or camera testing has been performed by the author of this specification.
+Not required: real structural engineering, material economics, fluid/heat/electrical simulations, procedurally generated quests, multiplayer networking, 3D building depth, real-money economy, combat, generative NPC dialogue, competitive fitness metrics. Parks are represented as side-view walkable landscapes, not top-down plans. Real-world weight shift is only a pose proxy; camera angle, vertical signal and hand gestures need prototyping. The row (5 blocks, 15 s, the weights), grid dimensions and art are design proposals. The initial tutorial is deliberately a small park feature rather than a house to teach placement; change if playtests favour a house-first tutorial. Persistent sites use separate scenes first. The choice of Godot/GDScript follows existing Dinamika project patterns but must be confirmed against the actual repository. No implementation or camera testing has been performed by the author of this specification.
+
+Open questions:
+
+- The camera position, the gesture thresholds and the dwell of the hand cursor need trials with children and adults, in the plank and on the knees; nothing about false triggers, lighting or body proportions has been measured yet. The calibration, the thresholds and the gestures are tested with synthetic pose sequences only.
+- How long a block may wait in the row (15 s), and whether a block should leave at all while the player is in a push-up, needs trials; also whether the random row ever blocks a mission for too long (the wanted parts come 4 times more often).
+- The cut points of the sound effects were chosen from their loudness envelopes, not by ear.
+- Packaging (export presets, the publish workflow) is not set up; the exports for Windows and macOS are untested.
+
 
 ## 14. Definition of first release
 
-A user can create a distinct builder, complete at least four creative construction tasks with keyboard or calibrated motion controls, save and resume, observe residents use the projects, receive unique rewards and unlock genuinely new construction options. The player can stop comfortably at any time. Each mandatory mission has multiple solutions and no dependency on real-world physical performance or a specific character specialization. All UI text is English and localizable. Project runs without network and fails gracefully without camera.
+A user can complete at least four creative construction tasks with push-ups (and a helper's keyboard), save and resume, and observe residents use the projects. The player can stop comfortably at any time. Each mandatory mission has multiple solutions and no dependency on real-world physical performance. All UI text is English and localizable. Project runs without network and fails gracefully without camera.

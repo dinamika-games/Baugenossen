@@ -4,7 +4,7 @@ extends RefCounted
 ## predicates over a [SiteAnalysis] (DESIGN.md, 5.2).
 ##
 ## Every result is a dictionary with: "id", "satisfied", "current", "required",
-## "text_key" (with the placeholders {current} and {required}), "hint_key" (why
+## "text" (with the placeholders {current} and {required}), "hint_key" (why
 ## it is not satisfied, or ""), "cells" and "instances" to highlight.
 ##
 ## An unknown or not yet implemented type fails the content load (see
@@ -45,7 +45,7 @@ const FUTURE_TYPES := [
     "heritage_preservation",
 ]
 
-const COMMON_FIELDS := ["id", "type", "text_key", "xp", "karma"]
+const COMMON_FIELDS := ["id", "type", "text", "xp", "karma"]
 
 
 ## Check an objective of the mission; return the problems (empty if valid).
@@ -60,7 +60,7 @@ static func validate(
     if not TYPES.has(type):
         problems.append("unknown objective type '%s'" % type)
         return problems
-    for field in ["id", "text_key"]:
+    for field in ["id", "text"]:
         if not objective.has(field):
             problems.append("lacks the field %s" % field)
     var spec: Dictionary = TYPES[type]
@@ -110,7 +110,7 @@ static func _result(
         "satisfied": satisfied,
         "current": current,
         "required": required,
-        "text_key": str(objective["text_key"]),
+        "text": str(objective["text"]),
         "hint_key": "",
         "cells": [],
         "instances": [],

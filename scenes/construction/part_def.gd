@@ -15,11 +15,11 @@ extends RefCounted
 ##   exclusive occupancy of the cells.
 ## * "surface": cells on the ground or the floor (grass), under the volumes.
 ## * "background": cells behind (back walls).
-## * "window": cells over the background (windows), see docs/DECISIONS.md.
+## * "window": cells over the background (windows), see DESIGN.md, 2.3.
 
 var id := ""
-var name_key := ""
-var description_key := ""
+var name := ""
+var description := ""
 var category_id := ""
 var layer := ""
 var footprint := Vector2i.ZERO
@@ -37,15 +37,14 @@ var interaction_offsets: Array[Vector2i] = []
 ## The bottom and the top landing of the stairs and the ladders (offsets).
 var landings: Array[Vector2i] = []
 var allowed_transforms: Array[String] = []
-var requirements: Array = []
 var colour_variants := 1
 
 
 static func from_dict(record: Dictionary) -> PartDef:
     var definition := PartDef.new()
     definition.id = str(record["id"])
-    definition.name_key = str(record["name_key"])
-    definition.description_key = str(record["description_key"])
+    definition.name = str(record["name"])
+    definition.description = str(record["description"])
     definition.category_id = str(record["category_id"])
     definition.layer = str(record["layer"])
     definition.footprint = Vector2i(int(record["footprint"][0]), int(record["footprint"][1]))
@@ -70,7 +69,6 @@ static func from_dict(record: Dictionary) -> PartDef:
     definition.landings = _cells(record.get("landings", []))
     for transform in record.get("allowed_transforms", []):
         definition.allowed_transforms.append(str(transform))
-    definition.requirements = record["requirements"]
     definition.colour_variants = maxi(1, int(record.get("colour_variants", 1)))
     return definition
 

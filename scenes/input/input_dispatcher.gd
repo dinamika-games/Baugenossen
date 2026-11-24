@@ -4,6 +4,7 @@ extends RefCounted
 ## and filter them by the input state (DESIGN.md, 3.1 and 3.4).
 ##
 ## The commands: "move_hook" (with a velocity), "select_part" (with an ID),
+## "next_block", "previous_block", "select_slot" (with the index in the row),
 ## "confirm", "cancel", "open_catalogue", "toggle_remove", "undo", "redo",
 ## "pause", "resume", "pan_camera", "zoom_camera", "submit_mission", and the
 ## build helpers "mirror_part", "colour_variant" and "move_part".
@@ -43,6 +44,9 @@ const ACCEPTED := {
         "mirror_part",
         "colour_variant",
         "move_part",
+        "next_block",
+        "previous_block",
+        "select_slot",
     ],
     CATALOGUE: ["select_part", "cancel", "open_catalogue", "pause", "pan_camera", "zoom_camera"],
     GESTURE_PENDING: ["cancel", "pause"],

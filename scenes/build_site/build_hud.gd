@@ -2,53 +2,39 @@ class_name BuildHud
 extends Control
 ## Show the build interface (DESIGN.md, 7): the top bar with the mission, the
 ## tool, the input status and the large buttons (undo, redo, remove, review,
-## pause), the checklist of the objectives, the catalogue with its category
-## tabs at the bottom, and the message about the preview. The overlays (pause,
+## pause), the checklist of the objectives, the row of five blocks to choose
+## from at the bottom (see [BlockQueue]), and the message about the preview. The overlays (pause,
 ## review, completion) are built by [BuildOverlays].
 ##
 ## The HUD only shows and forwards; the build site decides.
 
 signal action_requested(action: String)
-signal part_clicked(part_id: String)
-
-const CATEGORY_ORDER := [
-    "structure", "access", "furniture", "utilities", "nature", "recreation", "tools"
-]
+signal slot_clicked(index: int)
 
 var content: ContentDb
-var character: Character
-var unlocked: Dictionary = {}
-var offered: Array = []
-var category := "structure"
 
 var _title: Label
 var _tool: Label
 var _status: Label
 var _message: Label
 var _checklist: VBoxContainer
-var _tabs: HBoxContainer
-var _items: HBoxContainer
+var _row: HBoxContainer
 var _tutorial: Label
 var _undo: Button
 var _redo: Button
 var _remove: Button
-## part ID -> Button
-var _item_buttons: Dictionary = {}
-var _dwell_target := ""
-var _dwell_progress := 0.0
+var _slots: Array[PartIcon] = []
 
 
-func build(db: ContentDb, builder: Character, high_contrast: bool) -> void:
+func build(db: ContentDb, high_contrast: bool) -> void:
     content = db
-    character = builder
-    unlocked = Progression.unlocked_parts(builder, db)
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     mouse_filter = Control.MOUSE_FILTER_IGNORE
     theme = Ui.make_theme(high_contrast)
     _build_top_bar()
     _build_checklist()
-    _build_catalogue()
-    show_category(category)
+    _build_camera()
+    _build_row()
 
 
 func _build_top_bar() -> void:
@@ -65,20 +51,36 @@ func _build_top_bar() -> void:
     bar.add_child(_tool)
     _status = Ui.label("", 18)
     bar.add_child(_status)
-    _undo = Ui.button(tr("HUD_UNDO"), action_requested.emit.bind("undo"), 100)
-    _redo = Ui.button(tr("HUD_REDO"), action_requested.emit.bind("redo"), 100)
-    _remove = Ui.button(tr("HUD_REMOVE"), action_requested.emit.bind("toggle_remove"), 120)
+    _undo = Ui.button(tr("Undo"), action_requested.emit.bind("undo"), 100)
+    _redo = Ui.button(tr("Redo"), action_requested.emit.bind("redo"), 100)
+    _remove = Ui.button(Texts.of("HUD_REMOVE"), action_requested.emit.bind("toggle_remove"), 120)
     _remove.toggle_mode = true
     bar.add_child(_undo)
     bar.add_child(_redo)
     bar.add_child(_remove)
-    bar.add_child(Ui.button(tr("HUD_REVIEW"), action_requested.emit.bind("submit_mission"), 120))
+    bar.add_child(Ui.button(tr("Review"), action_requested.emit.bind("submit_mission"), 120))
     # NOTE (mristin):
     # The pause button is always visible (DESIGN.md, 7).
-    bar.add_child(Ui.button(tr("HUD_PAUSE"), action_requested.emit.bind("pause"), 110))
+    bar.add_child(Ui.button(tr("Pause"), action_requested.emit.bind("pause"), 110))
     for child in bar.get_children():
         if child is Button:
             child.focus_mode = Control.FOCUS_NONE
+
+
+## The player in the camera, with the key points, so that they see whether the
+## crane follows them while they build.
+func _build_camera() -> void:
+    var frame := Panel.new()
+    frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    frame.position = Vector2(8, 72)
+    frame.size = Vector2(248, 188)
+    add_child(frame)
+    var camera := CameraView.new()
+    camera.position = Vector2(4, 4)
+    camera.size = Vector2(240, 180)
+    camera.cover = true
+    camera.frame = frame
+    frame.add_child(camera)
 
 
 func _build_checklist() -> void:
@@ -91,7 +93,7 @@ func _build_checklist() -> void:
     panel.custom_minimum_size.x = 322
     panel.modulate = Color(1, 1, 1, 0.94)
     add_child(panel)
-    box.add_child(Ui.label(tr("HUD_CHECKLIST"), 20))
+    box.add_child(Ui.label(tr("Checklist"), 20))
     _checklist = Ui.vbox(4)
     box.add_child(_checklist)
     _tutorial = Ui.label("", 16, true)
@@ -99,7 +101,7 @@ func _build_checklist() -> void:
     box.add_child(_tutorial)
 
 
-func _build_catalogue() -> void:
+func _build_row() -> void:
     var box := Ui.vbox(4)
     var panel := Ui.panel(box)
     panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -108,119 +110,38 @@ func _build_catalogue() -> void:
     _message = Ui.label("", 18)
     _message.clip_text = true
     box.add_child(_message)
-    _tabs = Ui.hbox(6)
-    box.add_child(_tabs)
-    for id in CATEGORY_ORDER:
-        var record := _category_record(id)
-        if record.is_empty():
-            continue
-        var tab := Ui.button(tr(record["name_key"]), show_category.bind(id), 120)
-        tab.custom_minimum_size.y = 40
-        tab.focus_mode = Control.FOCUS_NONE
-        _tabs.add_child(tab)
-    var scroll := ScrollContainer.new()
-    scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-    scroll.custom_minimum_size.y = 92
-    box.add_child(scroll)
-    _items = Ui.hbox(8)
-    scroll.add_child(_items)
-
-
-func _category_record(id: String) -> Dictionary:
-    for record in content.categories:
-        if record["id"] == id:
-            return record
-    return {}
-
-
-func show_category(id: String) -> void:
-    category = id
-    for child in _items.get_children():
-        child.queue_free()
-    _item_buttons.clear()
-    if id == "tools":
-        _items.add_child(_tool_button("HUD_REMOVE", "toggle_remove"))
-        _items.add_child(_tool_button("HUD_MOVE", "move_part"))
-        _items.add_child(_tool_button("HUD_MIRROR", "mirror_part"))
-        _items.add_child(_tool_button("HUD_COLOUR", "colour_variant"))
-        return
-    for part_id in content.part_order:
-        var definition := content.part(part_id)
-        if definition.category_id != id:
-            continue
-        if not offered.is_empty() and part_id not in offered:
-            continue
+    _row = Ui.hbox(12)
+    _row.alignment = BoxContainer.ALIGNMENT_CENTER
+    box.add_child(_row)
+    for index in range(BlockQueue.SIZE):
         var button := Button.new()
-        button.custom_minimum_size = Vector2(112, 88)
-        button.tooltip_text = tr(definition.description_key)
+        button.custom_minimum_size = Vector2(150, 124)
+        button.focus_mode = Control.FOCUS_NONE
         var icon := PartIcon.new()
-        icon.definition = definition
-        icon.locked = not unlocked.has(part_id)
-        icon.label = tr(definition.name_key)
         icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
         icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
         button.add_child(icon)
-        button.pressed.connect(part_clicked.emit.bind(part_id))
-        _items.add_child(button)
-        _item_buttons[part_id] = button
+        button.pressed.connect(slot_clicked.emit.bind(index))
+        _row.add_child(button)
+        _slots.append(icon)
 
 
-## Show the previous (-1) or the next (+1) category.
-func next_category(direction: int) -> void:
-    var available: Array[String] = []
-    for id in CATEGORY_ORDER:
-        if not _category_record(id).is_empty():
-            available.append(id)
-    var index := available.find(category)
-    show_category(available[posmod(index + direction, available.size())])
-
-
-func _tool_button(key: String, action: String) -> Button:
-    var button := Ui.button(tr(key), action_requested.emit.bind(action), 150)
-    button.custom_minimum_size.y = 88
-    return button
-
-
-## Give the keyboard focus to the catalogue (in the CATALOGUE state).
-func focus_catalogue(selected: String) -> void:
-    var target: Button = _item_buttons.get(selected)
-    if target == null:
-        for child in _items.get_children():
-            if not child.is_queued_for_deletion() and child is Button:
-                target = child
-                break
-    if target != null:
-        target.grab_focus()
+## Show the row of blocks, the chosen one, and how soon the oldest leaves.
+func set_queue(parts: Array[String], selected: int, progress: float) -> void:
+    for index in range(_slots.size()):
+        var icon := _slots[index]
+        var definition := content.part(parts[index]) if index < parts.size() else null
+        icon.definition = definition
+        icon.label = tr(definition.name) if definition != null else ""
+        icon.selected = index == selected
+        icon.leaving = progress if index == 0 else -1.0
+        icon.queue_redraw()
 
 
 func release_focus_all() -> void:
     var focused := get_viewport().gui_get_focus_owner()
     if focused != null:
         focused.release_focus()
-
-
-## The catalogue entry under a point of the screen (for the pointing hand).
-func entry_at(screen_point: Vector2) -> String:
-    for part_id in _item_buttons:
-        var button: Button = _item_buttons[part_id]
-        if button.get_global_rect().has_point(screen_point):
-            return part_id
-    return ""
-
-
-func catalogue_rect() -> Rect2:
-    return _items.get_global_rect()
-
-
-func show_dwell(target: String, progress: float) -> void:
-    if target == _dwell_target and is_equal_approx(progress, _dwell_progress):
-        return
-    for part_id in _item_buttons:
-        var icon: PartIcon = _item_buttons[part_id].get_child(0)
-        icon.dwell = progress if part_id == target else 0.0
-        icon.queue_redraw()
-    _dwell_target = target
-    _dwell_progress = progress
 
 
 func set_title(text: String) -> void:
@@ -251,13 +172,6 @@ func set_history(can_undo: bool, can_redo: bool, removing: bool) -> void:
     _remove.set_pressed_no_signal(removing)
 
 
-func set_selected(part_id: String) -> void:
-    for id in _item_buttons:
-        var icon: PartIcon = _item_buttons[id].get_child(0)
-        icon.selected = id == part_id
-        icon.queue_redraw()
-
-
 ## Show the objectives: a symbol and the text for each, mandatory first.
 func set_checklist(report: MissionEvaluator.Report) -> void:
     for child in _checklist.get_children():
@@ -265,7 +179,7 @@ func set_checklist(report: MissionEvaluator.Report) -> void:
     for result in report.mandatory:
         _checklist.add_child(_objective_label(result, false))
     if not report.optional.is_empty():
-        _checklist.add_child(Ui.label(tr("HUD_WISHES"), 18))
+        _checklist.add_child(Ui.label(tr("Wishes"), 18))
         for result in report.optional:
             _checklist.add_child(_objective_label(result, true))
 

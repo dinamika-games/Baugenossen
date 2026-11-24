@@ -34,6 +34,7 @@ class Step(enum.Enum):
 
     REFORMAT = "reformat"
     LINT = "lint"
+    TRANSLATIONS = "translations"
     DOTNET_TEST = "dotnet-test"
     BUILD = "build"
     IMPORT = "import"
@@ -317,6 +318,24 @@ def main() -> int:
                 cmd=[sys.executable, "-m", "gdtoolkit.linter", "scenes", "tests/godot"],
                 cwd=REPO_ROOT,
             )
+
+        elif step == Step.TRANSLATIONS:
+            # NOTE (mristin):
+            # The translation files must hold every message of the game, and no
+            # translation may break a placeholder.
+            print("Checking the translations...")
+            exit_code = call_and_report(
+                verb="check that the translation files are up to date",
+                cmd=[sys.executable, "dev/translations/extract.py"]
+                + ([] if overwrite else ["--check"]),
+                cwd=REPO_ROOT,
+            )
+            if exit_code == 0:
+                exit_code = call_and_report(
+                    verb="check the translations",
+                    cmd=[sys.executable, "dev/translations/check.py"],
+                    cwd=REPO_ROOT,
+                )
 
         elif step == Step.DOTNET_TEST:
             print("Running the C# unit tests...")

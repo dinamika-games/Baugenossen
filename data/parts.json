@@ -2,38 +2,38 @@
   "categories": [
     {
       "id": "structure",
-      "name_key": "CATEGORY_STRUCTURE"
+      "name": "Structure"
     },
     {
       "id": "access",
-      "name_key": "CATEGORY_ACCESS"
+      "name": "Access"
     },
     {
       "id": "furniture",
-      "name_key": "CATEGORY_FURNITURE"
+      "name": "Furniture"
     },
     {
       "id": "utilities",
-      "name_key": "CATEGORY_UTILITIES"
+      "name": "Utilities"
     },
     {
       "id": "nature",
-      "name_key": "CATEGORY_NATURE"
+      "name": "Nature"
     },
     {
       "id": "recreation",
-      "name_key": "CATEGORY_RECREATION"
+      "name": "Recreation"
     },
     {
       "id": "tools",
-      "name_key": "CATEGORY_TOOLS"
+      "name": "Tools"
     }
   ],
   "parts": [
     {
       "id": "floor_wood",
-      "name_key": "ITEM_FLOOR_WOOD",
-      "description_key": "ITEM_FLOOR_WOOD_DESC",
+      "name": "Wooden floor",
+      "description": "A floor of 2 cells; people walk on it. Rests on walls or beams.",
       "category_id": "structure",
       "layer": "edge_h",
       "footprint": [
@@ -47,18 +47,16 @@
         "weather_seal"
       ],
       "support_rule": "span",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "floor_wood",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1
     },
     {
       "id": "wall_wood",
-      "name_key": "ITEM_WALL_WOOD",
-      "description_key": "ITEM_WALL_WOOD_DESC",
+      "name": "Wooden wall",
+      "description": "A wall one storey (6 cells) high; keeps the weather out.",
       "category_id": "structure",
       "layer": "edge_v",
       "footprint": [
@@ -72,18 +70,16 @@
         "weather_seal"
       ],
       "support_rule": "wall",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "wall_wood",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "wall_short",
-      "name_key": "ITEM_WALL_SHORT",
-      "description_key": "ITEM_WALL_SHORT_DESC",
+      "name": "Short wall",
+      "description": "A wall of 2 cells, e.g., above a door.",
       "category_id": "structure",
       "layer": "edge_v",
       "footprint": [
@@ -97,18 +93,16 @@
         "weather_seal"
       ],
       "support_rule": "wall",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "wall_short",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "roof_flat",
-      "name_key": "ITEM_ROOF_FLAT",
-      "description_key": "ITEM_ROOF_FLAT_DESC",
+      "name": "Flat roof",
+      "description": "A roof of 2 cells; keeps the weather out. Rests on walls or beams.",
       "category_id": "structure",
       "layer": "edge_h",
       "footprint": [
@@ -121,18 +115,16 @@
         "weather_seal"
       ],
       "support_rule": "span",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "roof_flat",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "door_wood",
-      "name_key": "ITEM_DOOR_WOOD",
-      "description_key": "ITEM_DOOR_WOOD_DESC",
+      "name": "Wooden door",
+      "description": "A door of 4 cells; closed against the weather, open for people.",
       "category_id": "access",
       "layer": "edge_v",
       "footprint": [
@@ -146,18 +138,16 @@
         "traversable"
       ],
       "support_rule": "wall",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "door_wood",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "back_wall",
-      "name_key": "ITEM_BACK_WALL",
-      "description_key": "ITEM_BACK_WALL_DESC",
+      "name": "Back wall",
+      "description": "The wall at the back of a room (2 × 6 cells), for the look.",
       "category_id": "structure",
       "layer": "background",
       "footprint": [
@@ -169,18 +159,16 @@
         "enclosure_visual"
       ],
       "support_rule": "none",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "back_wall",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "window_basic",
-      "name_key": "ITEM_WINDOW_BASIC",
-      "description_key": "ITEM_WINDOW_BASIC_DESC",
+      "name": "Window",
+      "description": "A window (2 × 2 cells) over the back wall; brings daylight.",
       "category_id": "structure",
       "layer": "window",
       "footprint": [
@@ -192,18 +180,16 @@
         "daylight"
       ],
       "support_rule": "none",
-      "craft_skill": "glassworking",
       "material_id": "wood",
       "visual_id": "window_basic",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1
     },
     {
       "id": "stairs_basic",
-      "name_key": "ITEM_STAIRS_BASIC",
-      "description_key": "ITEM_STAIRS_BASIC_DESC",
+      "name": "Stairs",
+      "description": "Stairs up one storey (6 × 6 cells). They need a floor at the top.",
       "category_id": "access",
       "layer": "volume",
       "footprint": [
@@ -215,14 +201,12 @@
         "traversal"
       ],
       "support_rule": "stairs",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "stairs_basic",
       "blocked_cells": [],
       "allowed_transforms": [
         "mirror"
       ],
-      "requirements": [],
       "colour_variants": 1,
       "interaction_offsets": [],
       "landings": [
@@ -238,8 +222,8 @@
     },
     {
       "id": "bed_single",
-      "name_key": "ITEM_BED_SINGLE",
-      "description_key": "ITEM_BED_SINGLE_DESC",
+      "name": "Bed",
+      "description": "A bed for one person.",
       "category_id": "furniture",
       "layer": "volume",
       "footprint": [
@@ -251,20 +235,18 @@
         "sleep_capacity:1"
       ],
       "support_rule": "base",
-      "craft_skill": "interior_design",
       "material_id": "wood",
       "visual_id": "bed_single",
       "blocked_cells": [],
       "allowed_transforms": [
         "mirror"
       ],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "table_basic",
-      "name_key": "ITEM_TABLE_BASIC",
-      "description_key": "ITEM_TABLE_BASIC_DESC",
+      "name": "Table",
+      "description": "A table.",
       "category_id": "furniture",
       "layer": "volume",
       "footprint": [
@@ -276,18 +258,16 @@
         "table"
       ],
       "support_rule": "base",
-      "craft_skill": "interior_design",
       "material_id": "wood",
       "visual_id": "table_basic",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "chair_basic",
-      "name_key": "ITEM_CHAIR_BASIC",
-      "description_key": "ITEM_CHAIR_BASIC_DESC",
+      "name": "Chair",
+      "description": "A seat for one.",
       "category_id": "furniture",
       "layer": "volume",
       "footprint": [
@@ -299,20 +279,18 @@
         "seat_capacity:1"
       ],
       "support_rule": "base",
-      "craft_skill": "interior_design",
       "material_id": "wood",
       "visual_id": "chair_basic",
       "blocked_cells": [],
       "allowed_transforms": [
         "mirror"
       ],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "sink_basic",
-      "name_key": "ITEM_SINK_BASIC",
-      "description_key": "ITEM_SINK_BASIC_DESC",
+      "name": "Sink",
+      "description": "A sink for washing.",
       "category_id": "utilities",
       "layer": "volume",
       "footprint": [
@@ -324,18 +302,16 @@
         "hygiene"
       ],
       "support_rule": "base",
-      "craft_skill": "plumbing",
       "material_id": "wood",
       "visual_id": "sink_basic",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1
     },
     {
       "id": "toilet_basic",
-      "name_key": "ITEM_TOILET_BASIC",
-      "description_key": "ITEM_TOILET_BASIC_DESC",
+      "name": "Toilet",
+      "description": "A toilet.",
       "category_id": "utilities",
       "layer": "volume",
       "footprint": [
@@ -347,20 +323,18 @@
         "toilet"
       ],
       "support_rule": "base",
-      "craft_skill": "plumbing",
       "material_id": "wood",
       "visual_id": "toilet_basic",
       "blocked_cells": [],
       "allowed_transforms": [
         "mirror"
       ],
-      "requirements": [],
       "colour_variants": 1
     },
     {
       "id": "stove_basic",
-      "name_key": "ITEM_STOVE_BASIC",
-      "description_key": "ITEM_STOVE_BASIC_DESC",
+      "name": "Stove",
+      "description": "A stove for cooking.",
       "category_id": "utilities",
       "layer": "volume",
       "footprint": [
@@ -372,18 +346,16 @@
         "cooking"
       ],
       "support_rule": "base",
-      "craft_skill": "electrical_engineering",
       "material_id": "wood",
       "visual_id": "stove_basic",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1
     },
     {
       "id": "lamp_basic",
-      "name_key": "ITEM_LAMP_BASIC",
-      "description_key": "ITEM_LAMP_BASIC_DESC",
+      "name": "Lamp",
+      "description": "A standing lamp.",
       "category_id": "utilities",
       "layer": "decor",
       "footprint": [
@@ -395,18 +367,16 @@
         "lighting"
       ],
       "support_rule": "base",
-      "craft_skill": "electrical_engineering",
       "material_id": "wood",
       "visual_id": "lamp_basic",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "bench_basic",
-      "name_key": "ITEM_BENCH_BASIC",
-      "description_key": "ITEM_BENCH_BASIC_DESC",
+      "name": "Bench",
+      "description": "A bench for two.",
       "category_id": "recreation",
       "layer": "volume",
       "footprint": [
@@ -419,20 +389,18 @@
         "bench"
       ],
       "support_rule": "base",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "bench_basic",
       "blocked_cells": [],
       "allowed_transforms": [
         "mirror"
       ],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "flower_bed",
-      "name_key": "ITEM_FLOWER_BED",
-      "description_key": "ITEM_FLOWER_BED_DESC",
+      "name": "Flower bed",
+      "description": "Flowers on 2 cells.",
       "category_id": "nature",
       "layer": "decor",
       "footprint": [
@@ -444,18 +412,16 @@
         "planted_area"
       ],
       "support_rule": "base",
-      "craft_skill": "landscaping",
       "material_id": "wood",
       "visual_id": "flower_bed",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 3
     },
     {
       "id": "tree_small",
-      "name_key": "ITEM_TREE_SMALL",
-      "description_key": "ITEM_TREE_SMALL_DESC",
+      "name": "Small tree",
+      "description": "A young tree giving shade.",
       "category_id": "nature",
       "layer": "decor",
       "footprint": [
@@ -468,18 +434,16 @@
         "shade"
       ],
       "support_rule": "base",
-      "craft_skill": "landscaping",
       "material_id": "wood",
       "visual_id": "tree_small",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1
     },
     {
       "id": "grass_patch",
-      "name_key": "ITEM_GRASS_PATCH",
-      "description_key": "ITEM_GRASS_PATCH_DESC",
+      "name": "Grass",
+      "description": "Grass on 2 cells of ground.",
       "category_id": "nature",
       "layer": "surface",
       "footprint": [
@@ -491,18 +455,16 @@
         "green_area"
       ],
       "support_rule": "base",
-      "craft_skill": "landscaping",
       "material_id": "wood",
       "visual_id": "grass_patch",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1
     },
     {
       "id": "ladder_basic",
-      "name_key": "ITEM_LADDER_BASIC",
-      "description_key": "ITEM_LADDER_BASIC_DESC",
+      "name": "Ladder",
+      "description": "A ladder up one storey.",
       "category_id": "access",
       "layer": "volume",
       "footprint": [
@@ -515,12 +477,10 @@
         "traversal"
       ],
       "support_rule": "ladder",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "ladder_basic",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1,
       "interaction_offsets": [],
       "landings": [
@@ -536,8 +496,8 @@
     },
     {
       "id": "beam_wood",
-      "name_key": "ITEM_BEAM_WOOD",
-      "description_key": "ITEM_BEAM_WOOD_DESC",
+      "name": "Wooden beam",
+      "description": "A beam of 4 cells; carries floors and roofs, fixed to a wall or on support.",
       "category_id": "structure",
       "layer": "volume",
       "footprint": [
@@ -550,7 +510,6 @@
         "structural"
       ],
       "support_rule": "beam",
-      "craft_skill": "carpentry",
       "material_id": "wood",
       "visual_id": "beam_wood",
       "blocked_cells": [
@@ -572,14 +531,13 @@
         ]
       ],
       "allowed_transforms": [],
-      "requirements": [],
       "colour_variants": 1,
       "interaction_offsets": []
     },
     {
       "id": "wall_stone",
-      "name_key": "ITEM_WALL_STONE",
-      "description_key": "ITEM_WALL_STONE_DESC",
+      "name": "Stone wall",
+      "description": "A sturdy stone wall one storey high.",
       "category_id": "structure",
       "layer": "edge_v",
       "footprint": [
@@ -593,24 +551,16 @@
         "weather_seal"
       ],
       "support_rule": "wall",
-      "craft_skill": "masonry",
       "material_id": "stone",
       "visual_id": "wall_stone",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [
-        {
-          "type": "skill",
-          "id": "masonry",
-          "minimum": 40
-        }
-      ],
       "colour_variants": 3
     },
     {
       "id": "window_large",
-      "name_key": "ITEM_WINDOW_LARGE",
-      "description_key": "ITEM_WINDOW_LARGE_DESC",
+      "name": "Large window",
+      "description": "A wide window (4 × 2 cells).",
       "category_id": "structure",
       "layer": "window",
       "footprint": [
@@ -622,24 +572,16 @@
         "daylight"
       ],
       "support_rule": "none",
-      "craft_skill": "glassworking",
       "material_id": "glass",
       "visual_id": "window_large",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [
-        {
-          "type": "skill",
-          "id": "glassworking",
-          "minimum": 40
-        }
-      ],
       "colour_variants": 1
     },
     {
       "id": "tree_large",
-      "name_key": "ITEM_TREE_LARGE",
-      "description_key": "ITEM_TREE_LARGE_DESC",
+      "name": "Large tree",
+      "description": "A grown tree with a wide crown.",
       "category_id": "nature",
       "layer": "decor",
       "footprint": [
@@ -652,24 +594,16 @@
         "shade"
       ],
       "support_rule": "base",
-      "craft_skill": "landscaping",
       "material_id": "wood",
       "visual_id": "tree_large",
       "blocked_cells": [],
       "allowed_transforms": [],
-      "requirements": [
-        {
-          "type": "skill",
-          "id": "landscaping",
-          "minimum": 40
-        }
-      ],
       "colour_variants": 1
     },
     {
       "id": "sofa_basic",
-      "name_key": "ITEM_SOFA_BASIC",
-      "description_key": "ITEM_SOFA_BASIC_DESC",
+      "name": "Sofa",
+      "description": "A comfortable seat for three.",
       "category_id": "furniture",
       "layer": "volume",
       "footprint": [
@@ -681,26 +615,18 @@
         "seat_capacity:3"
       ],
       "support_rule": "base",
-      "craft_skill": "interior_design",
       "material_id": "wood",
       "visual_id": "sofa_basic",
       "blocked_cells": [],
       "allowed_transforms": [
         "mirror"
       ],
-      "requirements": [
-        {
-          "type": "skill",
-          "id": "interior_design",
-          "minimum": 40
-        }
-      ],
       "colour_variants": 3
     },
     {
       "id": "beam_steel",
-      "name_key": "ITEM_BEAM_STEEL",
-      "description_key": "ITEM_BEAM_STEEL_DESC",
+      "name": "Steel beam",
+      "description": "A long beam of 6 cells.",
       "category_id": "structure",
       "layer": "volume",
       "footprint": [
@@ -713,7 +639,6 @@
         "structural"
       ],
       "support_rule": "beam",
-      "craft_skill": "metalworking",
       "material_id": "steel",
       "visual_id": "beam_steel",
       "blocked_cells": [
@@ -743,13 +668,6 @@
         ]
       ],
       "allowed_transforms": [],
-      "requirements": [
-        {
-          "type": "skill",
-          "id": "metalworking",
-          "minimum": 40
-        }
-      ],
       "colour_variants": 1,
       "interaction_offsets": []
     }

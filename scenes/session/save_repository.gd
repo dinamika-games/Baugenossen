@@ -8,7 +8,7 @@ extends RefCounted
 ## A save of an unknown (newer) version is never overwritten: the repository
 ## locks itself and reports it. Old versions are migrated explicitly.
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const FILE_NAME := "baugenossen_save.json"
 
 var directory := "user://saves"
@@ -142,18 +142,23 @@ func set_aside() -> String:
 static func migrate(data: Dictionary) -> Dictionary:
     var record := data.duplicate(true)
     var version := int(record.get("schema_version", 0))
-    if version == 0:
+    if version < 2:
         # NOTE (mristin):
-        # Version 0 (the prototype) called the character "builder" and kept the
-        # sites by their site ID instead of the mission ID.
-        if record.has("builder") and not record.has("character"):
-            record["character"] = record["builder"]
-            record.erase("builder")
+        # Versions 0 and 1 had a character; version 2 keeps only the
+        # cooperative's progress, which was the character's completed missions.
+        var character: Variant = record.get("character", record.get("builder", {}))
+        if character is Dictionary and not record.has("progress"):
+            record["progress"] = {
+                "completed_missions": character.get("completed_missions", []),
+                "fulfilled_wishes": [],
+            }
+        record.erase("character")
+        record.erase("builder")
         if record.has("sites") and not record.has("missions"):
             record["missions"] = {}
             for key in record["sites"]:
                 record["missions"][key] = {"site": record["sites"][key], "status": "in_progress"}
             record.erase("sites")
-        version = 1
+        version = 2
     record["schema_version"] = version
     return record

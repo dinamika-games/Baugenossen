@@ -1,8 +1,8 @@
 extends Node
-## Keep what the game remembers between sessions apart from the saves: the
-## calibration of the body controls (user://settings.cfg). There is no
-## settings screen: the camera starts with the game, the sound and the music
-## switch with S and M, and the rest is chosen on the command line.
+## Keep the settings of the game apart from the saves. There is no settings
+## screen and no calibration screen (the body controls calibrate themselves):
+## the camera starts with the game, the sound and the music switch with S and
+## M, and the rest is chosen on the command line.
 ##
 ## The options after `--`:
 ## * `--settings=user://other.cfg`: keep the settings elsewhere (e.g., in the tests),
@@ -17,16 +17,14 @@ const DEFAULTS := {
     "camera_mirror": true,
     "sensitivity": 1.0,
     "dead_zone": 0.15,
-    "calibration": {},
     "sound": true,
     "music": true,
-    "locale": "en",
     "reduced_motion": false,
     "high_contrast": false,
 }
 
 ## The settings saved in the file; the others come from the command line.
-const SAVED := ["calibration"]
+const SAVED := []
 
 var path := "user://settings.cfg"
 var values: Dictionary = DEFAULTS.duplicate(true)
@@ -84,4 +82,4 @@ func set_value(key: String, value: Variant) -> void:
 
 
 func apply() -> void:
-    TranslationServer.set_locale(str(values["locale"]))
+    pass

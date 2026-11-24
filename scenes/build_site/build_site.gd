@@ -1,11 +1,10 @@
 extends Node2D
-## Build a mission's site with the crane (DESIGN.md, 2 and 3): pick a part in
-## the catalogue, move the hook, see the snapped preview and why it is valid or
-## not, place, remove, move, undo and redo, watch the checklist, review and
-## submit. Only the body moves the hook: the player leans and rises. The
-## keyboard and the mouse help with the rest (placing, the catalogue, undo,
-## pause), never with the hook; without a camera or a calibration, the site
-## asks for them.
+## Build a mission's site with the crane (DESIGN.md, 2 and 3): five blocks
+## wait in a row (see [BlockQueue]); the player picks one with a short dip,
+## leans to move the hook, sees where the block lands, and places it with a
+## push-up. Only the body plays: the hook, the choice and the placing. The
+## keyboard and the mouse of a helper do the rest (undo, remove, review,
+## pause), never the hook; without a camera, the site asks for it.
 ##
 ## The grid, the history and the mission are the truth; the view and the HUD
 ## only show them.
@@ -34,13 +33,15 @@ var mode := "place"
 var moving_id := 0
 var hook := Vector2(4, 8)
 var report: MissionEvaluator.Report
+## The row of blocks to choose from, and the chosen one.
+var queue: BlockQueue
+var slot := 0
 
 var _context := Placement.Context.new()
-var _raw_anchor := Vector2i(-9999, -9999)
+var _preview_key := Vector3i(-9999, -9999, 0)
 var _preview_result: PlacementResult = null
 var _autosave_at := -1.0
 var _delta := 0.0
-var _dwell := DwellSelector.new()
 var _walk: ResidentWalk = null
 var _revisit := false
 var _tutorial: Dictionary = {}
@@ -49,8 +50,10 @@ var _pause_reason := ""
 var _dragging := false
 ## Whether the body was tracked in this visit: only then a loss pauses.
 var _body_seen := false
-## What the site waits for before the hook can move: "", "camera" or "calibration".
+## What the site waits for before the hook can move: "" or "camera".
 var _waiting := ""
+## Calibrates the body controls by itself while the player holds still.
+var _auto_calibration := AutoCalibration.new()
 var _pose_log: PoseLog = PoseLog.from_args(OS.get_cmdline_user_args())
 @onready var _game: Node = get_node("/root/Game")
 @onready var _settings: Node = get_node("/root/Settings")
@@ -59,30 +62,32 @@ var _pose_log: PoseLog = PoseLog.from_args(OS.get_cmdline_user_args())
 func _ready() -> void:
     content = _game.content
     mission_id = _game.mission_id
-    if _game.session.character == null or not content.missions.has(mission_id):
+    if _game.session.progress == null or not content.missions.has(mission_id):
         _game.go("city_map")
         return
     mission = content.mission(mission_id)
     grid = _game.session.open_site(mission_id)
-    var character: Character = _game.session.character
-    _revisit = character.has_completed(mission_id)
-    _context.capacity = Progression.crane_capacity(character)
-    _context.unlocked = Progression.unlocked_parts(character, content)
+    _revisit = _game.session.progress.has_completed(mission_id)
     _context.offered = mission["available_catalogue_ids"]
+    queue = BlockQueue.new(content, _context.offered)
     if mission.get("tutorial", false):
-        _tutorial = {"select": false, "move": false, "place": false, "remove": false, "undo": false}
+        _tutorial = {"select": false, "move": false, "place": false}
 
     dispatcher.command.connect(_on_command)
     dispatcher.state_changed.connect(func(_state: String) -> void: _refresh_status())
-    pose.calibration = _settings.get_value("calibration")
+    # NOTE (mristin):
+    # Every visit calibrates anew: the player may be on the knees today and
+    # in the plank tomorrow.
+    pose.calibration = {}
     pose.dead_zone = float(_settings.get_value("dead_zone"))
     pose.sensitivity = float(_settings.get_value("sensitivity"))
+    pose.hand_gestures = false
 
     RenderingServer.set_default_clear_color(Color("bfe3f2"))
     view = SiteView.new()
     view.grid = grid
     view.high_contrast = bool(_settings.get_value("high_contrast"))
-    view.show_guides = "golden_hands" in character.perks
+    view.show_guides = true
     add_child(view)
     camera = Camera2D.new()
     add_child(camera)
@@ -90,18 +95,17 @@ func _ready() -> void:
     var layer := CanvasLayer.new()
     add_child(layer)
     hud = BuildHud.new()
-    hud.offered = _context.offered
     layer.add_child(hud)
-    hud.build(content, character, bool(_settings.get_value("high_contrast")))
+    hud.build(content, bool(_settings.get_value("high_contrast")))
     hud.action_requested.connect(func(action: String) -> void: dispatcher.dispatch(action))
-    hud.part_clicked.connect(_on_part_clicked)
-    hud.set_title(tr(mission["title_key"]))
+    hud.slot_clicked.connect(func(index: int) -> void: dispatcher.dispatch("select_slot", index))
+    hud.set_title(tr(mission["title"]))
     overlays = BuildOverlays.new()
     layer.add_child(overlays)
     overlays.build(bool(_settings.get_value("high_contrast")))
     overlays.action_requested.connect(_on_overlay_action)
 
-    hook = Vector2(grid.width / 2.0, grid.height * 0.5)
+    hook = Vector2(grid.width / 2.0, grid.height)
     _fit_camera()
     _game.ensure_pose()
     if _pose_log != null:
@@ -110,7 +114,7 @@ func _ready() -> void:
     if sounds != null:
         sounds.loop("ambience_birds", true, -18.0)
     _evaluate()
-    _update_preview(true)
+    _choose_slot(0)
     _refresh_status()
     get_viewport().size_changed.connect(_fit_camera)
 
@@ -146,6 +150,7 @@ func _process(delta: float) -> void:
     var hook_before := hook
     _check_body()
     _process_pose()
+    _advance_queue(delta)
     _sound_loop("crane", hook.distance_to(hook_before) > 0.001)
     var pan := InputActions.pan_axis()
     if pan != Vector2.ZERO:
@@ -156,17 +161,38 @@ func _process(delta: float) -> void:
         for walker in _walk.walkers:
             view.residents.append(walker)
         if arrived and view.bubble.is_empty() and not _walk.walkers.is_empty():
-            view.bubble = {
-                "text": tr(mission["completion_dialogue_key"]),
-                "position": _walk.walkers[0]["position"]
-            }
+            view.bubble = {"text": tr(mission["thanks"]), "position": _walk.walkers[0]["position"]}
         view.queue_redraw()
     if _autosave_at > 0.0 and Time.get_ticks_msec() / 1000.0 >= _autosave_at:
         _autosave_at = -1.0
         _game.session.save()
 
 
-## Ask for the camera or the calibration while the body can not move the hook.
+## Let the row of blocks move on while the player builds: the oldest block
+## leaves now and then (first in, first out).
+func _advance_queue(delta: float) -> void:
+    if dispatcher.state != InputDispatcher.BUILD or not pose.calibration.has("h"):
+        return
+    if queue.advance(delta):
+        # NOTE (mristin):
+        # The chosen block moves one place to the front with the row; if it
+        # was the oldest, it left, and the new oldest is chosen.
+        _choose_slot(maxi(slot - 1, 0))
+    hud.set_queue(queue.slots, slot, queue.progress)
+
+
+## Choose the block of the row, if the hook carries a new block.
+func _choose_slot(index: int) -> void:
+    slot = posmod(index, queue.slots.size())
+    if mode == "place" and moving_id == 0:
+        carried = queue.slots[slot]
+        mirrored = false
+        variant = 0
+    hud.set_queue(queue.slots, slot, queue.progress)
+    _update_preview(true)
+
+
+## Ask for the camera while the body can not move the hook.
 func _check_body() -> void:
     if dispatcher.state == InputDispatcher.COMPLETE:
         return
@@ -174,8 +200,6 @@ func _check_body() -> void:
     var waiting := ""
     if provider.status() in ["off", "failed"]:
         waiting = "camera"
-    elif not pose.calibration.has("h"):
-        waiting = "calibration"
     if waiting == _waiting:
         return
     _waiting = waiting
@@ -189,10 +213,13 @@ func _check_body() -> void:
 
 
 func _process_pose() -> void:
-    if _game.pose_provider.status() != "running" or not pose.calibration.has("h"):
+    if _game.pose_provider.status() != "running":
         return
     var provider: PoseProvider = _game.pose_provider
     var frame := provider.latest_frame()
+    if not pose.calibration.has("h"):
+        _auto_calibrate(provider, frame)
+        return
     var state_before := dispatcher.state
     var output := pose.update(frame, provider.now(), dispatcher.state)
     for event in output["events"]:
@@ -218,21 +245,13 @@ func _process_pose() -> void:
             dispatcher.dispatch("pause")
     if pose.tracking == "ok":
         _body_seen = true
-    if dispatcher.state == InputDispatcher.CATALOGUE:
-        var entry := ""
-        if pose.cursor.x >= 0.0:
-            var rect := hud.catalogue_rect()
-            entry = hud.entry_at(rect.position + pose.cursor * rect.size)
-        hud.show_dwell(entry, _dwell.point(entry, provider.now()))
     _refresh_status()
 
 
 ## The settings which matter for reading a pose log.
 func _log_settings(context: String) -> Dictionary:
     var result := {"context": context}
-    for key in [
-        "input_source", "gesture_mode", "camera_mirror", "sensitivity", "dead_zone", "calibration"
-    ]:
+    for key in ["camera_mirror", "sensitivity", "dead_zone"]:
         result[key] = _settings.get_value(key)
     return result
 
@@ -244,15 +263,11 @@ func _on_pose_event(event: String) -> void:
                 _refresh_status()
         "gesture_cancelled":
             dispatcher.end_gesture()
-        "confirm", "open_catalogue":
+        "level":
+            dispatcher.dispatch("next_block")
+        "confirm":
             if not dispatcher.end_gesture(event):
                 dispatcher.dispatch(event)
-        "catalogue_release":
-            var chosen := _dwell.selected()
-            _dwell.reset()
-            hud.show_dwell("", 0.0)
-            if chosen != "" and _context.unlocked.has(chosen):
-                dispatcher.dispatch("select_part", chosen)
         "resume":
             dispatcher.dispatch("resume")
 
@@ -288,11 +303,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _handle_key(event: InputEvent) -> void:
-    if dispatcher.state == InputDispatcher.CATALOGUE:
-        for step in [["catalogue_previous", -1], ["catalogue_next", 1]]:
+    if dispatcher.state == InputDispatcher.BUILD:
+        for step in [["catalogue_previous", "previous_block"], ["catalogue_next", "next_block"]]:
             if event.is_action_pressed(step[0]):
-                hud.next_category(step[1])
-                hud.focus_catalogue(carried)
+                dispatcher.dispatch(step[1])
                 get_viewport().set_input_as_handled()
                 return
     if event.is_action_pressed("undo", false, true):
@@ -304,7 +318,6 @@ func _handle_key(event: InputEvent) -> void:
     else:
         for action in [
             "confirm",
-            "open_catalogue",
             "toggle_remove",
             "submit_mission",
             "mirror_part",
@@ -341,90 +354,38 @@ func _on_cancel_key() -> void:
             dispatcher.dispatch("cancel")
 
 
-func _on_part_clicked(part_id: String) -> void:
-    if not _context.unlocked.has(part_id):
-        _show_locked(part_id)
-        return
-    if dispatcher.state == InputDispatcher.BUILD or dispatcher.state == InputDispatcher.CATALOGUE:
-        dispatcher.dispatch("select_part", part_id)
-
-
-func _show_locked(part_id: String) -> void:
-    var definition := content.part(part_id)
-    var missing := Progression.missing_requirements(
-        definition.requirements, _game.session.character, content
-    )
-    var parts: Array[String] = []
-    for requirement in missing:
-        parts.append(_requirement_text(requirement))
-    hud.set_message(
-        (
-            "🔒 "
-            + tr("LOCKED_NEEDS").format(
-                {"part": tr(definition.name_key), "needs": ", ".join(parts)}
-            )
-        ),
-        Ui.INK
-    )
-
-
-func _requirement_text(requirement: Dictionary) -> String:
-    var name := ""
-    match str(requirement["type"]):
-        "skill":
-            name = tr(content.skills[requirement["id"]]["name_key"])
-        "attribute":
-            for attribute in content.attributes:
-                if attribute["id"] == requirement["id"]:
-                    name = tr(attribute["name_key"])
-        "level":
-            name = tr("SHEET_LEVEL")
-        _:
-            name = tr("SHEET_ANY_SKILL")
-    return tr("REQUIREMENT_LINE").format(
-        {"name": name, "minimum": requirement["minimum"], "current": requirement["current"]}
-    )
-
-
 func _on_command(action: String, argument: Variant) -> void:
     match action:
         "move_hook":
             var before := hook
-            _set_hook(hook + Vector2(argument) * _delta)
+            # NOTE (mristin):
+            # The hook moves only sideways; the part drops onto a level.
+            _set_hook(Vector2(hook.x + Vector2(argument).x * _delta, grid.height))
             _hook_travel += before.distance_to(hook)
             if _hook_travel > 3.0:
                 _tutorial_step("move")
         "confirm":
             _confirm()
+        "next_block", "previous_block", "select_slot":
+            var index := slot + (1 if action == "next_block" else -1)
+            if action == "select_slot":
+                index = int(argument)
+            mode = "place"
+            moving_id = 0
+            _choose_slot(index)
+            _sound("click")
+            _tutorial_step("select")
         "cancel":
             moving_id = 0
             if mode != "place":
                 mode = "place"
             hud.release_focus_all()
             overlays.hide_all()
-            _update_preview(true)
-        "open_catalogue":
-            _sound("catalogue")
-            if dispatcher.state == InputDispatcher.CATALOGUE:
-                hud.focus_catalogue(carried)
-            else:
-                hud.release_focus_all()
-        "select_part":
-            carried = str(argument)
-            mode = "place"
-            moving_id = 0
-            mirrored = false
-            variant = 0
-            hud.set_selected(carried)
-            _sound("click")
-            hud.release_focus_all()
-            pose.rearm()
-            _tutorial_step("select")
-            _update_preview(true)
+            _choose_slot(slot)
         "toggle_remove":
             mode = "place" if mode == "remove" else "remove"
             moving_id = 0
-            _update_preview(true)
+            _choose_slot(slot)
         "undo", "redo":
             var done := history.undo(grid) if action == "undo" else history.redo(grid)
             if done:
@@ -461,7 +422,7 @@ func _on_command(action: String, argument: Variant) -> void:
 
 
 func _set_hook(target: Vector2) -> void:
-    hook = target.clamp(Vector2.ZERO, Vector2(grid.width, grid.height))
+    hook = Vector2(clampf(target.x, 0.0, grid.width), grid.height)
     view.hook = hook
     _update_preview(false)
     _follow_hook()
@@ -482,7 +443,12 @@ func _confirm() -> void:
             var command := Placement.remove_command(grid, view.pointed)
             if command == null:
                 hud.set_message(
-                    "✗ " + tr("ERROR_PROTECTED" if view.pointed != 0 else "ERROR_NOTHING_THERE"),
+                    (
+                        "✗ "
+                        + Texts.of(
+                            "ERROR_PROTECTED" if view.pointed != 0 else "ERROR_NOTHING_THERE"
+                        )
+                    ),
                     Ui.BAD_COLOUR
                 )
                 _sound("invalid")
@@ -508,8 +474,14 @@ func _confirm() -> void:
                 if moving_id != 0:
                     moving_id = 0
                     mode = "place"
+                else:
+                    # NOTE (mristin):
+                    # The placed block leaves the row; a new one comes at
+                    # the end, and the chosen place now holds the next block.
+                    queue.take(slot)
                 _tutorial_step("place")
                 _after_edit()
+                _choose_slot(slot)
 
 
 ## The effect of placing a part: by its material and kind.
@@ -545,13 +517,14 @@ func _exit_tree() -> void:
 
 
 func _pick_for_move() -> void:
-    var id := grid.pick_at(Vector2i(floori(hook.x), floori(hook.y)))
+    var column := column_parts()
+    var id := column[0] if not column.is_empty() else 0
     if id == 0:
-        hud.set_message("✗ " + tr("ERROR_NOTHING_THERE"), Ui.BAD_COLOUR)
+        hud.set_message("✗ " + Texts.of("ERROR_NOTHING_THERE"), Ui.BAD_COLOUR)
         return
     var instance: PartInstance = grid.instances[id]
     if instance.protected:
-        hud.set_message("✗ " + tr("ERROR_PROTECTED"), Ui.BAD_COLOUR)
+        hud.set_message("✗ " + Texts.of("ERROR_PROTECTED"), Ui.BAD_COLOUR)
         return
     moving_id = id
     mode = "move"
@@ -564,9 +537,6 @@ func _pick_for_move() -> void:
 func _cycle_colour() -> void:
     var definition := content.part(carried)
     if definition == null:
-        return
-    if "colourist" not in _game.session.character.perks:
-        hud.set_message(tr("COLOUR_NEEDS_PERK"), Ui.INK)
         return
     variant = (variant + 1) % definition.colour_variants
     _update_preview(true)
@@ -581,6 +551,7 @@ func _after_edit() -> void:
 
 func _evaluate() -> void:
     report = MissionEvaluator.evaluate(mission, grid)
+    queue.wanted_tags = wanted_tags(mission, report)
     hud.set_checklist(report)
     var highlighted: Array = []
     for id in report.analysis.support.problem_ids():
@@ -589,6 +560,30 @@ func _evaluate() -> void:
     hud.set_history(history.can_undo(), history.can_redo(), mode == "remove")
     _refresh_tutorial()
     view.queue_redraw()
+
+
+## The tags which the unmet objectives of the mission ask for (as keys), so
+## that the row brings their parts more often.
+static func wanted_tags(of_mission: Dictionary, of_report: MissionEvaluator.Report) -> Dictionary:
+    var unmet := {}
+    for result in of_report.mandatory + of_report.optional:
+        if not result["satisfied"]:
+            unmet[str(result["id"])] = true
+    var tags := {}
+    for objective in of_mission["mandatory_objectives"] + of_mission["optional_objectives"]:
+        if unmet.has(str(objective["id"])):
+            _collect_tags(objective, tags)
+    return tags
+
+
+static func _collect_tags(objective: Dictionary, tags: Dictionary) -> void:
+    if objective.has("tag"):
+        tags[str(objective["tag"])] = true
+    for tag in objective.get("tags", []):
+        tags[str(tag)] = true
+    for nested in objective.get("requirements", []) + objective.get("objectives", []):
+        if nested is Dictionary:
+            _collect_tags(nested, tags)
 
 
 func _highlight_unmet() -> void:
@@ -600,60 +595,62 @@ func _highlight_unmet() -> void:
     view.queue_redraw()
 
 
-## Snap the carried part to the nearest valid anchor near the hook, and show
-## whether (and why not) it can be placed there.
+## Drop the carried block from the hook: it lands at the first height, from
+## the top down, at which it can be placed in the column under the hook. The
+## preview shows where, with why it is valid or not. The remove tool points at
+## the top part of the column the same way.
 func _update_preview(force: bool) -> void:
     view.remove_mode = mode == "remove"
     view.pointed = 0
     if mode == "remove":
         view.preview = {}
-        view.pointed = grid.pick_at(Vector2i(floori(hook.x), floori(hook.y)))
-        if view.pointed != 0:
-            var definition := grid.definition_of(grid.instances[view.pointed])
+        var column := column_parts()
+        if not column.is_empty():
+            view.pointed = column[0]
+            var pointed := grid.definition_of(grid.instances[view.pointed])
             hud.set_message(
-                "✓ " + tr("REMOVE_TARGET").format({"part": tr(definition.name_key)}), Ui.OK_COLOUR
+                (
+                    "✓ "
+                    + Grammar.format(
+                        tr("Remove {part}: dip down, or press Space."), {"part": tr(pointed.name)}
+                    )
+                ),
+                Ui.OK_COLOUR
             )
         else:
-            hud.set_message(tr("REMOVE_HINT"), Ui.INK)
+            hud.set_message(tr("Move the hook over a part to remove it."), Ui.INK)
         view.queue_redraw()
         return
     var definition := content.part(carried)
     if definition == null:
         view.preview = {}
-        hud.set_message(tr("HINT_OPEN_CATALOGUE"), Ui.INK)
+        hud.set_message(
+            tr("Choose a block in the row below: a short dip takes the next one."), Ui.INK
+        )
         view.queue_redraw()
         return
-    var raw := _raw_anchor_for(definition)
-    if raw == _raw_anchor and not force:
+    var x := _column_anchor_x(definition)
+    var key := Vector3i(x, slot, moving_id)
+    if key == _preview_key and not force:
         return
-    _raw_anchor = raw
-    var best := raw
-    _preview_result = null
-    var first: PlacementResult = null
-    for offset in [
-        Vector2i(0, 0),
-        Vector2i(0, -1),
-        Vector2i(-1, 0),
-        Vector2i(1, 0),
-        Vector2i(0, 1),
-        Vector2i(-1, -1),
-        Vector2i(1, -1),
-        Vector2i(0, -2)
-    ]:
-        var candidate: Vector2i = raw + offset
-        var result := Placement.validate(grid, definition, candidate, mirrored, _context, moving_id)
-        if first == null:
-            first = result
-        if result.ok:
-            best = candidate
-            _preview_result = result
-            break
-    if _preview_result == null:
-        _preview_result = first
+    _preview_key = key
+    var levels := landing_levels(definition, x)
+    var anchor := Vector2i(x, grid.height - maxi(definition.footprint.y, 1))
+    if levels.is_empty():
+        _preview_result = Placement.validate(
+            grid, definition, anchor, mirrored, _context, moving_id
+        )
+        if _preview_result.reason_key not in ["ERROR_NOT_OFFERED", "ERROR_OVERWEIGHT"]:
+            _preview_result = PlacementResult.invalid("ERROR_NO_LANDING")
+    else:
+        anchor = levels[0]
+        _preview_result = Placement.validate(
+            grid, definition, anchor, mirrored, _context, moving_id
+        )
     view.pointed = moving_id
     view.preview = {
         "definition": definition,
-        "anchor": best,
+        "anchor": anchor,
         "mirrored": mirrored,
         "variant": variant,
         "ok": _preview_result.ok,
@@ -662,28 +659,63 @@ func _update_preview(force: bool) -> void:
     view.queue_redraw()
 
 
-## The anchor under the hook: the hook's tip is the middle of the part's
-## bottom (or of the edge), so a part lands on the floor at the hook's height.
-func _raw_anchor_for(definition: PartDef) -> Vector2i:
-    var size := definition.footprint
-    match definition.layer:
-        "edge_v":
-            return Vector2i(roundi(hook.x), roundi(hook.y))
-        _:
-            return Vector2i(roundi(hook.x - size.x / 2.0), roundi(hook.y))
+## The anchor column of the part under the hook.
+func _column_anchor_x(definition: PartDef) -> int:
+    if definition.layer == "edge_v":
+        return roundi(hook.x)
+    return roundi(hook.x - definition.footprint.x / 2.0)
+
+
+## The anchor at which the part lands in the column: the first, from the top
+## down, at which it can be placed; empty if there is none.
+func landing_levels(definition: PartDef, x: int) -> Array[Vector2i]:
+    var levels: Array[Vector2i] = []
+    for y in range(grid.height, -1, -1):
+        var anchor := Vector2i(x, y)
+        if Placement.validate(grid, definition, anchor, mirrored, _context, moving_id).ok:
+            levels.append(anchor)
+            break
+    return levels
+
+
+## The parts in the column under the hook, from the top down (for the remove
+## and the move tool).
+func column_parts() -> Array[int]:
+    var x := floori(hook.x)
+    var found: Array[int] = []
+    for id in grid.sorted_ids():
+        var instance: PartInstance = grid.instances[id]
+        if instance.protected:
+            continue
+        var vertical := grid.definition_of(instance).layer == "edge_v"
+        for slot in grid.slots_of(instance):
+            if slot.x == x or (vertical and slot.x == x + 1):
+                found.append(id)
+                break
+    found.sort_custom(_higher)
+    return found
+
+
+func _higher(a: int, b: int) -> bool:
+    return grid.top_of(grid.instances[a]) > grid.top_of(grid.instances[b])
 
 
 func _show_preview_message(definition: PartDef) -> void:
-    var name: String = tr(definition.name_key)
+    var name: String = tr(definition.name)
     if _preview_result.ok:
-        var text := "✓ " + tr("PREVIEW_VALID").format({"part": name})
+        var text := (
+            "✓ "
+            + Grammar.format(tr("{part} lands here: do a push-up to place it."), {"part": name})
+        )
         if _preview_result.warning_key != "":
-            text += "  ⚠ " + tr(_preview_result.warning_key)
+            text += "  ⚠ " + Texts.of(_preview_result.warning_key)
         hud.set_message(text, Ui.OK_COLOUR)
     else:
         var params := _preview_result.params.duplicate()
         params["part"] = name
-        hud.set_message("✗ " + tr(_preview_result.reason_key).format(params), Ui.BAD_COLOUR)
+        hud.set_message(
+            "✗ " + Grammar.format(Texts.of(_preview_result.reason_key), params), Ui.BAD_COLOUR
+        )
 
 
 func _refresh_status() -> void:
@@ -692,24 +724,27 @@ func _refresh_status() -> void:
     var tool := ""
     match mode:
         "remove":
-            tool = tr("TOOL_REMOVE")
+            tool = tr("Removing")
         "move":
-            tool = tr("TOOL_MOVE").format({"part": tr(content.part(carried).name_key)})
+            tool = Grammar.format(tr("Moving: {part}"), {"part": tr(content.part(carried).name)})
         _:
-            tool = tr("TOOL_PLACE").format(
-                {"part": tr(content.part(carried).name_key) if carried != "" else "—"}
+            tool = Grammar.format(
+                tr("Carrying: {part}"),
+                {"part": tr(content.part(carried).name) if carried != "" else "—"}
             )
     hud.set_tool(tool)
     var tracking := {"ok": "TRACKING_OK", "frozen": "TRACKING_FROZEN", "lost": "TRACKING_LOST"}
-    var source := tr("INPUT_BODY").format({"tracking": tr(tracking[pose.tracking])})
+    var source := Grammar.format(
+        tr("Body: {tracking}"), {"tracking": Texts.of(tracking[pose.tracking])}
+    )
     match _game.pose_provider.status():
         "starting":
-            source = tr("INPUT_CAMERA_STARTING")
+            source = tr("Starting the camera…")
         "off", "failed":
-            source = tr("INPUT_NO_CAMERA")
-    if not pose.calibration.has("h"):
-        source = tr("INPUT_BODY_UNCALIBRATED")
-    hud.set_status("%s · %s" % [source, tr("STATE_" + dispatcher.state)])
+            source = tr("No camera")
+    if not pose.calibration.has("h") and _game.pose_provider.status() == "running":
+        source = tr("Body: hold still…")
+    hud.set_status("%s · %s" % [source, Texts.of("STATE_" + dispatcher.state)])
     hud.set_history(history.can_undo(), history.can_redo(), mode == "remove")
 
 
@@ -723,19 +758,49 @@ func _refresh_tutorial() -> void:
     if _tutorial.is_empty():
         hud.set_tutorial("")
         return
-    var lines: Array[String] = [tr("TUTORIAL_TITLE")]
-    for step in ["select", "move", "place", "remove", "undo"]:
-        lines.append(("✓ " if _tutorial[step] else "○ ") + tr("TUTORIAL_" + step.to_upper()))
+    var lines: Array[String] = [Texts.of("TUTORIAL_TITLE")]
+    for step in ["select", "move", "place"]:
+        lines.append(("✓ " if _tutorial[step] else "○ ") + Texts.of("TUTORIAL_" + step.to_upper()))
     hud.set_tutorial("\n".join(lines))
 
 
+## Calibrate anew: the next posture the player holds still becomes neutral.
 func _recentre() -> void:
-    var frame: Dictionary = _game.pose_provider.latest_frame()
-    if frame.is_empty() or not pose.calibration.has("h"):
-        return
-    pose.calibration = PoseCalibration.recentre(pose.calibration, PoseMeasure.measure(frame))
-    _settings.set_value("calibration", pose.calibration)
+    pose.calibration = {}
+    _auto_calibration.reset()
+    _body_seen = false
     pose.rearm()
+
+
+## Learn the neutral posture while the player holds still; the hook waits.
+func _auto_calibrate(provider: PoseProvider, frame: Dictionary) -> void:
+    var measures := {}
+    var fresh := not frame.is_empty() and provider.now() - float(frame["timestamp"]) <= 0.25
+    if fresh and PoseMeasure.confident(frame, pose.min_confidence):
+        measures = PoseMeasure.measure(frame)
+    var calibration := _auto_calibration.feed(measures, provider.now())
+    hud.set_message(
+        Texts.of("AUTO_CALIBRATING" if not measures.is_empty() else "AUTO_CALIBRATING_NOT_SEEN"),
+        Ui.INK
+    )
+    var events: Array = []
+    if not calibration.is_empty():
+        pose.calibration = calibration
+        pose.rearm()
+        events.append("auto_calibrated")
+        _refresh_status()
+        _update_preview(true)
+    if _pose_log != null:
+        var fields := {"screen": "build_site", "state": dispatcher.state, "tracking": "calibrating"}
+        fields["feedback"] = _auto_calibration.feedback
+        var logged := {}
+        for key in ["unit", "h", "v", "lift_left", "lift_right"]:
+            if measures.has(key):
+                logged[key] = snappedf(float(measures[key]), 0.001)
+        fields["m"] = logged
+        if not calibration.is_empty():
+            fields["calibration"] = calibration
+        _pose_log.sample(provider.now(), frame, fields, events)
 
 
 func _on_overlay_action(action: String) -> void:
@@ -744,10 +809,6 @@ func _on_overlay_action(action: String) -> void:
             dispatcher.dispatch("resume")
         "recentre":
             _recentre()
-        "calibrate":
-            _game.session.save()
-            _game.return_screen = "build_site"
-            _game.go("calibration")
         "leave":
             _game.session.store_site(mission_id, grid)
             _game.session.save()
@@ -777,7 +838,5 @@ func _submit() -> void:
     _sound("cheer")
     var names := MissionText.requesters(mission, content)
     overlays.show_completion(
-        tr("COMPLETE_THANKS").format(
-            {"names": names, "thanks": tr(mission["completion_dialogue_key"])}
-        )
+        Grammar.format(tr("{names}: “{thanks}”"), {"names": names, "thanks": tr(mission["thanks"])})
     )

@@ -2,20 +2,17 @@
   "missions": [
     {
       "id": "place_to_sit",
-      "title_key": "MISSION_PLACE_TO_SIT",
-      "brief_key": "MISSION_PLACE_TO_SIT_BRIEF",
+      "title": "A Place to Sit",
+      "brief": "Vera walks to the market every day and would love a pleasant spot to rest on the way: somewhere two people can sit, under a tree, with a bit of green.",
       "site_id": "meadow_20_12",
       "requester_ids": [
         "vera"
       ],
       "prerequisite_ids": [],
-      "min_karma": 0,
       "available_catalogue_ids": [],
-      "base_xp": 20,
-      "base_karma": 20,
       "estimated_placements": 6,
       "tutorial": true,
-      "completion_dialogue_key": "MISSION_PLACE_TO_SIT_THANKS",
+      "thanks": "What a lovely spot. Come and sit with me sometime!",
       "npc_spawn_defs": [
         {
           "resident_id": "vera"
@@ -26,14 +23,14 @@
         {
           "id": "seats",
           "type": "usable_tag_count",
-          "text_key": "OBJ_SIT_SEATS",
+          "text": "Seats for {required} people ({current} of {required})",
           "tag": "seat_capacity",
           "minimum": 2
         },
         {
           "id": "tree",
           "type": "usable_tag_count",
-          "text_key": "OBJ_SIT_TREE",
+          "text": "A tree ({current} of {required})",
           "tag": "tree",
           "minimum": 1,
           "reachable": false
@@ -41,20 +38,20 @@
         {
           "id": "green",
           "type": "green_area",
-          "text_key": "OBJ_SIT_GREEN",
+          "text": "{required} cells of green ({current} of {required})",
           "minimum_cells": 2
         },
         {
           "id": "supported",
           "type": "no_unsupported_parts",
-          "text_key": "OBJ_SIT_SUPPORTED"
+          "text": "Everything stands safely"
         }
       ],
       "optional_objectives": [
         {
           "id": "flower_beds",
           "type": "usable_tag_count",
-          "text_key": "OBJ_SIT_FLOWER_BEDS",
+          "text": "{required} flower beds ({current} of {required})",
           "tag": "planted_area",
           "minimum": 2,
           "reachable": false,
@@ -66,8 +63,8 @@
     },
     {
       "id": "first_home",
-      "title_key": "MISSION_FIRST_HOME",
-      "brief_key": "MISSION_FIRST_HOME_BRIEF",
+      "title": "The First Home",
+      "brief": "Tomás and Amina need a weatherproof home: somewhere to sleep, cook, eat, wash and use the toilet, all under one roof. One storey or two: it is up to you.",
       "site_id": "flat_40_24",
       "requester_ids": [
         "tomas",
@@ -76,12 +73,9 @@
       "prerequisite_ids": [
         "place_to_sit"
       ],
-      "min_karma": 0,
       "available_catalogue_ids": [],
-      "base_xp": 100,
-      "base_karma": 100,
       "estimated_placements": 45,
-      "completion_dialogue_key": "MISSION_FIRST_HOME_THANKS",
+      "thanks": "A home of our own, and it is dry and warm. Thank you!",
       "npc_spawn_defs": [
         {
           "resident_id": "tomas"
@@ -95,7 +89,7 @@
         {
           "id": "room",
           "type": "enclosed_room_count",
-          "text_key": "OBJ_HOME_ROOM",
+          "text": "A closed room of at least 24 cells with a way in ({current} of {required})",
           "minimum": 1,
           "minimum_area": 24,
           "accessible": true
@@ -103,7 +97,7 @@
         {
           "id": "beds",
           "type": "usable_tag_count",
-          "text_key": "OBJ_HOME_BEDS",
+          "text": "Beds for {required} indoors, within reach ({current} of {required})",
           "tag": "sleep_capacity",
           "minimum": 2,
           "indoors": true
@@ -111,7 +105,7 @@
         {
           "id": "table",
           "type": "usable_tag_count",
-          "text_key": "OBJ_HOME_TABLE",
+          "text": "A table indoors ({current} of {required})",
           "tag": "table",
           "minimum": 1,
           "indoors": true
@@ -119,7 +113,7 @@
         {
           "id": "seats",
           "type": "usable_tag_count",
-          "text_key": "OBJ_HOME_SEATS",
+          "text": "Seats for {required} indoors ({current} of {required})",
           "tag": "seat_capacity",
           "minimum": 2,
           "indoors": true
@@ -127,7 +121,7 @@
         {
           "id": "stove",
           "type": "usable_tag_count",
-          "text_key": "OBJ_HOME_STOVE",
+          "text": "A stove indoors ({current} of {required})",
           "tag": "cooking",
           "minimum": 1,
           "indoors": true
@@ -135,7 +129,7 @@
         {
           "id": "sink",
           "type": "usable_tag_count",
-          "text_key": "OBJ_HOME_SINK",
+          "text": "A sink indoors ({current} of {required})",
           "tag": "hygiene",
           "minimum": 1,
           "indoors": true
@@ -143,7 +137,7 @@
         {
           "id": "toilet",
           "type": "usable_tag_count",
-          "text_key": "OBJ_HOME_TOILET",
+          "text": "A toilet indoors ({current} of {required})",
           "tag": "toilet",
           "minimum": 1,
           "indoors": true
@@ -151,14 +145,14 @@
         {
           "id": "supported",
           "type": "no_unsupported_parts",
-          "text_key": "OBJ_HOME_SUPPORTED"
+          "text": "Everything stands safely"
         }
       ],
       "optional_objectives": [
         {
           "id": "two_bedrooms",
           "type": "distinct_rooms_with_tags",
-          "text_key": "OBJ_HOME_TWO_BEDROOMS",
+          "text": "Two separate bedrooms ({current} of {required})",
           "requirements": [
             {
               "tags": [
@@ -177,7 +171,7 @@
         {
           "id": "windows",
           "type": "usable_tag_count",
-          "text_key": "OBJ_HOME_WINDOWS",
+          "text": "{required} windows to the rooms ({current} of {required})",
           "tag": "daylight",
           "minimum": 2,
           "indoors": true,
@@ -189,12 +183,12 @@
         {
           "id": "garden",
           "type": "all_of",
-          "text_key": "OBJ_HOME_GARDEN",
+          "text": "A bench and green outside ({current} of {required})",
           "objectives": [
             {
               "id": "garden_bench",
               "type": "usable_tag_count",
-              "text_key": "OBJ_HOME_GARDEN_BENCH",
+              "text": "A bench outside ({current} of {required})",
               "tag": "bench",
               "minimum": 1,
               "outdoors": true,
@@ -203,7 +197,7 @@
             {
               "id": "garden_green",
               "type": "green_area",
-              "text_key": "OBJ_HOME_GARDEN_GREEN",
+              "text": "{required} cells of green ({current} of {required})",
               "minimum_cells": 4
             }
           ],
@@ -214,8 +208,8 @@
     },
     {
       "id": "garden_for_everyone",
-      "title_key": "MISSION_GARDEN",
-      "brief_key": "MISSION_GARDEN_BRIEF",
+      "title": "A Garden for Everyone",
+      "brief": "Leo and Ida would like a garden for the whole neighbourhood, with seats, trees and plenty of green, that everyone can walk to.",
       "site_id": "flat_40_24",
       "requester_ids": [
         "leo",
@@ -224,12 +218,9 @@
       "prerequisite_ids": [
         "first_home"
       ],
-      "min_karma": 0,
       "available_catalogue_ids": [],
-      "base_xp": 100,
-      "base_karma": 100,
       "estimated_placements": 20,
-      "completion_dialogue_key": "MISSION_GARDEN_THANKS",
+      "thanks": "The neighbours already meet here every evening!",
       "npc_spawn_defs": [
         {
           "resident_id": "leo"
@@ -249,7 +240,7 @@
             32,
             8
           ],
-          "name_key": "ZONE_GARDEN"
+          "name": "the garden"
         },
         "west": {
           "rect": [
@@ -258,7 +249,7 @@
             20,
             24
           ],
-          "name_key": "ZONE_WEST"
+          "name": "the west"
         },
         "east": {
           "rect": [
@@ -267,27 +258,27 @@
             20,
             24
           ],
-          "name_key": "ZONE_EAST"
+          "name": "the east"
         }
       },
       "mandatory_objectives": [
         {
           "id": "seats",
           "type": "usable_tag_count",
-          "text_key": "OBJ_GARDEN_SEATS",
+          "text": "Seats for {required} people ({current} of {required})",
           "tag": "seat_capacity",
           "minimum": 4
         },
         {
           "id": "green",
           "type": "green_area",
-          "text_key": "OBJ_GARDEN_GREEN",
+          "text": "{required} cells of green ({current} of {required})",
           "minimum_cells": 12
         },
         {
           "id": "trees",
           "type": "usable_tag_count",
-          "text_key": "OBJ_GARDEN_TREES",
+          "text": "{required} trees ({current} of {required})",
           "tag": "tree",
           "minimum": 2,
           "reachable": false,
@@ -296,20 +287,20 @@
         {
           "id": "garden_reachable",
           "type": "reachable_zone",
-          "text_key": "OBJ_GARDEN_GARDEN_REACHABLE",
+          "text": "Everyone can walk into the garden",
           "zone_id": "garden"
         },
         {
           "id": "supported",
           "type": "no_unsupported_parts",
-          "text_key": "OBJ_GARDEN_SUPPORTED"
+          "text": "Everything stands safely"
         }
       ],
       "optional_objectives": [
         {
           "id": "flower_beds",
           "type": "usable_tag_count",
-          "text_key": "OBJ_GARDEN_FLOWER_BEDS",
+          "text": "{required} flower beds ({current} of {required})",
           "tag": "planted_area",
           "minimum": 4,
           "reachable": false,
@@ -320,12 +311,12 @@
         {
           "id": "two_seating_areas",
           "type": "all_of",
-          "text_key": "OBJ_GARDEN_TWO_SEATING_AREAS",
+          "text": "Seats in the west and in the east ({current} of {required})",
           "objectives": [
             {
               "id": "seats_west",
               "type": "usable_tag_count",
-              "text_key": "OBJ_GARDEN_SEATS_WEST",
+              "text": "Seats in the west ({current} of {required})",
               "tag": "seat_capacity",
               "minimum": 1,
               "zone": "west"
@@ -333,7 +324,7 @@
             {
               "id": "seats_east",
               "type": "usable_tag_count",
-              "text_key": "OBJ_GARDEN_SEATS_EAST",
+              "text": "Seats in the east ({current} of {required})",
               "tag": "seat_capacity",
               "minimum": 1,
               "zone": "east"
@@ -346,8 +337,8 @@
     },
     {
       "id": "neighbourhood_workshop",
-      "title_key": "MISSION_WORKSHOP",
-      "brief_key": "MISSION_WORKSHOP_BRIEF",
+      "title": "The Neighbourhood Workshop",
+      "brief": "Karim and Noor want a workshop where neighbours repair and make things together: two rooms, each with a table, a seat and a lamp.",
       "site_id": "flat_40_24",
       "requester_ids": [
         "karim",
@@ -356,12 +347,9 @@
       "prerequisite_ids": [
         "garden_for_everyone"
       ],
-      "min_karma": 0,
       "available_catalogue_ids": [],
-      "base_xp": 150,
-      "base_karma": 120,
       "estimated_placements": 45,
-      "completion_dialogue_key": "MISSION_WORKSHOP_THANKS",
+      "thanks": "Two rooms full of ideas. We will fix the whole street's bicycles here!",
       "npc_spawn_defs": [
         {
           "resident_id": "karim"
@@ -375,7 +363,7 @@
         {
           "id": "rooms",
           "type": "distinct_rooms_with_tags",
-          "text_key": "OBJ_WORKSHOP_ROOMS",
+          "text": "Two rooms of at least 18 cells, each with a table, a seat and a lamp ({current} of {required})",
           "requirements": [
             {
               "tags": [
@@ -398,19 +386,19 @@
         {
           "id": "supported",
           "type": "no_unsupported_parts",
-          "text_key": "OBJ_WORKSHOP_SUPPORTED"
+          "text": "Everything stands safely"
         }
       ],
       "optional_objectives": [
         {
           "id": "garden",
           "type": "all_of",
-          "text_key": "OBJ_WORKSHOP_GARDEN",
+          "text": "A bench and green outside ({current} of {required})",
           "objectives": [
             {
               "id": "garden_bench",
               "type": "usable_tag_count",
-              "text_key": "OBJ_WORKSHOP_GARDEN_BENCH",
+              "text": "A bench outside ({current} of {required})",
               "tag": "bench",
               "minimum": 1,
               "outdoors": true,
@@ -419,7 +407,7 @@
             {
               "id": "garden_green",
               "type": "green_area",
-              "text_key": "OBJ_WORKSHOP_GARDEN_GREEN",
+              "text": "{required} cells of green ({current} of {required})",
               "minimum_cells": 4
             }
           ],

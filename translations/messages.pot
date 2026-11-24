@@ -1,0 +1,1066 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Baugenossen\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: scenes/build_site/build_hud.gd
+msgid "Undo"
+msgstr ""
+
+#: scenes/build_site/build_hud.gd
+msgid "Redo"
+msgstr ""
+
+#: scenes/build_site/build_hud.gd scenes/build_site/build_overlays.gd
+msgid "Review"
+msgstr ""
+
+#: scenes/build_site/build_hud.gd
+msgid "Pause"
+msgstr ""
+
+#: scenes/build_site/build_hud.gd
+msgid "Checklist"
+msgstr ""
+
+#: scenes/build_site/build_hud.gd scenes/build_site/build_overlays.gd
+msgid "Wishes"
+msgstr ""
+
+#: scenes/build_site/build_overlays.gd
+msgid "Paused"
+msgstr ""
+
+#: scenes/build_site/build_overlays.gd
+msgid "Some needs are still open; you can keep building as long as you like."
+msgstr ""
+
+#: scenes/build_site/build_overlays.gd
+msgid "Moving in!"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Remove {part}: dip down, or press Space."
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Move the hook over a part to remove it."
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Choose a block in the row below: a short dip takes the next one."
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "{part} lands here: do a push-up to place it."
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Removing"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Moving: {part}"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Carrying: {part}"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Body: {tracking}"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Starting the camera…"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "No camera"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Body: hold still…"
+msgstr ""
+
+#: scenes/build_site/build_site.gd scenes/mission_results/mission_results.gd
+msgid "{names}: “{thanks}”"
+msgstr ""
+
+#: scenes/city_map/city_map.gd
+msgid "The cooperative's projects"
+msgstr ""
+
+#: scenes/city_map/city_map.gd scenes/mission_results/mission_results.gd
+msgid "Save and exit"
+msgstr ""
+
+#: scenes/city_map/city_map.gd
+msgid "Asked by {names}"
+msgstr ""
+
+#: scenes/city_map/city_map.gd
+msgid "Opens after: {missions}"
+msgstr ""
+
+#: scenes/main_menu/credits.gd scenes/main_menu/main_menu.gd
+msgid "Credits"
+msgstr ""
+
+#: scenes/main_menu/credits.gd
+msgid "Back"
+msgstr ""
+
+#: scenes/main_menu/main_menu.gd
+msgid "A City Built Together"
+msgstr ""
+
+#: scenes/main_menu/main_menu.gd
+msgid "Continue"
+msgstr ""
+
+#: scenes/main_menu/main_menu.gd
+msgid "New game"
+msgstr ""
+
+#: scenes/main_menu/main_menu.gd
+msgid "Quit"
+msgstr ""
+
+#: scenes/mission_results/mission_results.gd
+msgid "Well built!"
+msgstr ""
+
+#: scenes/mission_results/mission_results.gd
+msgid "Choose another project"
+msgstr ""
+
+#: scenes/mission_results/mission_results.gd
+msgid "Back to this site"
+msgstr ""
+
+#: scenes/session/game.gd
+msgid "Press Esc again to quit."
+msgstr ""
+
+#. message ERROR_NO_LANDING
+#: scenes/languages/texts.gd
+msgid "Nothing to land on below the hook: move it over the ground or a floor."
+msgstr ""
+
+#. message PAUSE_BODY_RESUME_HINT
+#: scenes/languages/texts.gd
+msgid "To go on, hold your neutral posture, then do a push-up, or press P."
+msgstr ""
+
+#. message CREDITS_TEXT
+#: scenes/languages/texts.gd
+msgid ""
+"Baugenossen is made by Dinamika Games and its contributors, under the MIT License.\n"
+"\n"
+"Made with Godot Engine. The body tracking uses RTMO and RTMPose by OpenMMLab (Apache License 2.0) through ONNX Runtime (MIT); the camera runs only on this computer and nothing is recorded or sent.\n"
+"\n"
+"The pictures are placeholder drawings made in code. See THIRD_PARTY_NOTICES.md for all the licenses."
+msgstr ""
+
+#. message AUTO_CALIBRATING
+#: scenes/languages/texts.gd
+msgid ""
+"Go into your push-up position (or on your knees, hands on the floor) and hold still for a moment: "
+"the crane learns your posture."
+msgstr ""
+
+#. message AUTO_CALIBRATING_NOT_SEEN
+#: scenes/languages/texts.gd
+msgid "Move into the camera picture, so that it sees your shoulders, elbows and wrists."
+msgstr ""
+
+#. message CITY_CONTINUE
+#: scenes/languages/texts.gd
+msgid "Continue building"
+msgstr ""
+
+#. message CITY_REPAIR
+#: scenes/languages/texts.gd
+msgid "Repair"
+msgstr ""
+
+#. message CITY_REVISIT
+#: scenes/languages/texts.gd
+msgid "Visit and edit"
+msgstr ""
+
+#. message CITY_START
+#: scenes/languages/texts.gd
+msgid "Start"
+msgstr ""
+
+#. message COMPLETE_CONTINUE
+#: scenes/languages/texts.gd
+msgid "See the results"
+msgstr ""
+
+#. message CREATE_LOOK_CLOTHING
+#: scenes/languages/texts.gd
+msgid "Clothes"
+msgstr ""
+
+#. message CREATE_LOOK_HAIR
+#: scenes/languages/texts.gd
+msgid "Hair"
+msgstr ""
+
+#. message CREATE_LOOK_SKIN
+#: scenes/languages/texts.gd
+msgid "Skin"
+msgstr ""
+
+#. message ERROR_CANNOT_MIRROR
+#: scenes/languages/texts.gd
+msgid "{part} can not be mirrored."
+msgstr ""
+
+#. message ERROR_CROSSES_PART
+#: scenes/languages/texts.gd
+msgid "It would cut through another part."
+msgstr ""
+
+#. message ERROR_NOTHING_THERE
+#: scenes/languages/texts.gd
+msgid "There is nothing to pick here."
+msgstr ""
+
+#. message ERROR_NOT_OFFERED
+#: scenes/languages/texts.gd
+msgid "This project does not use {part}."
+msgstr ""
+
+#. message ERROR_OUT_OF_BOUNDS
+#: scenes/languages/texts.gd
+msgid "{part} does not fit on the site here."
+msgstr ""
+
+#. message ERROR_OVERHANG
+#: scenes/languages/texts.gd
+msgid "overhangs more than 2 cells; finish it with a wall or a beam below."
+msgstr ""
+
+#. message ERROR_OVERLAP
+#: scenes/languages/texts.gd
+msgid "Something is already there."
+msgstr ""
+
+#. message ERROR_OVERWEIGHT
+#: scenes/languages/texts.gd
+msgid "{part} weighs {mass}; your crane lifts {capacity}."
+msgstr ""
+
+#. message ERROR_PROTECTED
+#: scenes/languages/texts.gd
+msgid "This part belongs to the site and stays."
+msgstr ""
+
+#. message ERROR_TOP_LANDING
+#: scenes/languages/texts.gd
+msgid "the stairs need a floor at their top landing."
+msgstr ""
+
+#. message ERROR_UNKNOWN_PART
+#: scenes/languages/texts.gd
+msgid "Unknown part."
+msgstr ""
+
+#. message ERROR_UNSUPPORTED
+#: scenes/languages/texts.gd
+msgid "{part} needs support: put it on the ground, a floor, a wall or a beam."
+msgstr ""
+
+#. message HINT_DISTINCT_ROOMS
+#: scenes/languages/texts.gd
+msgid "each needs a room of its own"
+msgstr ""
+
+#. message HINT_NOT_INDOORS
+#: scenes/languages/texts.gd
+msgid "it must be inside a closed room"
+msgstr ""
+
+#. message HINT_NO_ROOM
+#: scenes/languages/texts.gd
+msgid "no closed room yet: close every wall and the roof"
+msgstr ""
+
+#. message HINT_ROOM_MISSING_THINGS
+#: scenes/languages/texts.gd
+msgid "a room still lacks something"
+msgstr ""
+
+#. message HINT_ROOM_NO_ENTRANCE
+#: scenes/languages/texts.gd
+msgid "the room has no way in"
+msgstr ""
+
+#. message HINT_ROOM_TOO_SMALL
+#: scenes/languages/texts.gd
+msgid "the room is too small"
+msgstr ""
+
+#. message HINT_TOO_HIGH
+#: scenes/languages/texts.gd
+msgid "the construction is too high"
+msgstr ""
+
+#. message HINT_UNREACHABLE
+#: scenes/languages/texts.gd
+msgid "nobody can reach it: add a door, stairs or a way"
+msgstr ""
+
+#. message HINT_ZONES_NOT_CONNECTED
+#: scenes/languages/texts.gd
+msgid "the places are not connected"
+msgstr ""
+
+#. message HINT_ZONE_MUST_STAY_FREE
+#: scenes/languages/texts.gd
+msgid "this place must stay free"
+msgstr ""
+
+#. message HINT_ZONE_UNREACHABLE
+#: scenes/languages/texts.gd
+msgid "nobody can get there yet"
+msgstr ""
+
+#. message HUD_COLOUR
+#: scenes/languages/texts.gd
+msgid "Colour"
+msgstr ""
+
+#. message HUD_MIRROR
+#: scenes/languages/texts.gd
+msgid "Mirror"
+msgstr ""
+
+#. message HUD_MOVE
+#: scenes/languages/texts.gd
+msgid "Move"
+msgstr ""
+
+#. message HUD_REMOVE
+#: scenes/languages/texts.gd
+msgid "Remove"
+msgstr ""
+
+#. message NEEDS_BODY_TITLE
+#: scenes/languages/texts.gd
+msgid "The crane listens to your body"
+msgstr ""
+
+#. message NEEDS_CAMERA
+#: scenes/languages/texts.gd
+msgid ""
+"The hook moves only when you move, and the camera does not work. Connect a camera and allow it."
+msgstr ""
+
+#. message PAUSE_RECENTRE
+#: scenes/languages/texts.gd
+msgid "Learn my posture again"
+msgstr ""
+
+#. message PAUSE_RESUME
+#: scenes/languages/texts.gd
+msgid "Resume"
+msgstr ""
+
+#. message PAUSE_SAVE_AND_LEAVE
+#: scenes/languages/texts.gd
+msgid "Save and go to the projects"
+msgstr ""
+
+#. message PAUSE_SAVE_AND_QUIT
+#: scenes/languages/texts.gd
+msgid "Save and quit"
+msgstr ""
+
+#. message PAUSE_TRACKING_LOST
+#: scenes/languages/texts.gd
+msgid "The camera lost sight of you, so everything stopped. Take your time."
+msgstr ""
+
+#. message REVIEW_BACK
+#: scenes/languages/texts.gd
+msgid "Back to building"
+msgstr ""
+
+#. message REVIEW_COMPLETE
+#: scenes/languages/texts.gd
+msgid "Hand over to the residents"
+msgstr ""
+
+#. message REVIEW_RESUBMIT
+#: scenes/languages/texts.gd
+msgid "Hand over again"
+msgstr ""
+
+#. message SAVE_ERROR_CORRUPT
+#: scenes/languages/texts.gd
+msgid ""
+"The save is damaged and no backup could be read. It is kept as it is; a new game sets it aside."
+msgstr ""
+
+#. message SAVE_ERROR_LOCKED
+#: scenes/languages/texts.gd
+msgid "The save on disk can not be overwritten (see the message when loading)."
+msgstr ""
+
+#. message SAVE_ERROR_UNKNOWN_VERSION
+#: scenes/languages/texts.gd
+msgid "The save comes from a newer version of the game; it is left untouched."
+msgstr ""
+
+#. message SAVE_ERROR_VERIFY
+#: scenes/languages/texts.gd
+msgid ""
+"Saving failed: the written file could not be read back. Your progress is still here; try again."
+msgstr ""
+
+#. message SAVE_ERROR_WRITE
+#: scenes/languages/texts.gd
+msgid "Saving failed. Your progress is still here; try again."
+msgstr ""
+
+#. message SAVE_RECOVERED_FROM_BACKUP
+#: scenes/languages/texts.gd
+msgid "The last save was damaged, so the one before it was loaded."
+msgstr ""
+
+#. message STATE_BUILD
+#: scenes/languages/texts.gd
+msgid "building"
+msgstr ""
+
+#. message STATE_CALIBRATION
+#: scenes/languages/texts.gd
+msgid "calibrating"
+msgstr ""
+
+#. message STATE_CATALOGUE
+#: scenes/languages/texts.gd
+msgid "catalogue"
+msgstr ""
+
+#. message STATE_COMPLETE
+#: scenes/languages/texts.gd
+msgid "complete"
+msgstr ""
+
+#. message STATE_GESTURE_PENDING
+#: scenes/languages/texts.gd
+msgid "gesture…"
+msgstr ""
+
+#. message STATE_PAUSED
+#: scenes/languages/texts.gd
+msgid "paused"
+msgstr ""
+
+#. message STATE_REVIEW
+#: scenes/languages/texts.gd
+msgid "review"
+msgstr ""
+
+#. message STATUS_AVAILABLE
+#: scenes/languages/texts.gd
+msgid "open"
+msgstr ""
+
+#. message STATUS_COMPLETED
+#: scenes/languages/texts.gd
+msgid "completed"
+msgstr ""
+
+#. message STATUS_IN_PROGRESS
+#: scenes/languages/texts.gd
+msgid "in progress"
+msgstr ""
+
+#. message STATUS_LOCKED
+#: scenes/languages/texts.gd
+msgid "not yet open"
+msgstr ""
+
+#. message STATUS_NEEDS_REPAIR
+#: scenes/languages/texts.gd
+msgid "needs repair"
+msgstr ""
+
+#. message TRACKING_FROZEN
+#: scenes/languages/texts.gd
+msgid "hold on…"
+msgstr ""
+
+#. message TRACKING_LOST
+#: scenes/languages/texts.gd
+msgid "tracking lost"
+msgstr ""
+
+#. message TRACKING_OK
+#: scenes/languages/texts.gd
+msgid "tracking"
+msgstr ""
+
+#. message TUTORIAL_MOVE
+#: scenes/languages/texts.gd
+msgid "Move the hook: lean left and right"
+msgstr ""
+
+#. message TUTORIAL_PLACE
+#: scenes/languages/texts.gd
+msgid "Place the block: do a push-up"
+msgstr ""
+
+#. message TUTORIAL_SELECT
+#: scenes/languages/texts.gd
+msgid "Choose a block: a short dip (down a little, and back up) takes the next one"
+msgstr ""
+
+#. message TUTORIAL_TITLE
+#: scenes/languages/texts.gd
+msgid "How to build:"
+msgstr ""
+
+#. the title of a project, a few words
+#: data/missions.json
+msgid "A Place to Sit"
+msgstr ""
+
+#. the problem of the residents, two short sentences
+#: data/missions.json
+msgid ""
+"Vera walks to the market every day and would love a pleasant spot to rest on the way: somewhere "
+"two people can sit, under a tree, with a bit of green."
+msgstr ""
+
+#. what the residents say after moving in, one or two short sentences
+#: data/missions.json
+msgid "What a lovely spot. Come and sit with me sometime!"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Seats for {required} people ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A tree ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "{required} cells of green ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Everything stands safely"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "{required} flower beds ({current} of {required})"
+msgstr ""
+
+#. the title of a project, a few words
+#: data/missions.json
+msgid "The First Home"
+msgstr ""
+
+#. the problem of the residents, two short sentences
+#: data/missions.json
+msgid ""
+"Tomás and Amina need a weatherproof home: somewhere to sleep, cook, eat, wash and use the toilet, "
+"all under one roof. One storey or two: it is up to you."
+msgstr ""
+
+#. what the residents say after moving in, one or two short sentences
+#: data/missions.json
+msgid "A home of our own, and it is dry and warm. Thank you!"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A closed room of at least 24 cells with a way in ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Beds for {required} indoors, within reach ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A table indoors ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Seats for {required} indoors ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A stove indoors ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A sink indoors ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A toilet indoors ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Two separate bedrooms ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "{required} windows to the rooms ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A bench and green outside ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "A bench outside ({current} of {required})"
+msgstr ""
+
+#. the title of a project, a few words
+#: data/missions.json
+msgid "A Garden for Everyone"
+msgstr ""
+
+#. the problem of the residents, two short sentences
+#: data/missions.json
+msgid ""
+"Leo and Ida would like a garden for the whole neighbourhood, with seats, trees and plenty of "
+"green, that everyone can walk to."
+msgstr ""
+
+#. what the residents say after moving in, one or two short sentences
+#: data/missions.json
+msgid "The neighbours already meet here every evening!"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/missions.json
+msgid "the garden"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/missions.json
+msgid "the west"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/missions.json
+msgid "the east"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "{required} trees ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Everyone can walk into the garden"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Seats in the west and in the east ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Seats in the west ({current} of {required})"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid "Seats in the east ({current} of {required})"
+msgstr ""
+
+#. the title of a project, a few words
+#: data/missions.json
+msgid "The Neighbourhood Workshop"
+msgstr ""
+
+#. the problem of the residents, two short sentences
+#: data/missions.json
+msgid ""
+"Karim and Noor want a workshop where neighbours repair and make things together: two rooms, each "
+"with a table, a seat and a lamp."
+msgstr ""
+
+#. what the residents say after moving in, one or two short sentences
+#: data/missions.json
+msgid "Two rooms full of ideas. We will fix the whole street's bicycles here!"
+msgstr ""
+
+#. an objective; {current} and {required} are numbers
+#: data/missions.json
+msgid ""
+"Two rooms of at least 18 cells, each with a table, a seat and a lamp ({current} of {required})"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Structure"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Access"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Furniture"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Utilities"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Nature"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Recreation"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Tools"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Wooden floor"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A floor of 2 cells; people walk on it. Rests on walls or beams."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Wooden wall"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A wall one storey (6 cells) high; keeps the weather out."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Short wall"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A wall of 2 cells, e.g., above a door."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Flat roof"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A roof of 2 cells; keeps the weather out. Rests on walls or beams."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Wooden door"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A door of 4 cells; closed against the weather, open for people."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Back wall"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "The wall at the back of a room (2 × 6 cells), for the look."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Window"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A window (2 × 2 cells) over the back wall; brings daylight."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Stairs"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "Stairs up one storey (6 × 6 cells). They need a floor at the top."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Bed"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A bed for one person."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Table"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A table."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Chair"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A seat for one."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Sink"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A sink for washing."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Toilet"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A toilet."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Stove"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A stove for cooking."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Lamp"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A standing lamp."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Bench"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A bench for two."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Flower bed"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "Flowers on 2 cells."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Small tree"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A young tree giving shade."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Grass"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "Grass on 2 cells of ground."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Ladder"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A ladder up one storey."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Wooden beam"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A beam of 4 cells; carries floors and roofs, fixed to a wall or on support."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Stone wall"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A sturdy stone wall one storey high."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Large window"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A wide window (4 × 2 cells)."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Large tree"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A grown tree with a wide crown."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Sofa"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A comfortable seat for three."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/parts.json
+msgid "Steel beam"
+msgstr ""
+
+#. what a part, an attribute or a perk does, one short sentence
+#: data/parts.json
+msgid "A long beam of 6 cells."
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/residents.json
+msgid "Vera"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/residents.json
+msgid "Tomás"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/residents.json
+msgid "Amina"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/residents.json
+msgid "Leo"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/residents.json
+msgid "Ida"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/residents.json
+msgid "Karim"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/residents.json
+msgid "Noor"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/sites.json
+msgid "The meadow"
+msgstr ""
+
+#. a name (of a part, a category, an attribute, a perk, a site, a resident or a zone)
+#: data/sites.json
+msgid "The flat plot"
+msgstr ""

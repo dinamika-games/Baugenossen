@@ -2,7 +2,7 @@ class_name CommandHistory
 extends RefCounted
 ## Keep the edits of a site for undo and redo, at most [constant LIMIT] of them
 ## (DESIGN.md, 2.4). A new edit after an undo clears the redo. The history is
-## not saved: it starts empty when a site is opened (see docs/DECISIONS.md).
+## not saved: it starts empty when a site is opened (see DESIGN.md, 2.4).
 
 const LIMIT := 100
 

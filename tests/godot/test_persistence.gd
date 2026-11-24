@@ -1,7 +1,7 @@
 extends "res://tests/godot/godot_test.gd"
 ## Check the saves: the roundtrip, an incomplete site, the backup after
 ## corruption, an unknown version left untouched, the migration, and that a
-## resubmitted mission grants nothing twice, also after a restart (DESIGN.md,
+## resubmitted mission counts once, also after a restart (DESIGN.md,
 ## 10). The test writes only into its own temporary directory.
 
 const SampleBuilds := preload("res://tests/godot/sample_builds.gd")
@@ -24,16 +24,10 @@ func _session(name: String) -> GameSession:
     return GameSession.new(content, SaveRepository.new(directory.path_join(name)))
 
 
-func _character() -> Character:
-    var character := Character.create_default(content)
-    character.name = "Ana"
-    return character
-
-
 func _test_roundtrip_and_no_duplicate_rewards() -> void:
     var builds := SampleBuilds.new(content)
     var session := _session("roundtrip")
-    session.new_game(_character())
+    session.new_game()
     check_equal(session.mission_status("first_home"), "locked", "the home waits for the tutorial")
     var sit := builds.place_to_sit()
     var summary := session.submit("place_to_sit", sit)
@@ -46,14 +40,13 @@ func _test_roundtrip_and_no_duplicate_rewards() -> void:
 
     var restarted := _session("roundtrip")
     check(restarted.continue_game(), "the game continues after a restart")
-    check_equal(restarted.character.xp, 20, "with the XP of the tutorial")
-    check(restarted.character.has_completed("place_to_sit"), "and its completion")
+    check(restarted.progress.has_completed("place_to_sit"), "with the tutorial completed")
     check_equal(restarted.mission_status("first_home"), "in_progress", "the home is in progress")
     check_equal(restarted.open_site("first_home").instances.size(), 1, "with its wall")
     var again := restarted.submit("place_to_sit", restarted.open_site("place_to_sit"))
     check(again["submitted"], "the tutorial can be resubmitted")
-    check_equal(again["xp"], 0, "but grants no XP again")
-    check_equal(restarted.character.xp, 20, "the XP stays")
+    check(not again["first"], "but counts once")
+    check_equal(restarted.progress.completed_missions.size(), 1, "the progress stays")
     var bench: int = sit.at(WorldGrid.SLOT_CELLS, Vector2i(5, 0))
     var site := restarted.open_site("place_to_sit")
     site.remove_instance(bench)
@@ -61,14 +54,14 @@ func _test_roundtrip_and_no_duplicate_rewards() -> void:
     check_equal(
         restarted.mission_status("place_to_sit"), "needs_repair", "a broken site needs repair"
     )
-    check_equal(restarted.character.karma, 20, "without losing the karma")
+    check(restarted.progress.has_completed("place_to_sit"), "without losing the completion")
 
 
 func _test_corruption_falls_back() -> void:
     var session := _session("corrupt")
-    session.new_game(_character())
+    session.new_game()
     session.save()
-    session.character.xp = 5
+    session.progress.completed_missions.append("place_to_sit")
     session.save()
     var file := FileAccess.open(session.repository.path(), FileAccess.WRITE)
     file.store_string("{ this is not json")
@@ -76,7 +69,7 @@ func _test_corruption_falls_back() -> void:
     var restarted := _session("corrupt")
     check(restarted.continue_game(), "a corrupt save falls back to the backup")
     check_equal(restarted.load_message, "SAVE_RECOVERED_FROM_BACKUP", "and says so")
-    check_equal(restarted.character.xp, 0, "the backup is the previous save")
+    check(restarted.progress.completed_missions.is_empty(), "the backup is the previous save")
     var both := FileAccess.open(restarted.repository.backup_path(), FileAccess.WRITE)
     both.store_string("also broken")
     both.close()
@@ -84,7 +77,7 @@ func _test_corruption_falls_back() -> void:
     check(not broken.continue_game(), "without a good backup, nothing loads")
     check_equal(broken.load_message, "SAVE_ERROR_CORRUPT", "and the player is told")
     check(broken.repository.locked, "the damaged save is not overwritten")
-    broken.new_game(_character())
+    broken.new_game()
     check(broken.save(), "a new game sets the damaged save aside")
     var kept := DirAccess.get_files_at(directory.path_join("corrupt"))
     var aside := 0
@@ -104,7 +97,7 @@ func _test_unknown_version() -> void:
     var session := _session("future")
     check(not session.continue_game(), "a save of a newer version does not load")
     check_equal(session.load_message, "SAVE_ERROR_UNKNOWN_VERSION", "with an explanation")
-    session.character = _character()
+    session.progress = Progress.new()
     check(not session.save(), "and is never overwritten")
     var after := FileAccess.get_file_as_string(path.path_join(SaveRepository.FILE_NAME))
     check_equal(after, text, "the file is untouched")
@@ -112,28 +105,25 @@ func _test_unknown_version() -> void:
 
 func _test_migration() -> void:
     var old := {
-        "builder": _character().to_dict(),
+        "builder": {"name": "Ana", "xp": 20, "completed_missions": ["place_to_sit"]},
         "sites": {"place_to_sit": {"instances": [], "next_id": 1}},
     }
     var migrated := SaveRepository.migrate(old)
     check_equal(
         migrated["schema_version"], SaveRepository.SCHEMA_VERSION, "migrated to the current"
     )
-    check(migrated.has("character") and not migrated.has("builder"), "the builder is the character")
+    check(not migrated.has("builder") and not migrated.has("character"), "the character is gone")
+    check_equal(
+        migrated["progress"]["completed_missions"], ["place_to_sit"], "but its completions stay"
+    )
     check(migrated["missions"].has("place_to_sit"), "the sites are kept by mission")
 
 
 func _test_invalid_values() -> void:
     var problems: Array[String] = []
-    var record := _character().to_dict()
-    record["attributes"]["B"] = 50
-    check(Character.from_dict(record, content, problems) == null, "an attribute of 50 is rejected")
-    record = _character().to_dict()
-    record["background_id"] = "astronaut"
-    check(Character.from_dict(record, content, problems) == null, "an unknown background too")
-    record = _character().to_dict()
-    record["invested"] = {"carpentry": 500}
-    record["xp"] = -10
-    var character := Character.from_dict(record, content, problems)
-    check_equal(character.invested["carpentry"], 100, "investments are capped")
-    check_equal(character.xp, 0, "the XP is never negative")
+    var progress := Progress.from_dict(
+        {"completed_missions": ["juggling", "place_to_sit"]}, content, problems
+    )
+    check_equal(progress.completed_missions, ["place_to_sit"], "an unknown mission is dropped")
+    check(not problems.is_empty(), "and reported")
+    check(Progress.from_dict("nonsense", content, problems) != null, "a damaged record is empty")

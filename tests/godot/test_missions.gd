@@ -134,23 +134,17 @@ func _test_distinct_room_matching() -> void:
 func _test_unknown_objective_type() -> void:
     var mission := {"zones": {}}
     var problems := Objectives.validate(
-        {"id": "x", "type": "teleport", "text_key": "X"}, mission, content
+        {"id": "x", "type": "teleport", "text": "X"}, mission, content
     )
     check(problems.size() == 1 and "unknown" in problems[0], "an unknown type is rejected")
-    problems = Objectives.validate(
-        {"id": "x", "type": "daylight", "text_key": "X"}, mission, content
-    )
+    problems = Objectives.validate({"id": "x", "type": "daylight", "text": "X"}, mission, content)
     check(problems.size() == 1 and "not implemented" in problems[0], "a future type is rejected")
-    problems = Objectives.validate(
-        {"id": "x", "type": "green_area", "text_key": "X"}, mission, content
-    )
+    problems = Objectives.validate({"id": "x", "type": "green_area", "text": "X"}, mission, content)
     check(
         problems.size() == 1 and "minimum_cells" in problems[0], "a missing parameter is rejected"
     )
     problems = Objectives.validate(
-        {"id": "x", "type": "reachable_zone", "zone_id": "nowhere", "text_key": "X"},
-        mission,
-        content
+        {"id": "x", "type": "reachable_zone", "zone_id": "nowhere", "text": "X"}, mission, content
     )
     check(problems.size() == 1 and "zone" in problems[0], "an unknown zone is rejected")
     var broken := ContentDb.new()

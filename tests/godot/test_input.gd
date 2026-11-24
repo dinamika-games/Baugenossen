@@ -1,7 +1,8 @@
 extends "res://tests/godot/godot_test.gd"
 ## Check the input with synthetic pose sequences, without a camera (DESIGN.md,
-## 3 and 11, M4): the calibration, holding neutral, the axes, one gesture is one
-## placement, the loss of the tracking freezes, the reacquisition never places,
+## 3 and 11, M4): the calibration, holding neutral, the lean, one full dip is
+## one placement and a short dip one level lower, a hand lift opens the
+## catalogue, the loss of the tracking freezes, the reacquisition never places,
 ## the catalogue never places, and the keyboard and a gesture confirming at
 ## once place only once.
 
@@ -90,6 +91,8 @@ func _handle(event: String) -> void:
                 dispatcher.dispatch(event)
         "resume":
             dispatcher.dispatch("resume")
+        "level":
+            dispatcher.dispatch("next_block")
 
 
 func _count(action: String) -> int:
@@ -151,12 +154,9 @@ func _test_neutral_and_axes() -> void:
     check(moved.x < -2.0, "leaning left moves left: %s" % moved)
     pose.shift = 0.0
     _play(1.0)
-    pose.rise = 0.12
-    moved = _play(1.0)
-    check(moved.y > 2.0 and absf(moved.x) < 0.5, "rising moves up: %s" % moved)
     pose.rise = -0.12
-    moved = _play(1.5)
-    check(moved.y < -2.0, "lowering moves down: %s" % moved)
+    moved = _play(1.0)
+    check(moved.length() < 0.001, "the hook never moves vertically, and stands during a dip")
     pose.rise = 0.0
     _play(1.0)
     pose.shift = 0.06 * 0.1
@@ -175,21 +175,34 @@ func _lift(side: String, height: float) -> void:
         pose.lift_left = height
 
 
+func _dip(depth: float, seconds := 0.5) -> void:
+    pose.rise = -depth
+    _play(seconds)
+    pose.rise = 0.0
+    _play(0.6)
+
+
 func _test_gesture_places_once() -> void:
     _setup()
     _play(1.0)
-    _lift("right", 0.25)
-    var moved := _play(0.5)
-    check_equal(dispatcher.state, InputDispatcher.GESTURE_PENDING, "a lifted hand pends")
-    check(moved.length() < 0.001, "the hook stands still meanwhile")
-    _play(2.0)
-    check_equal(_count("confirm"), 0, "a held hand places nothing yet")
-    _lift("right", 0.0)
+    pose.rise = -0.12
     _play(0.5)
-    check_equal(_count("confirm"), 1, "lift and return places exactly once")
-    check_equal(dispatcher.state, InputDispatcher.BUILD, "back to building")
+    check_equal(_count("confirm"), 1, "a full dip places at once")
+    _play(2.0)
+    check_equal(_count("confirm"), 1, "holding down places nothing more")
+    pose.rise = 0.0
     _play(1.0)
-    check_equal(_count("confirm"), 1, "and nothing repeats")
+    check_equal(_count("confirm"), 1, "and coming up neither")
+    _dip(0.06)
+    check_equal(_count("next_block"), 1, "a short dip takes the next block")
+    check_equal(_count("confirm"), 1, "without placing")
+    _dip(0.12)
+    check_equal(_count("confirm"), 2, "the next full dip places again")
+    _lift("right", 0.25)
+    _play(0.4)
+    _lift("right", 0.0)
+    _play(0.4)
+    check_equal(_count("open_catalogue"), 1, "a hand lift opens the catalogue")
 
 
 func _test_brief_lift_is_ignored() -> void:
@@ -199,7 +212,7 @@ func _test_brief_lift_is_ignored() -> void:
     _play(0.1)
     _lift("right", 0.0)
     _play(0.5)
-    check_equal(_count("confirm"), 0, "a twitch of 100 ms places nothing")
+    check_equal(_count("open_catalogue"), 0, "a twitch of 100 ms opens nothing")
     check_equal(dispatcher.state, InputDispatcher.BUILD, "and the build goes on")
 
 
@@ -220,7 +233,7 @@ func _test_tracking_loss() -> void:
     _play(1.0)
     pose.shift = 0.06
     _play(0.5)
-    _lift("right", 0.25)
+    pose.rise = -0.06
     _play(0.3)
     pose.confidence = 0.3
     var moved := _play(0.1)
@@ -230,17 +243,14 @@ func _test_tracking_loss() -> void:
     check_equal(controller.tracking, "lost", "and is lost after 500 ms")
     dispatcher.dispatch("pause")
     pose.confidence = 0.9
-    _lift("right", 0.0)
+    pose.rise = 0.0
     _play(1.0)
     check_equal(_count("confirm"), 0, "the reacquisition never places the pending part")
     check_equal(dispatcher.state, InputDispatcher.PAUSED, "and the game stays paused")
     pose.shift = 0.0
     _play(1.0)
-    _lift("right", 0.25)
-    _play(0.4)
-    _lift("right", 0.0)
-    _play(0.4)
-    check_equal(dispatcher.state, InputDispatcher.BUILD, "an explicit lift resumes")
+    _dip(0.12, 0.4)
+    check_equal(dispatcher.state, InputDispatcher.BUILD, "an explicit full dip resumes")
     check_equal(_count("confirm"), 0, "without placing")
     _setup()
     _play(1.0)
@@ -257,11 +267,8 @@ func _test_catalogue_cannot_place() -> void:
     _lift("left", 0.0)
     _play(0.4)
     check_equal(dispatcher.state, InputDispatcher.CATALOGUE, "the left hand opens the catalogue")
-    _lift("right", 0.25)
-    _play(0.4)
-    _lift("right", 0.0)
-    _play(0.4)
-    check_equal(_count("confirm"), 0, "the right hand places nothing in the catalogue")
+    _dip(0.12)
+    check_equal(_count("confirm"), 0, "a dip places nothing in the catalogue")
     _lift("left", 0.25)
     _play(0.3)
     check(controller.cursor.x >= 0.0, "the raised left hand points")

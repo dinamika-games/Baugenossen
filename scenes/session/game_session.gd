@@ -1,20 +1,19 @@
 class_name GameSession
 extends RefCounted
-## Hold the game in progress: the character and the state of every mission's
-## site, and save them together (DESIGN.md, 6 and 10).
+## Hold the game in progress: the cooperative's progress and the state of
+## every mission's site, and save them together (DESIGN.md, 6 and 10).
 ##
-## The character's progression and the claimed rewards are global; each
-## mission has its own site, saved even when incomplete. The undo history and
-## the camera are local to the open site and not saved. The reward and the
-## completion of a mission are saved in the same snapshot; if the save fails,
-## they stay in memory as pending and are retried, never granted twice.
+## Each mission has its own site, saved even when incomplete. The undo history
+## and the camera are local to the open site and not saved. The completion of a
+## mission is saved in the same snapshot as its site; if the save fails, it
+## stays in memory and is retried.
 
 signal saved
 signal save_failed(message_key: String)
 
 var content: ContentDb
 var repository: SaveRepository
-var character: Character = null
+var progress: Progress = null
 ## mission ID -> {"site": Dictionary (see WorldGrid.to_dict), "status": String}
 var missions: Dictionary = {}
 var revision := 0
@@ -32,8 +31,8 @@ func has_save() -> bool:
     return repository.exists()
 
 
-func new_game(created: Character) -> void:
-    character = created
+func new_game() -> void:
+    progress = Progress.new()
     missions = {}
     revision = 0
     if repository.locked:
@@ -49,13 +48,9 @@ func continue_game() -> bool:
         return false
     var data: Dictionary = loaded["data"]
     var problems: Array[String] = []
-    var restored := Character.from_dict(data.get("character"), content, problems)
-    if restored == null:
-        load_message = "SAVE_ERROR_CORRUPT"
-        for problem in problems:
-            push_warning("Save: " + problem)
-        return false
-    character = restored
+    progress = Progress.from_dict(data.get("progress", {}), content, problems)
+    for problem in problems:
+        push_warning("Save: " + problem)
     missions = {}
     var saved_missions: Variant = data.get("missions", {})
     if saved_missions is Dictionary:
@@ -74,7 +69,7 @@ func continue_game() -> bool:
 func to_dict() -> Dictionary:
     return {
         "revision": revision,
-        "character": character.to_dict() if character != null else null,
+        "progress": progress.to_dict() if progress != null else null,
         "missions": missions.duplicate(true),
     }
 
@@ -82,7 +77,7 @@ func to_dict() -> Dictionary:
 ## Save everything; return whether it worked. On failure the changes stay in
 ## memory (dirty) for the next try.
 func save() -> bool:
-    if character == null:
+    if progress == null:
         return false
     revision += 1
     var error := repository.save(to_dict())
@@ -113,8 +108,6 @@ func store_site(mission_id: String, grid: WorldGrid) -> void:
     if missions.has(mission_id):
         status = str(missions[mission_id]["status"])
     missions[mission_id] = {"site": grid.to_dict(), "status": status}
-    if character != null and not character.started:
-        character.started = true
     dirty = true
 
 
@@ -122,9 +115,9 @@ func store_site(mission_id: String, grid: WorldGrid) -> void:
 ## "completed" or "needs_repair" (completed, but no longer valid after edits).
 func mission_status(mission_id: String) -> String:
     var mission := content.mission(mission_id)
-    if character == null or not Progression.mission_available(character, mission):
+    if progress == null or not Progression.mission_available(progress, mission):
         return "locked"
-    if character.has_completed(mission_id):
+    if progress.has_completed(mission_id):
         if missions.has(mission_id):
             var report := MissionEvaluator.evaluate(mission, open_site(mission_id))
             if not report.can_submit():
@@ -138,8 +131,8 @@ func mission_status(mission_id: String) -> String:
     return "available"
 
 
-## Submit the mission: grant the rewards (once) and save the site, the
-## completion and the rewards in one snapshot. Return the summary of
+## Submit the mission: record its completion (once) and save it with the
+## site in one snapshot. Return the summary of
 ## [method Progression.complete_mission], with "saved": whether it was saved.
 func submit(mission_id: String, grid: WorldGrid) -> Dictionary:
     var mission := content.mission(mission_id)
@@ -147,7 +140,7 @@ func submit(mission_id: String, grid: WorldGrid) -> Dictionary:
     if not report.can_submit():
         return {"submitted": false}
     store_site(mission_id, grid)
-    var summary := Progression.complete_mission(character, mission, report, grid, content)
+    var summary := Progression.complete_mission(progress, mission, report)
     missions[mission_id]["status"] = "completed"
     summary["submitted"] = true
     summary["saved"] = save()

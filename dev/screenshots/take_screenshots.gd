@@ -20,10 +20,7 @@ func _run() -> void:
     GameFixture.new(self, "screenshots")
     var game: Node = root.get_node("Game")
     await _shoot(game, "main_menu", output.path_join("01_main_menu.png"))
-    await _shoot(game, "character_creation", output.path_join("02_character_creation.png"))
-    var character := GameFixture.new_character(game.content)
-    character.background_id = "bricklayer"
-    game.session.new_game(character)
+    game.session.new_game()
     var builds := SampleBuilds.new(game.content)
     game.session.store_site("place_to_sit", builds.place_to_sit())
     var home := builds.new_site("flat_40_24")
@@ -38,15 +35,14 @@ func _run() -> void:
     var garden := builds.new_site("flat_40_24")
     builds.garden(garden)
     game.session.store_site("garden_for_everyone", garden)
-    character.completed_missions.append("place_to_sit")
-    await _shoot(game, "city_map", output.path_join("03_city_map.png"))
+    game.session.progress.completed_missions.append("place_to_sit")
+    await _shoot(game, "city_map", output.path_join("02_city_map.png"))
     game.mission_id = "first_home"
-    await _shoot(game, "build_site", output.path_join("04_build_two_storeys.png"))
+    await _shoot(game, "build_site", output.path_join("03_build_two_storeys.png"))
     game.session.store_site("first_home", single)
-    await _shoot(game, "build_site", output.path_join("05_build_single.png"))
+    await _shoot(game, "build_site", output.path_join("04_build_single.png"))
     game.mission_id = "garden_for_everyone"
-    await _shoot(game, "build_site", output.path_join("06_build_garden.png"))
-    await _shoot(game, "character_sheet", output.path_join("07_character_sheet.png"))
+    await _shoot(game, "build_site", output.path_join("05_build_garden.png"))
     quit()
 
 

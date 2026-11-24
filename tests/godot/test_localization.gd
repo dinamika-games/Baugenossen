@@ -1,72 +1,56 @@
 extends "res://tests/godot/godot_test.gd"
-## Check the translations (DESIGN.md, 8): every key the content and the code
-## use exists in translations/translations.csv with an English text, no key is
-## its own text, and switching the locale changes no ID.
-
-const DYNAMIC_PREFIXES := {
-    "STATE_":
-    ["CALIBRATION", "BUILD", "CATALOGUE", "GESTURE_PENDING", "PAUSED", "REVIEW", "COMPLETE"],
-    "TUTORIAL_": ["SELECT", "MOVE", "PLACE", "REMOVE", "UNDO"],
-    "CALIBRATION_STEP_": ["NEUTRAL", "LEFT", "RIGHT", "UP", "DOWN"],
-    "CALIBRATION_STATUS_": ["OFF", "STARTING", "RUNNING", "FAILED"],
-    "CREATE_LOOK_": ["SKIN", "HAIR", "CLOTHING"],
-    "NEEDS_": ["CAMERA", "CALIBRATION"],
-}
+## Check the translations (DESIGN.md, 8): the languages are registered from
+## translations/languages.json, the German translation is shown (also its
+## fuzzy messages), the IDs of the messages are translated through Texts, the
+## grammar fills the placeholders, agrees the words with the numbers and picks
+## the forms for the builder's gender, and the IDs of the content never depend
+## on the language. (dev/translations/extract.py --check and check.py, in the
+## pre-commit checks, make sure that every message is in the .po files and that
+## no translation breaks a placeholder.)
 
 
 func _run() -> void:
+    var languages: Node = root.get_node("Languages")
+    check_equal(languages.codes(), ["en", "de"] as Array[String], "English and German")
     var content := ContentDb.get_default()
-    var table := _read_csv("res://translations/translations.csv")
-    check(table.size() > 300, "the table has the keys (%d)" % table.size())
-    var keys := content.translation_keys()
-    keys.append_array(_code_keys("res://scenes"))
-    for prefix in DYNAMIC_PREFIXES:
-        for suffix in DYNAMIC_PREFIXES[prefix]:
-            keys.append(prefix + suffix)
-    keys.append_array(Progression.LEVEL_RANKS.map(func(entry: Array) -> String: return entry[1]))
-    keys.append_array(Progression.REPUTATIONS.map(func(entry: Array) -> String: return entry[1]))
-    var missing: Array[String] = []
-    for key in keys:
-        if not table.has(key) and key not in missing:
-            missing.append(key)
-    check(missing.is_empty(), "every key is translated; missing: %s" % [missing])
-    for key in table:
-        check(str(table[key]).strip_edges() != "", "%s has an English text" % key)
-    TranslationServer.set_locale("en")
-    check_equal(tr("ITEM_BED_SINGLE"), "Bed", "the translation is loaded")
-    var line := MissionText.line("OBJ_HOME_BEDS", 1, 2)
-    check(
-        line.contains("1") and line.contains("2") and not line.contains("{"),
-        "placeholders: " + line
-    )
     var before := content.mission_order.duplicate()
-    TranslationServer.set_locale("de")
-    check_equal(content.mission_order, before, "the IDs do not depend on the locale")
+
     TranslationServer.set_locale("en")
+    check_equal(tr("New game"), "New game", "English is the source")
+    check_equal(Texts.of("ERROR_OVERLAP"), "Something is already there.", "a message by its ID")
 
+    TranslationServer.set_locale("de")
+    check_equal(languages.current(), "de", "German is chosen")
+    check_equal(tr("New game"), "Neues Spiel", "the German translation shows, fuzzy or not")
+    check_equal(Texts.of("ERROR_OVERLAP"), "Da ist schon etwas.", "and the messages by ID")
+    check_equal(tr(content.part("bed_single").name), "Bett", "and the content")
+    for id in Texts.MESSAGES:
+        check(Texts.of(id).strip_edges() != "", "%s has a text" % id)
 
-func _read_csv(path: String) -> Dictionary:
-    var table := {}
-    var file := FileAccess.open(path, FileAccess.READ)
-    var header := file.get_csv_line()
-    check_equal(header[0], "keys", "the CSV starts with keys")
-    while not file.eof_reached():
-        var row := file.get_csv_line()
-        if row.size() >= 2 and row[0] != "":
-            check(not table.has(row[0]), "%s is defined once" % row[0])
-            table[row[0]] = row[1]
-    return table
+    var line := MissionText.line("Seats for {required} people ({current} of {required})", 1, 2)
+    check_equal(line, "Sitzplätze für 2 (1 von 2)", "the placeholders are filled")
+    check_equal(
+        Grammar.format(
+            "{count} {count|Sitz|Sitze}, {beds} {beds|Bett|Betten}", {"count": 1, "beds": 2}
+        ),
+        "1 Sitz, 2 Betten",
+        "the words agree with the numbers"
+    )
+    Grammar.gender = "female"
+    check_equal(Grammar.address("{builder|Baumeister|Baumeisterin}"), "Baumeisterin", "female")
+    Grammar.gender = "male"
+    check_equal(Grammar.address("{builder|Baumeister|Baumeisterin}"), "Baumeister", "male")
+    Grammar.gender = ""
+    check_equal(content.mission_order, before, "the IDs do not depend on the language")
 
-
-## The literal keys of tr("...") in the scripts.
-func _code_keys(directory: String) -> Array[String]:
-    var keys: Array[String] = []
-    var pattern := RegEx.create_from_string('tr\\("([A-Z0-9_]+)"\\)')
-    for name in DirAccess.get_files_at(directory):
-        if name.ends_with(".gd"):
-            var text := FileAccess.get_file_as_string(directory.path_join(name))
-            for found in pattern.search_all(text):
-                keys.append(found.get_string(1))
-    for sub in DirAccess.get_directories_at(directory):
-        keys.append_array(_code_keys(directory.path_join(sub)))
-    return keys
+    TranslationServer.set_locale("en")
+    check_equal(Grammar.plural_index(1), 0, "one in English")
+    check_equal(Grammar.plural_index(2), 1, "other in English")
+    TranslationServer.set_locale("ru")
+    check_equal(Grammar.plural_index(3), 1, "a few in Russian")
+    check_equal(Grammar.plural_index(5), 2, "many in Russian")
+    check_equal(Grammar.plural_index(21), 0, "21 is one in Russian")
+    TranslationServer.set_locale("en")
+    check_equal(
+        Grammar.format("{count} {count|seat|seats}", {"count": 1}), "1 seat", "one seat in English"
+    )

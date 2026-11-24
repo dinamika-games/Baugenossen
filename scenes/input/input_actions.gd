@@ -1,7 +1,7 @@
 class_name InputActions
 extends RefCounted
 ## Register the keyboard and mouse helpers. They never move the crane's hook:
-## the player moves it with the body (see docs/DECISIONS.md). They place,
+## the player moves it with the body (see DESIGN.md, 3.1). They place,
 ## remove, undo, open the catalogue and pause, e.g., for a helper next to the
 ## player. S and M (the effects and the music) belong to the Sounds autoload.
 

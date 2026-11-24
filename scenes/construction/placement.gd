@@ -15,15 +15,11 @@ class Context:
     var capacity := 99
     ## The part IDs which the mission offers; empty offers everything.
     var offered: Array = []
-    ## The part IDs which the character has unlocked (as keys); null if all are.
-    var unlocked: Variant = null
 
 
 static func check_offer(definition: PartDef, context: Context) -> PlacementResult:
     if not context.offered.is_empty() and definition.id not in context.offered:
         return PlacementResult.invalid("ERROR_NOT_OFFERED")
-    if context.unlocked != null and not (context.unlocked as Dictionary).has(definition.id):
-        return PlacementResult.invalid("ERROR_LOCKED")
     if definition.mass > context.capacity:
         return PlacementResult.invalid(
             "ERROR_OVERWEIGHT", [], {"mass": definition.mass, "capacity": context.capacity}
