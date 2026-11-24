@@ -56,7 +56,6 @@ func _ready() -> void:
     buttons.add_child(
         Ui.button(tr("CITY_CHARACTER_SHEET"), func() -> void: _game.go("character_sheet"))
     )
-    buttons.add_child(Ui.button(tr("MENU_SETTINGS"), _on_settings))
     buttons.add_child(Ui.button(tr("BUTTON_SAVE_AND_EXIT"), _on_save_and_exit))
     column.add_child(buttons)
     var first_button: Button = null
@@ -136,11 +135,6 @@ func _need_line(
 func _open(id: String) -> void:
     _game.mission_id = id
     _game.go("build_site")
-
-
-func _on_settings() -> void:
-    _game.return_screen = "city_map"
-    _game.go("settings")
 
 
 func _on_save_and_exit() -> void:

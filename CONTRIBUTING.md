@@ -38,10 +38,12 @@ $GODOT --path .
 
 `$GODOT --path .` starts at the main menu. The options after `--`:
 
-* `--no-camera`: forbid the camera (the keyboard and the mouse always work),
-* `--synthetic-pose`: a made-up body instead of the camera, to try the body controls' plumbing,
-* `--saves=user://other_saves` and `--settings=user://other.cfg`: keep the saves and the settings elsewhere,
-* `--mute`: start without sound (M mutes and unmutes anytime),
+* `--no-camera`: forbid the camera (then the hook can not move),
+* `--synthetic-pose`: a made-up body, standing still, instead of the camera, to try the plumbing,
+* `--saves=user://other_saves` and `--settings=user://other.cfg`: keep the saves and the calibration elsewhere,
+* `--mute`: start without sound, `--no-music`: without the music (M switches the music, S the effects anytime),
+* `--high-contrast`, `--reduced-motion`, `--no-mirror`, `--sensitivity=<0.25 to 2>`, `--dead-zone=<0.05 to 0.4>`: there is no settings screen, so these are chosen here,
+* `--windowed` (of Godot, before `--`): run in a window instead of full screen,
 * `--log-pose` or `--log-pose=<lines a second>` (10 by default): log the body pose (see below).
 
 ## The pose log
@@ -57,7 +59,7 @@ python3 dev/pose/analyze_pose_log.py godot.log --csv pose.csv
 prints, for each screen, the sample rate, the stale frames, the joints with low confidence, the time frozen and lost, the gestures started, completed and cancelled (many cancelled ones hint at false triggers), any hook movement while a gesture pends (a bug), the range of each measure against the calibration and the jumps of key points; the CSV has every sample for a plot.
 Log only with the player's consent; the log has no pictures, but it is a record of their movements.
 
-The body controls start only after choosing them in the settings and allowing the camera; then calibrate them (Settings, Calibrate the body controls).
+The camera starts with the game (not in headless runs). The hook moves only with the body: calibrate once from the main menu ("Calibrate the body controls"); the calibration is kept in `user://settings.cfg`. The keyboard and the mouse help with everything else, never with the hook. In the menus, the hand cursor (`scenes/hand_cursor/`, the autoload `HandCursor`, from Steppe Rescue) follows a raised hand, found by the hand detector (YOLOX) of the vision, sticks to the buttons and clicks them after two seconds; it works with every ordinary Godot button, and the screens use big ◀/▶ choosers (`Chooser`) instead of drop-down lists, which a hand can not open.
 
 ## Checks before a pull request
 
@@ -74,7 +76,7 @@ The Godot tests:
 * `test_progression.gd`: the creation budget, the skill formula, backgrounds and traits, caps, levels, rewards once, perks, unlocks per background, practice;
 * `test_persistence.gd`: roundtrip, incomplete sites, backup after corruption, unknown versions, migration, invalid values, no duplicate rewards after a restart;
 * `test_input.gd`: synthetic pose sequences: calibration, neutral, the axes, one gesture is one placement, tracking loss, reacquisition, the catalogue, concurrent confirms, dwell;
-* `test_keyboard_loop.gd`: plays the tutorial with key presses only, from the catalogue to the results;
+* `test_body_loop.gd`: plays the tutorial with a synthetic body (leaning, rising, hand lifts), and checks that neither the keys nor the mouse move the hook; `test_hand_cursor.gd`: the dwell clicks, toggles, disabled and scrolled-away buttons, and scrolling;
 * `test_screens.gd`: starts every screen; `test_localization.gd`: the translation coverage.
 
 Run one with `$GODOT --headless --fixed-fps 60 --path . --script tests/godot/test_missions.gd`. The tests write only into `user://tests/`.

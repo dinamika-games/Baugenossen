@@ -47,7 +47,6 @@ func _run() -> void:
     game.mission_id = "garden_for_everyone"
     await _shoot(game, "build_site", output.path_join("06_build_garden.png"))
     await _shoot(game, "character_sheet", output.path_join("07_character_sheet.png"))
-    await _shoot(game, "settings", output.path_join("08_settings.png"))
     quit()
 
 

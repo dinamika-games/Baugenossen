@@ -40,18 +40,14 @@ BUTTON_CONTINUE,Continue
 BUTTON_SAVE_AND_EXIT,Save and exit
 CALIBRATION_DONE,"Done! Lean to move the hook; lift and lower your right hand to place, your left hand to open the catalogue."
 CALIBRATION_HOLD_STILL,Hold still for a moment…
-CALIBRATION_MODE_KNEES,"Put the camera in front of you, a bit to the side, so that it sees your shoulders, elbows, wrists and hips. Kneel with your hands on the floor."
-CALIBRATION_MODE_PLANK,"Put the camera in front of you, a bit to the side, so that it sees your shoulders, elbows, wrists and hips. Rest on your hands; never lift both hands at once."
-CALIBRATION_MODE_SEATED,"Sit facing the camera with your hands on a table or your knees, so that it sees your shoulders, elbows and wrists."
-CALIBRATION_MODE_STANDING,"Stand facing the camera with your hands on a table or a chair back, so that it sees your shoulders, elbows and wrists."
+CALIBRATION_HOW,"Put the camera in front of you, a bit to the side, so that it sees your shoulders, elbows, wrists and hips. Kneel or stand with your hands resting on the floor, a table or a chair; never lift both hands at once."
 CALIBRATION_MOVE_FURTHER,"A little further, if it is comfortable; or skip this step."
 CALIBRATION_NOT_VISIBLE,"The camera does not see your shoulders, elbows and wrists well; move into the picture."
-CALIBRATION_NO_CONSENT,The camera is off. Allow it in the settings first.
 CALIBRATION_RESTART,Start again
 CALIBRATION_SKIP,Skip this step
-CALIBRATION_SKIPPED,Without the neutral posture the body controls stay off; the keyboard and the mouse work as always.
-CALIBRATION_STATUS_FAILED,The camera does not work; the keyboard and the mouse do.
-CALIBRATION_STATUS_OFF,The camera is off.
+CALIBRATION_SKIPPED,Without the neutral posture the crane can not follow you; start again when you are ready.
+CALIBRATION_STATUS_FAILED,The camera does not work.
+CALIBRATION_STATUS_OFF,The camera is off (started with --no-camera?).
 CALIBRATION_STATUS_RUNNING,The camera sees you.
 CALIBRATION_STATUS_STARTING,Starting the camera…
 CALIBRATION_STEP_DOWN,"Lower your body a little, as far as comfortable, and stay there for a moment."
@@ -102,6 +98,7 @@ CREATE_PRONOUNS,Pronouns (optional)
 CREATE_PRONOUNS_PLACEHOLDER,"e.g., she/her, they/them"
 CREATE_RESET,Start over
 CREATE_SKILLS,Skills
+CREATE_SUGGEST_NAME,Suggest a name
 CREATE_TITLE,Create your builder
 CREATE_TRAITS,"Traits (choose up to {count}, optional)"
 CREATE_UNLOCKED,Advanced parts you can use: {parts}
@@ -125,14 +122,10 @@ ERROR_TOP_LANDING,the stairs need a floor at their top landing.
 ERROR_UNKNOWN_PART,Unknown part.
 ERROR_UNSUPPORTED,"{part} needs support: put it on the ground, a floor, a wall or a beam."
 GAME_SUBTITLE,A City Built Together
-GESTURE_MODE_KNEES,"On the knees, hands on the floor"
-GESTURE_MODE_PLANK,Supported plank (hands on the floor)
-GESTURE_MODE_SEATED,Seated
-GESTURE_MODE_STANDING,Standing
 HINT_DISTINCT_ROOMS,each needs a room of its own
 HINT_NOT_INDOORS,it must be inside a closed room
 HINT_NO_ROOM,no closed room yet: close every wall and the roof
-HINT_OPEN_CATALOGUE,"Choose a part in the catalogue below (Tab, or lift and lower your left hand)."
+HINT_OPEN_CATALOGUE,Choose a part in the catalogue below: lift and lower your left hand.
 HINT_ROOM_MISSING_THINGS,a room still lacks something
 HINT_ROOM_NO_ENTRANCE,the room has no way in
 HINT_ROOM_TOO_SMALL,the room is too small
@@ -152,8 +145,9 @@ HUD_REVIEW,Review
 HUD_UNDO,Undo
 HUD_WISHES,Wishes
 INPUT_BODY,Body: {tracking}
-INPUT_BODY_UNCALIBRATED,Body: not calibrated (keys work)
-INPUT_KEYBOARD,Keyboard and mouse
+INPUT_BODY_UNCALIBRATED,Body: not calibrated yet
+INPUT_CAMERA_STARTING,Starting the camera…
+INPUT_NO_CAMERA,No camera
 ITEM_BACK_WALL,Back wall
 ITEM_BACK_WALL_DESC,"The wall at the back of a room (2 × 6 cells), for the look."
 ITEM_BEAM_STEEL,Steel beam
@@ -206,14 +200,12 @@ ITEM_WINDOW_BASIC,Window
 ITEM_WINDOW_BASIC_DESC,A window (2 × 2 cells) over the back wall; brings daylight.
 ITEM_WINDOW_LARGE,Large window
 ITEM_WINDOW_LARGE_DESC,A wide window (4 × 2 cells).
-LANGUAGE_EN,English
 LOCKED_NEEDS,{part} is locked: it needs {needs}.
 MENU_CALIBRATION,Calibrate the body controls
 MENU_CONTINUE,Continue
 MENU_CREDITS,Credits
 MENU_NEW_GAME,New game
 MENU_QUIT,Quit
-MENU_SETTINGS,Settings
 MISSION_FIRST_HOME,The First Home
 MISSION_FIRST_HOME_BRIEF,"Tomás and Amina need a weatherproof home: somewhere to sleep, cook, eat, wash and use the toilet, all under one roof. One storey or two: it is up to you."
 MISSION_FIRST_HOME_THANKS,"A home of our own, and it is dry and warm. Thank you!"
@@ -226,6 +218,9 @@ MISSION_PLACE_TO_SIT_THANKS,What a lovely spot. Come and sit with me sometime!
 MISSION_WORKSHOP,The Neighbourhood Workshop
 MISSION_WORKSHOP_BRIEF,"Karim and Noor want a workshop where neighbours repair and make things together: two rooms, each with a table, a seat and a lamp."
 MISSION_WORKSHOP_THANKS,Two rooms full of ideas. We will fix the whole street's bicycles here!
+NEEDS_BODY_TITLE,The crane listens to your body
+NEEDS_CALIBRATION,"The hook moves only when you move. Calibrate once, so that the crane knows your neutral posture and how far you lean and rise."
+NEEDS_CAMERA,"The hook moves only when you move, and the camera does not work. Connect a camera and allow it, then calibrate."
 OBJ_GARDEN_FLOWER_BEDS,{required} flower beds ({current} of {required})
 OBJ_GARDEN_GARDEN_REACHABLE,Everyone can walk into the garden
 OBJ_GARDEN_GREEN,{required} cells of green ({current} of {required})
@@ -305,7 +300,7 @@ PERK_UNDERGROUND_PIONEER,Underground Pioneer
 PERK_UNDERGROUND_PIONEER_DESC,Underground parts.
 PERK_VERTICAL_DREAMER,Vertical Dreamer
 PERK_VERTICAL_DREAMER_DESC,High-rise parts.
-PREVIEW_VALID,"{part} fits here: press Space, click, or lift and lower your right hand."
+PREVIEW_VALID,{part} fits here: lift and lower your right hand to place it.
 RANK_APPRENTICE,Apprentice
 RANK_BUILDER,Builder
 RANK_CITY_BUILDER,City Builder
@@ -349,27 +344,6 @@ SAVE_ERROR_UNKNOWN_VERSION,The save comes from a newer version of the game; it i
 SAVE_ERROR_VERIFY,Saving failed: the written file could not be read back. Your progress is still here; try again.
 SAVE_ERROR_WRITE,Saving failed. Your progress is still here; try again.
 SAVE_RECOVERED_FROM_BACKUP,"The last save was damaged, so the one before it was loaded."
-SCALE_100,Interface size 100%
-SCALE_125,Interface size 125%
-SCALE_150,Interface size 150%
-SCALE_75,Interface size 75%
-SETTINGS_AUDIO,Sound
-SETTINGS_CAMERA_ALLOW,Allow the camera
-SETTINGS_CAMERA_CONSENT,"The body controls use the camera. The pictures are processed on this computer only, in memory; nothing is recorded, saved or sent. The keyboard and the mouse keep working. Allow the camera?"
-SETTINGS_CAMERA_DECLINE,Not now
-SETTINGS_DEAD_ZONE,Dead zone
-SETTINGS_DISPLAY,Display
-SETTINGS_GESTURE_MODE,Posture
-SETTINGS_HIGH_CONTRAST,High contrast
-SETTINGS_INPUT,Controls
-SETTINGS_INPUT_BODY,"Body, with the camera"
-SETTINGS_INPUT_KEYBOARD,Keyboard and mouse
-SETTINGS_KEYS,Keys: A/D/W/S or the arrows move the hook · Space places · Tab opens the catalogue · X removes · G moves a part · Q mirrors · C changes the colour · Ctrl+Z undo · Ctrl+Y redo · Enter reviews · P or Esc pauses · +/− and the wheel zoom · I/J/K/L or the middle mouse button pan · M mutes · Home re-centres the body controls
-SETTINGS_MIRROR,Mirror the camera picture
-SETTINGS_MUSIC,Music (work songs and journeymen's songs)
-SETTINGS_REDUCED_MOTION,Reduced motion
-SETTINGS_SENSITIVITY,Sensitivity
-SETTINGS_SOUND,Sound effects
 SHEET_ANY_SKILL,Any skill
 SHEET_LEVEL,Level
 SHEET_PERKS,Perks
@@ -432,10 +406,10 @@ TRAIT_SPECIALIST,Specialist
 TRAIT_SPECIALIST_DESC,"+20 to a chosen skill, −5 to all others"
 TRAIT_TRADITIONALIST,Traditionalist
 TRAIT_TRADITIONALIST_DESC,"+15 Carpentry and Masonry, −10 Electrical engineering"
-TUTORIAL_MOVE,"Move the hook (A, D, W, S, the arrows or the mouse)"
-TUTORIAL_PLACE,Place the part (Space or a click)
-TUTORIAL_REMOVE,"Remove a part (X, then Space)"
-TUTORIAL_SELECT,Choose a part in the catalogue (Tab or a click)
+TUTORIAL_MOVE,"Move the hook: lean left and right, rise and lower"
+TUTORIAL_PLACE,Place the part: lift and lower your right hand
+TUTORIAL_REMOVE,"Remove a part (X, then place)"
+TUTORIAL_SELECT,"Choose a part: lift and lower your left hand, point, lower it"
 TUTORIAL_TITLE,How to build:
 TUTORIAL_UNDO,Undo (Ctrl+Z)
 ZONE_EAST,the east

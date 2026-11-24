@@ -2,13 +2,14 @@ extends Node2D
 ## Build a mission's site with the crane (DESIGN.md, 2 and 3): pick a part in
 ## the catalogue, move the hook, see the snapped preview and why it is valid or
 ## not, place, remove, move, undo and redo, watch the checklist, review and
-## submit. The keyboard and the mouse always work; the body controls join when
-## the player chose them.
+## submit. Only the body moves the hook: the player leans and rises. The
+## keyboard and the mouse help with the rest (placing, the catalogue, undo,
+## pause), never with the hook; without a camera or a calibration, the site
+## asks for them.
 ##
 ## The grid, the history and the mission are the truth; the view and the HUD
 ## only show them.
 
-const KEY_SPEED := 8.0
 const AUTOSAVE_DELAY := 2.0
 const PAN_SPEED := 700.0
 
@@ -46,6 +47,10 @@ var _tutorial: Dictionary = {}
 var _hook_travel := 0.0
 var _pause_reason := ""
 var _dragging := false
+## Whether the body was tracked in this visit: only then a loss pauses.
+var _body_seen := false
+## What the site waits for before the hook can move: "", "camera" or "calibration".
+var _waiting := ""
 var _pose_log: PoseLog = PoseLog.from_args(OS.get_cmdline_user_args())
 @onready var _game: Node = get_node("/root/Game")
 @onready var _settings: Node = get_node("/root/Settings")
@@ -130,12 +135,17 @@ func _process(delta: float) -> void:
         # A clicked button keeps the focus, and would take Space from the
         # placing; while building, nothing in the HUD holds the focus.
         hud.release_focus_all()
+    var hand_cursor := get_node_or_null("/root/HandCursor")
+    if hand_cursor != null:
+        # NOTE (mristin):
+        # While building, the raised hands are the gestures of the crane.
+        hand_cursor.enabled = (
+            dispatcher.state
+            in [InputDispatcher.PAUSED, InputDispatcher.REVIEW, InputDispatcher.COMPLETE]
+        )
     var hook_before := hook
+    _check_body()
     _process_pose()
-    if dispatcher.state == InputDispatcher.BUILD:
-        var axis := InputActions.keyboard_axis()
-        if axis != Vector2.ZERO:
-            dispatcher.dispatch("move_hook", axis * KEY_SPEED)
     _sound_loop("crane", hook.distance_to(hook_before) > 0.001)
     var pan := InputActions.pan_axis()
     if pan != Vector2.ZERO:
@@ -156,8 +166,30 @@ func _process(delta: float) -> void:
         _game.session.save()
 
 
+## Ask for the camera or the calibration while the body can not move the hook.
+func _check_body() -> void:
+    if dispatcher.state == InputDispatcher.COMPLETE:
+        return
+    var provider: PoseProvider = _game.pose_provider
+    var waiting := ""
+    if provider.status() in ["off", "failed"]:
+        waiting = "camera"
+    elif not pose.calibration.has("h"):
+        waiting = "calibration"
+    if waiting == _waiting:
+        return
+    _waiting = waiting
+    if waiting == "":
+        if dispatcher.state == InputDispatcher.PAUSED:
+            dispatcher.dispatch("resume")
+        return
+    if dispatcher.state != InputDispatcher.PAUSED:
+        dispatcher.dispatch("pause")
+    overlays.show_needs_body(waiting, provider.status_message())
+
+
 func _process_pose() -> void:
-    if not _settings.body_controls() or not pose.calibration.has("h"):
+    if _game.pose_provider.status() != "running" or not pose.calibration.has("h"):
         return
     var provider: PoseProvider = _game.pose_provider
     var frame := provider.latest_frame()
@@ -181,8 +213,11 @@ func _process_pose() -> void:
             in [InputDispatcher.BUILD, InputDispatcher.CATALOGUE, InputDispatcher.GESTURE_PENDING]
         )
     ):
-        _pause_reason = "PAUSE_TRACKING_LOST"
-        dispatcher.dispatch("pause")
+        if _body_seen:
+            _pause_reason = "PAUSE_TRACKING_LOST"
+            dispatcher.dispatch("pause")
+    if pose.tracking == "ok":
+        _body_seen = true
     if dispatcher.state == InputDispatcher.CATALOGUE:
         var entry := ""
         if pose.cursor.x >= 0.0:
@@ -228,10 +263,6 @@ func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion:
         if _dragging:
             dispatcher.dispatch("pan_camera", -event.relative / camera.zoom)
-        elif dispatcher.state == InputDispatcher.BUILD:
-            var target := view.to_grid(view.get_local_mouse_position())
-            if Rect2(Vector2(-1, -1), Vector2(grid.width + 2, grid.height + 2)).has_point(target):
-                _set_hook(target)
         return
     if event is InputEventMouseButton and event.pressed:
         match event.button_index:
@@ -258,7 +289,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _handle_key(event: InputEvent) -> void:
     if dispatcher.state == InputDispatcher.CATALOGUE:
-        for step in [["hook_up", -1], ["hook_down", 1]]:
+        for step in [["catalogue_previous", -1], ["catalogue_next", 1]]:
             if event.is_action_pressed(step[0]):
                 hud.next_category(step[1])
                 hud.focus_catalogue(carried)
@@ -403,7 +434,8 @@ func _on_command(action: String, argument: Variant) -> void:
                 _after_edit()
         "pause":
             _game.session.save()
-            overlays.show_pause(_pause_reason, _settings.body_controls())
+            if _waiting == "":
+                overlays.show_pause(_pause_reason, _game.body_ready())
             _pause_reason = ""
         "resume":
             overlays.hide_all()
@@ -506,6 +538,9 @@ func _sound_loop(name: String, on: bool) -> void:
 
 func _exit_tree() -> void:
     _sound_loop("crane", false)
+    var hand_cursor := get_node_or_null("/root/HandCursor")
+    if hand_cursor != null:
+        hand_cursor.enabled = true
     _sound_loop("ambience_birds", false)
 
 
@@ -665,12 +700,15 @@ func _refresh_status() -> void:
                 {"part": tr(content.part(carried).name_key) if carried != "" else "—"}
             )
     hud.set_tool(tool)
-    var source := tr("INPUT_KEYBOARD")
-    if _settings.body_controls():
-        var tracking := {"ok": "TRACKING_OK", "frozen": "TRACKING_FROZEN", "lost": "TRACKING_LOST"}
-        source = tr("INPUT_BODY").format({"tracking": tr(tracking[pose.tracking])})
-        if not pose.calibration.has("h"):
-            source = tr("INPUT_BODY_UNCALIBRATED")
+    var tracking := {"ok": "TRACKING_OK", "frozen": "TRACKING_FROZEN", "lost": "TRACKING_LOST"}
+    var source := tr("INPUT_BODY").format({"tracking": tr(tracking[pose.tracking])})
+    match _game.pose_provider.status():
+        "starting":
+            source = tr("INPUT_CAMERA_STARTING")
+        "off", "failed":
+            source = tr("INPUT_NO_CAMERA")
+    if not pose.calibration.has("h"):
+        source = tr("INPUT_BODY_UNCALIBRATED")
     hud.set_status("%s · %s" % [source, tr("STATE_" + dispatcher.state)])
     hud.set_history(history.can_undo(), history.can_redo(), mode == "remove")
 

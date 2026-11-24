@@ -3,9 +3,11 @@ extends Node
 ## sites), the mission being built, the pose provider, and the change of
 ## screens.
 ##
-## Start with `-- --saves=user://other_saves` to keep the saves elsewhere (e.g.,
-## in the tests), `-- --no-camera` to forbid the camera, and
-## `-- --synthetic-pose` to try the body controls with a made-up body.
+## The camera starts with the game (it takes a few seconds), except headless
+## (the tests). Start with `-- --saves=user://other_saves` to keep the saves
+## elsewhere (e.g., in the tests), `-- --no-camera` to forbid the camera, and
+## `-- --synthetic-pose` to try the plumbing with a made-up body that stands
+## still.
 
 const SCREENS := {
     "main_menu": "res://scenes/main_menu/main_menu.tscn",
@@ -14,7 +16,6 @@ const SCREENS := {
     "build_site": "res://scenes/build_site/build_site.tscn",
     "character_sheet": "res://scenes/character_sheet/character_sheet.tscn",
     "mission_results": "res://scenes/mission_results/mission_results.tscn",
-    "settings": "res://scenes/settings/settings_screen.tscn",
     "calibration": "res://scenes/calibration/calibration.tscn",
     "credits": "res://scenes/main_menu/credits.tscn",
 }
@@ -24,7 +25,7 @@ var session: GameSession
 var mission_id := ""
 ## The result of the last submission, for the results screen.
 var last_summary: Dictionary = {}
-## Where the settings screen returns to.
+## Where the calibration returns to.
 var return_screen := "main_menu"
 var pose_provider: PoseProvider = null
 
@@ -41,6 +42,7 @@ func _ready() -> void:
         pose_provider = SyntheticPoseProvider.new()
     else:
         pose_provider = VisionPoseProvider.new(get_node_or_null("/root/Vision"))
+    ensure_pose.call_deferred()
 
 
 func _notification(what: int) -> void:
@@ -53,12 +55,20 @@ func go(screen: String) -> void:
     get_tree().change_scene_to_file.call_deferred(SCREENS[screen])
 
 
-## Start the camera if the player chose the body controls and agreed.
+## Start the camera, unless it is forbidden or nobody can see the game.
 func ensure_pose() -> void:
     var settings: Node = get_node("/root/Settings")
     pose_provider.mirrored = bool(settings.get_value("camera_mirror"))
-    if settings.body_controls() and pose_provider.status() == "off":
+    if DisplayServer.get_name() == "headless" and pose_provider is VisionPoseProvider:
+        return
+    if pose_provider.status() == "off":
         pose_provider.start()
+
+
+## Whether the body can move the hook: the pose comes and it is calibrated.
+func body_ready() -> bool:
+    var settings: Node = get_node("/root/Settings")
+    return pose_provider.status() == "running" and settings.get_value("calibration").has("h")
 
 
 func quit() -> void:

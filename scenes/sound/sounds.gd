@@ -11,8 +11,9 @@ extends Node
 ## Play an effect with [code]Sounds.play("place_wood")[/code], keep a loop going
 ## with [code]Sounds.loop("crane", true)[/code]. The music plays the songs one
 ## after another in a shuffled order, quietly under the effects; nothing in it
-## is a timer or an alarm. The settings switch the effects and the music off;
-## M mutes everything, and so does [code]-- --mute[/code] at the start.
+## is a timer or an alarm. M switches the music off and on, S the effects;
+## [code]-- --no-music[/code] starts without the music and
+## [code]-- --mute[/code] without both.
 
 const SOUNDS_DIR := "res://assets/sounds"
 const MUSIC_DIR := "res://assets/music"
@@ -25,6 +26,8 @@ const MUSIC_DB := -14.0
 const MUSIC_GAP := 2.0
 
 var muted := false
+var music_off := false
+var effects_off := false
 
 var _players: Array[AudioStreamPlayer] = []
 var _next_player := 0
@@ -41,6 +44,7 @@ func _ready() -> void:
     # Headless (the tests, the servers), nobody hears anything, and streams
     # still playing when a test quits would show as leaks.
     muted = "--mute" in OS.get_cmdline_user_args() or DisplayServer.get_name() == "headless"
+    music_off = "--no-music" in OS.get_cmdline_user_args()
     for i in range(VOICES):
         var player := AudioStreamPlayer.new()
         player.volume_db = EFFECTS_DB
@@ -71,7 +75,10 @@ func _exit_tree() -> void:
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and not event.echo:
         if event.physical_keycode == KEY_M:
-            muted = not muted
+            music_off = not music_off
+            _apply_settings()
+        elif event.physical_keycode == KEY_S:
+            effects_off = not effects_off
             _apply_settings()
 
 
@@ -88,11 +95,11 @@ func _setting(key: String) -> bool:
 
 
 func effects_on() -> bool:
-    return not muted and _setting("sound")
+    return not muted and not effects_off and _setting("sound")
 
 
 func music_on() -> bool:
-    return not muted and _setting("music")
+    return not muted and not music_off and _setting("music")
 
 
 func _apply_settings() -> void:

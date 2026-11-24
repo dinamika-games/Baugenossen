@@ -10,7 +10,7 @@ See [DESIGN.md](DESIGN.md) for the design, [docs/DECISIONS.md](docs/DECISIONS.md
 
 **No network access.**
 The game runs entirely on your computer and works offline.
-The camera starts only after you allow it in the settings; its pictures are processed locally, in memory, and are never saved nor sent anywhere.
+The camera starts with the game; its pictures are processed locally, in memory, and are never saved nor sent anywhere.
 
 ## Status
 
@@ -20,7 +20,7 @@ The first vertical slice (DESIGN.md, milestones M0 to M4) is implemented with pl
 * the four initial missions with their objectives, residents moving in, review and results,
 * character creation, skills, backgrounds, traits, levels, karma, three working perks and a handful of advanced parts,
 * saving and resuming, with backups and migration,
-* the keyboard and mouse controls, and the body controls (calibration, smoothing, hand-lift gestures) on the pose models of Drunken Vikings.
+* the keyboard and mouse controls, and the body controls (calibration, smoothing, hand-lift gestures) on the RTMO and RTMPose models, and a hand cursor for the menus on the YOLOX hand detector.
 
 The sound effects are cut from CC0 recordings, and the music is work songs and the old songs of the journeymen on their Wanderschaft.
 
@@ -29,9 +29,17 @@ The sprites will replace the vector drawings later.
 
 ## Controls
 
-Keyboard and mouse (always available): A/D/W/S or the arrows move the hook · Space or a click places · Tab opens the catalogue (W/S change the category there) · X removes · G moves a part · Q mirrors · C changes the colour (with the perk The Colourist) · Ctrl+Z / Ctrl+Y undo and redo · Enter reviews and hands over · P or Esc pauses · M mutes · +/− and the wheel zoom · I/J/K/L or the middle mouse button pan.
+The game runs full screen and is played with the body: **the hook moves only when you move.** Calibrate once (main menu, "Calibrate the body controls"), then:
 
-Body (after calibration): lean left and right, raise and lower your torso to move the hook; lift and lower your right hand to place, your left hand to open the catalogue, then point with the raised left hand and lower it to choose.
+* lean left and right, raise and lower your torso to move the hook;
+* lift and lower your right hand to place the part;
+* lift and lower your left hand to open the catalogue, then point with the raised left hand and lower it to choose.
+
+In the menus, raise a hand: a hand cursor follows it, sticks to the buttons, and clicks a button when you hold it there for two seconds (a ring fills around the button). The mouse works, too.
+
+**Sound:** press **M** to switch the music off and on, and **S** to switch the sound effects off and on.
+
+A helper next to the player may use the keyboard and the mouse, but never for the hook: Space or a click places · Tab opens the catalogue (the arrows choose there) · X removes · G moves a part · Q mirrors · C changes the colour (with the perk The Colourist) · Ctrl+Z / Ctrl+Y undo and redo · Enter reviews and hands over · P or Esc pauses · +/− and the wheel zoom · I/J/K/L or the middle mouse button pan · Home re-centres the body controls.
 
 ## License
 

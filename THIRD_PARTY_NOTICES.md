@@ -35,7 +35,7 @@ Their notices are in [licenses/godot/COPYRIGHT.txt](licenses/godot/COPYRIGHT.txt
 
 ### CameraServerExtension (only on Windows)
 
-* Version: 2026.03.27 (the prebuilt Windows x86_64 library of the release), taken over from Drunken Vikings
+* Version: 2026.03.27 (the prebuilt Windows x86_64 library of the release)
 * License: MIT
 * Copyright (c) 2024-present Jason Kuo
 * Source: https://github.com/j20001970/godot-cameraserver-extension
@@ -48,7 +48,7 @@ Godot 4.6 implements no camera on Windows; the extension provides it there.
 * File: `scenes/vision/rtmo/model/rtmo_t_body7_416x416.onnx`
 * License: Apache License 2.0
 * Copyright (c) OpenMMLab
-* Source: MMPose, https://github.com/open-mmlab/mmpose/tree/main/projects/rtmo, the checkpoint `rtmo-t_8xb32-600e_body7-416x416-f48f75cb_20231219.pth`, exported to ONNX with MMDeploy 1.3.0 (SHA-256 `20aad6e2e42359cac1c5b4a0b2da00e29bfe91a72a782fdcf287d273a04c1b24`), as in Drunken Vikings
+* Source: MMPose, https://github.com/open-mmlab/mmpose/tree/main/projects/rtmo, the checkpoint `rtmo-t_8xb32-600e_body7-416x416-f48f75cb_20231219.pth`, exported to ONNX with MMDeploy 1.3.0 (SHA-256 `20aad6e2e42359cac1c5b4a0b2da00e29bfe91a72a782fdcf287d273a04c1b24`)
 * License text: [scenes/vision/rtmo/model/LICENSE](scenes/vision/rtmo/model/LICENSE)
 
 ### RTMPose (following the builder)
@@ -56,10 +56,18 @@ Godot 4.6 implements no camera on Windows; the extension provides it there.
 * File: `scenes/vision/rtmpose/model/rtmpose_t_body7_256x192.onnx`
 * License: Apache License 2.0
 * Copyright (c) OpenMMLab
-* Source: MMPose RTMPose-t, the ONNX SDK export of OpenMMLab, https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-t_simcc-body7_pt-body7_420e-256x192-026a1439_20230504.zip (SHA-256 `a6c2f6a3896a4d51131d14d7a80a3d08b50f559af5a58a45d5b098aef510a70f`), as in Drunken Vikings and Jump 'n' Mine
+* Source: MMPose RTMPose-t, the ONNX SDK export of OpenMMLab, https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-t_simcc-body7_pt-body7_420e-256x192-026a1439_20230504.zip (SHA-256 `a6c2f6a3896a4d51131d14d7a80a3d08b50f559af5a58a45d5b098aef510a70f`)
 * License text: [scenes/vision/rtmpose/model/LICENSE](scenes/vision/rtmpose/model/LICENSE)
 
-Both pose models were trained on the Body7 collection of datasets, some of which carry their own terms of use; check them before a commercial release.
+### YOLOX-Body-Head-Hand (the hand cursor of the menus)
+
+* File: `scenes/vision/yolox/model/yolox_n_body_head_hand_Nx3xHxW.onnx`
+* License: Apache License 2.0
+* Copyright (c) PINTO0309 (Katsuya Hyodo); based on YOLOX by Megvii (https://github.com/Megvii-BaseDetection/YOLOX)
+* Source: https://github.com/PINTO0309/PINTO_model_zoo/tree/main/426_YOLOX-Body-Head-Hand, the nano model (SHA-256 `2cfe872bbf195743a5cac7a36c45c18f10422b01e7ca33cad486c9665283d6a1`)
+* License text: [scenes/vision/yolox/model/LICENSE](scenes/vision/yolox/model/LICENSE)
+
+The pose models were trained on the Body7 collection of datasets, some of which carry their own terms of use; check them before a commercial release.
 We distribute the models unmodified.
 
 ### The sound effects

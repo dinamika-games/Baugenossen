@@ -1,13 +1,13 @@
 class_name InputActions
 extends RefCounted
-## Register the keyboard and mouse fallback (DESIGN.md, 3.1). It is always
-## available, not only for debugging.
+## Register the keyboard and mouse helpers. They never move the crane's hook:
+## the player moves it with the body (see docs/DECISIONS.md). They place,
+## remove, undo, open the catalogue and pause, e.g., for a helper next to the
+## player. S and M (the effects and the music) belong to the Sounds autoload.
 
 const KEYS := {
-    "hook_left": [KEY_A, KEY_LEFT],
-    "hook_right": [KEY_D, KEY_RIGHT],
-    "hook_up": [KEY_W, KEY_UP],
-    "hook_down": [KEY_S, KEY_DOWN],
+    "catalogue_previous": [KEY_UP],
+    "catalogue_next": [KEY_DOWN],
     "confirm": [KEY_SPACE],
     "cancel": [KEY_ESCAPE],
     "open_catalogue": [KEY_TAB],
@@ -53,14 +53,6 @@ static func ensure_registered() -> void:
     redo.ctrl_pressed = true
     redo.shift_pressed = true
     InputMap.action_add_event("redo", redo)
-
-
-## The keyboard's hook direction in [-1, 1]^2 (x right, y up in the grid).
-static func keyboard_axis() -> Vector2:
-    return Vector2(
-        Input.get_action_strength("hook_right") - Input.get_action_strength("hook_left"),
-        Input.get_action_strength("hook_up") - Input.get_action_strength("hook_down")
-    )
 
 
 ## The keyboard's camera pan direction in [-1, 1]^2 (screen directions).

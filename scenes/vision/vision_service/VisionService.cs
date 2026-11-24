@@ -12,7 +12,8 @@ using Baugenossen.Vision;
 /// <remarks>
 /// <para>
 /// Taken over from Drunken Vikings, without the rowing, the hands and the
-/// recording. The pose thread runs <see cref="PoseFollower"/> back to back:
+/// recording, but with the hand detector (YOLOX) for the hand cursor of the
+/// screens. The pose thread runs <see cref="PoseFollower"/> back to back:
 /// RTMPose-t follows the builder on every frame, and RTMO finds them at the
 /// start or when they were lost. The main thread only copies a camera frame
 /// when the thread asks for one, so that we never queue frames (and latency)
@@ -46,6 +47,8 @@ public partial class VisionService : Node
     public const string RtmoModelPath = "res://scenes/vision/rtmo/model/rtmo_t_body7_416x416.onnx";
 
     public const string RtmPoseModelPath = "res://scenes/vision/rtmpose/model/rtmpose_t_body7_256x192.onnx";
+
+    public const string HandModelPath = "res://scenes/vision/yolox/model/yolox_n_body_head_hand_Nx3xHxW.onnx";
 
     /// <summary>How long to wait for the camera feeds to appear, in seconds.</summary>
     private const double _cameraSearchTimeout = 5.0;
@@ -147,7 +150,24 @@ public partial class VisionService : Node
     }
 
     private Thread? _poseThread;
+    private Thread? _handThread;
     private volatile bool _running;
+
+    /// <summary>Whether a screen shows the hand cursor and needs the hands.</summary>
+    private volatile bool _handTracking;
+
+    private readonly FrameSlot _handSlot = new();
+
+    /// <summary>The hands which YOLOX found last: the time, the size of the frame and the boxes.</summary>
+    private sealed class HandSnapshot
+    {
+        public double Timestamp { get; init; }
+        public int Width { get; init; }
+        public int Height { get; init; }
+        public IReadOnlyList<BoundingBox> Hands { get; init; } = Array.Empty<BoundingBox>();
+    }
+
+    private HandSnapshot? _latestHands;
 
     /// <summary>Whether we shut down (see <see cref="Shutdown"/>): no more frames are taken.</summary>
     private bool _shutDown;
@@ -294,6 +314,35 @@ public partial class VisionService : Node
         }
 
         return scores;
+    }
+
+    /// <summary>
+    /// Run the hand detector (for the hand cursor of the screens) or stop it,
+    /// so that it takes the processor only while a screen needs it.
+    /// </summary>
+    public void SetHandTracking(bool on) => _handTracking = on;
+
+    /// <summary>
+    /// The centers of the hands which the detector found lately, in the
+    /// <em>not mirrored</em> picture, normalized; empty if none were found in
+    /// the last 0.3 s, or the detector does not run.
+    /// </summary>
+    public Vector2[] GetHands()
+    {
+        var snapshot = Volatile.Read(ref _latestHands);
+        if (snapshot == null || !_handTracking || Now - snapshot.Timestamp > 0.3)
+        {
+            return Array.Empty<Vector2>();
+        }
+
+        var hands = new Vector2[snapshot.Hands.Count];
+        for (int i = 0; i < hands.Length; i++)
+        {
+            var box = snapshot.Hands[i];
+            hands[i] = new Vector2(box.CenterX / snapshot.Width, box.CenterY / snapshot.Height);
+        }
+
+        return hands;
     }
 
     /// <summary>How long the latest poses took, in milliseconds.</summary>
@@ -525,6 +574,22 @@ public partial class VisionService : Node
             Priority = ThreadPriority.BelowNormal,
         };
         _poseThread.Start();
+
+        if (FileAccess.FileExists(HandModelPath))
+        {
+            byte[] handModel = FileAccess.GetFileAsBytes(HandModelPath);
+            _handThread = new Thread(() => HandLoop(handModel))
+            {
+                IsBackground = true,
+                Name = "Hands",
+                Priority = ThreadPriority.BelowNormal,
+            };
+            _handThread.Start();
+        }
+        else
+        {
+            GD.PushWarning($"The hand model {HandModelPath} is missing; the screens work only with the mouse.");
+        }
     }
 
     private void OnFrameChanged()
@@ -549,8 +614,9 @@ public partial class VisionService : Node
         }
 
         bool forPose = _poseSlot.Requested;
+        bool forHands = _handTracking && _handSlot.Requested;
         bool twoPlanes = _feed.GetDatatype() == CameraFeed.FeedDataType.YcbcrSep;
-        if (!forPose && !twoPlanes)
+        if (!forPose && !forHands && !twoPlanes)
         {
             return;
         }
@@ -581,7 +647,7 @@ public partial class VisionService : Node
                 _ycbcrPreview.Update(preview);
             }
 
-            if (!forPose)
+            if (!forPose && !forHands)
             {
                 return;
             }
@@ -607,7 +673,16 @@ public partial class VisionService : Node
         // NOTE (mristin):
         // We copy the raw bytes on the main thread so that the pose thread
         // never touches any engine objects.
-        _poseSlot.Put(new Frame(rgb, width, height, Now));
+        var frame = new Frame(rgb, width, height, Now);
+        if (forPose)
+        {
+            _poseSlot.Put(frame);
+        }
+
+        if (forHands)
+        {
+            _handSlot.Put(frame);
+        }
     }
 
     /// <summary>Convert a Y plane and a CbCr plane of the camera to RGB8.</summary>
@@ -666,6 +741,55 @@ public partial class VisionService : Node
         }
 
         return slot.Take();
+    }
+
+    private void HandLoop(byte[] model)
+    {
+        YoloxHeadDetector? detector = null;
+        try
+        {
+            detector = new YoloxHeadDetector(model);
+            var heads = new List<Detection>();
+            while (_running)
+            {
+                if (!_handTracking)
+                {
+                    Thread.Sleep(50);
+                    continue;
+                }
+
+                var frame = NextFrame(_handSlot);
+                if (frame == null)
+                {
+                    continue;
+                }
+
+                detector.Detect(frame, heads);
+                var hands = new List<BoundingBox>();
+                foreach (var hand in detector.Hands)
+                {
+                    hands.Add(hand.Box);
+                }
+
+                Volatile.Write(ref _latestHands, new HandSnapshot
+                {
+                    Timestamp = frame.Timestamp,
+                    Width = frame.Width,
+                    Height = frame.Height,
+                    Hands = hands,
+                });
+            }
+        }
+        catch (Exception exception)
+        {
+            // NOTE (mristin):
+            // Without the hands, the screens still work with the mouse.
+            GD.PushWarning($"The hand detector stopped: {exception}");
+        }
+        finally
+        {
+            detector?.Dispose();
+        }
     }
 
     private void PoseLoop(byte[] rtmo, byte[] rtmPose, int threads)
@@ -729,8 +853,11 @@ public partial class VisionService : Node
         _shutDown = true;
         _running = false;
         _poseSlot.Ready.Set();
+        _handSlot.Ready.Set();
         _poseThread?.Join(2000);
         _poseThread = null;
+        _handThread?.Join(2000);
+        _handThread = null;
 
         if (_feed != null)
         {

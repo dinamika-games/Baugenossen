@@ -17,7 +17,7 @@ func _ready() -> void:
     continue_button.disabled = not has_save
     column.add_child(continue_button)
     column.add_child(Ui.button(tr("MENU_NEW_GAME"), _on_new_game, 320))
-    column.add_child(Ui.button(tr("MENU_SETTINGS"), _on_settings, 320))
+    column.add_child(Ui.button(tr("MENU_CALIBRATION"), _on_calibrate, 320))
     column.add_child(Ui.button(tr("MENU_CREDITS"), func() -> void: _game.go("credits"), 320))
     column.add_child(Ui.button(tr("MENU_QUIT"), func() -> void: _game.quit(), 320))
     _message = Ui.label("", Ui.FONT_SIZE, true)
@@ -40,6 +40,6 @@ func _on_new_game() -> void:
     _game.go("character_creation")
 
 
-func _on_settings() -> void:
+func _on_calibrate() -> void:
     _game.return_screen = "main_menu"
-    _game.go("settings")
+    _game.go("calibration")

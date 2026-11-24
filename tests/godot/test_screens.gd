@@ -9,7 +9,7 @@ const GameFixture := preload("res://tests/godot/game_fixture.gd")
 func _run() -> void:
     var fixture := GameFixture.new(self, "screens")
     var game: Node = root.get_node("Game")
-    for screen in ["main_menu", "credits", "settings", "character_creation", "calibration"]:
+    for screen in ["main_menu", "credits", "character_creation", "calibration"]:
         await _show(game, screen)
     var character := GameFixture.new_character(game.content)
     character.name = "Ŝtefánija-Āmina Łukasiewicz-Øvergård 李小龙"

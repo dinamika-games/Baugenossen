@@ -4,6 +4,26 @@ extends Control
 ## the preview of the skills and the unlocked parts. Continue is possible only
 ## with exactly 40 attribute points.
 
+## The names a hand can choose without a keyboard.
+const SUGGESTED_NAMES := [
+    "Ana",
+    "Ben",
+    "Chiara",
+    "Dario",
+    "Elif",
+    "Femi",
+    "Greta",
+    "Hugo",
+    "Ines",
+    "Jonas",
+    "Kofi",
+    "Lea",
+    "Mateo",
+    "Nora",
+    "Omar",
+    "Pia"
+]
+
 var _content: ContentDb
 var _character: Character
 var _attribute_labels: Dictionary = {}
@@ -14,7 +34,9 @@ var _problems: Label
 var _continue: Button
 var _background_description: Label
 var _trait_boxes: Dictionary = {}
-var _specialist: OptionButton
+var _specialist: Chooser
+var _name_edit: LineEdit
+var _suggested := -1
 var _preview: Control
 @onready var _game: Node = get_node("/root/Game")
 @onready var _settings: Node = get_node("/root/Settings")
@@ -60,8 +82,12 @@ func _build_identity(parent: VBoxContainer) -> void:
             _character.name = text
             _refresh()
     )
+    _name_edit = name_edit
     parent.add_child(Ui.label(tr("CREATE_NAME")))
-    parent.add_child(name_edit)
+    var name_row := Ui.hbox()
+    name_row.add_child(name_edit)
+    name_row.add_child(Ui.button(tr("CREATE_SUGGEST_NAME"), _suggest_name, 200))
+    parent.add_child(name_row)
     name_edit.grab_focus.call_deferred()
     var pronouns := LineEdit.new()
     pronouns.placeholder_text = tr("CREATE_PRONOUNS_PLACEHOLDER")
@@ -100,15 +126,13 @@ func _cycle(key: String, delta: int) -> void:
 
 func _build_background_and_traits(parent: VBoxContainer) -> void:
     parent.add_child(Ui.label(tr("CREATE_BACKGROUND")))
-    var backgrounds := OptionButton.new()
-    backgrounds.custom_minimum_size.y = Ui.BUTTON_HEIGHT
+    var names: Array[String] = []
     for id in _content.background_order:
-        backgrounds.add_item(tr(_content.backgrounds[id]["name_key"]))
-    backgrounds.item_selected.connect(
-        func(index: int) -> void:
-            _character.background_id = _content.background_order[index]
-            _refresh()
+        names.append(tr(_content.backgrounds[id]["name_key"]))
+    var backgrounds := Chooser.create(
+        names, _content.background_order.find(_character.background_id)
     )
+    backgrounds.changed.connect(_on_background)
     parent.add_child(backgrounds)
     _background_description = Ui.label("", 18, true)
     parent.add_child(_background_description)
@@ -123,16 +147,32 @@ func _build_background_and_traits(parent: VBoxContainer) -> void:
         box.toggled.connect(_on_trait.bind(id))
         _trait_boxes[id] = box
         parent.add_child(box)
-    _specialist = OptionButton.new()
+    var skills: Array[String] = []
     for id in _content.skill_order:
-        _specialist.add_item(tr(_content.skills[id]["name_key"]))
-    _specialist.item_selected.connect(
-        func(index: int) -> void:
-            _character.specialist_skill = _content.skill_order[index]
-            _refresh()
-    )
+        skills.append(tr(_content.skills[id]["name_key"]))
+    _specialist = Chooser.create(skills, 0)
+    _specialist.changed.connect(_on_specialist)
     _specialist.visible = false
     parent.add_child(_specialist)
+
+
+func _on_background(index: int) -> void:
+    _character.background_id = _content.background_order[index]
+    _refresh()
+
+
+func _on_specialist(index: int) -> void:
+    _character.specialist_skill = _content.skill_order[index]
+    _refresh()
+
+
+## Put the next of a few names into the name field, so that a hand can finish
+## the creation without a keyboard.
+func _suggest_name() -> void:
+    _suggested = (_suggested + 1) % SUGGESTED_NAMES.size()
+    _name_edit.text = SUGGESTED_NAMES[_suggested]
+    _character.name = _name_edit.text
+    _refresh()
 
 
 func _on_trait(on: bool, id: String) -> void:
@@ -144,7 +184,7 @@ func _on_trait(on: bool, id: String) -> void:
         _specialist.visible = on
         if on and _character.specialist_skill == "":
             _character.specialist_skill = _content.skill_order[0]
-            _specialist.select(0)
+            _specialist.set_index(0)
     _refresh()
 
 

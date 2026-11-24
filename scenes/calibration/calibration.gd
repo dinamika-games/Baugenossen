@@ -1,10 +1,9 @@
 extends Control
-## Calibrate the body controls (DESIGN.md, 3.3): the camera starts only after
-## the consent; the player sees the mirrored camera picture with the key
-## points, and follows the steps (neutral, lean left and right, raise and
-## lower). Any step but the neutral one may be skipped; the keyboard and the
-## mouse keep working regardless. Without a camera, it says so and the game
-## goes on with the keyboard.
+## Calibrate the body controls (DESIGN.md, 3.3): the player sees the mirrored
+## camera picture with the key points, and follows the steps (neutral, lean
+## left and right, raise and lower). Any step but the neutral one may be
+## skipped. The hook moves only with the body, so the game needs this once.
+## Without a camera, it says so.
 
 var _calibration := PoseCalibration.new()
 var _instruction: Label
@@ -21,11 +20,7 @@ var _pose_log: PoseLog = PoseLog.from_args(OS.get_cmdline_user_args())
 func _ready() -> void:
     var column := Ui.screen(self, _settings.get_value("high_contrast"))
     column.add_child(Ui.label(tr("CALIBRATION_TITLE"), Ui.TITLE_SIZE))
-    column.add_child(
-        Ui.label(
-            tr("CALIBRATION_MODE_" + str(_settings.get_value("gesture_mode")).to_upper()), 18, true
-        )
-    )
+    column.add_child(Ui.label(tr("CALIBRATION_HOW"), 18, true))
     var row := Ui.hbox(24)
     column.add_child(row)
     var stage := Control.new()
@@ -57,13 +52,10 @@ func _ready() -> void:
     var back := Ui.button(tr("BUTTON_BACK"), _back, 320)
     side.add_child(back)
     back.grab_focus.call_deferred()
-    if not bool(_settings.get_value("camera_consent")):
-        _status.text = tr("CALIBRATION_NO_CONSENT")
-        return
     _game.ensure_pose()
     if _pose_log != null:
         var settings := {}
-        for key in ["gesture_mode", "camera_mirror", "sensitivity", "dead_zone"]:
+        for key in ["camera_mirror", "sensitivity", "dead_zone"]:
             settings[key] = _settings.get_value(key)
         _pose_log.start("calibration", settings)
     if _game.pose_provider.status() == "off":
@@ -72,8 +64,6 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-    if not bool(_settings.get_value("camera_consent")):
-        return
     var provider: PoseProvider = _game.pose_provider
     var vision := get_node_or_null("/root/Vision")
     if vision != null and _picture.texture == null:
@@ -167,7 +157,7 @@ func _draw_skeleton() -> void:
 
 
 func _back() -> void:
-    _game.go("build_site" if _game.return_screen == "build_site" else "settings")
+    _game.go(_game.return_screen if _game.return_screen != "" else "main_menu")
 
 
 func _unhandled_input(event: InputEvent) -> void:

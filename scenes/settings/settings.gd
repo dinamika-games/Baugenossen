@@ -1,31 +1,32 @@
 extends Node
-## Keep the player's settings in user://settings.cfg, apart from the game data
-## (DESIGN.md, 7 and 8): the input source, the camera, the calibration, the
-## sound, the scale, the language and the accessibility options.
+## Keep what the game remembers between sessions apart from the saves: the
+## calibration of the body controls (user://settings.cfg). There is no
+## settings screen: the camera starts with the game, the sound and the music
+## switch with S and M, and the rest is chosen on the command line.
 ##
-## Start with `-- --settings=user://other.cfg` to keep them elsewhere (e.g., in
-## the tests).
+## The options after `--`:
+## * `--settings=user://other.cfg`: keep the settings elsewhere (e.g., in the tests),
+## * `--high-contrast`: stronger outlines and colours,
+## * `--reduced-motion`: the residents move in without walking,
+## * `--no-mirror`: show the camera picture as the camera sees it,
+## * `--sensitivity=<0.25 to 2>` and `--dead-zone=<0.05 to 0.4>`: tune the hook.
 
 signal changed
 
 const DEFAULTS := {
-    "input_source": "keyboard",
-    "camera_consent": false,
     "camera_mirror": true,
-    "gesture_mode": "knees",
     "sensitivity": 1.0,
     "dead_zone": 0.15,
     "calibration": {},
     "sound": true,
     "music": true,
-    "ui_scale": 1.0,
     "locale": "en",
     "reduced_motion": false,
     "high_contrast": false,
 }
 
-const GESTURE_MODES := ["plank", "knees", "seated", "standing"]
-const LOCALES := ["en"]
+## The settings saved in the file; the others come from the command line.
+const SAVED := ["calibration"]
 
 var path := "user://settings.cfg"
 var values: Dictionary = DEFAULTS.duplicate(true)
@@ -42,24 +43,28 @@ func _ready() -> void:
 func load_settings() -> void:
     values = DEFAULTS.duplicate(true)
     var config := ConfigFile.new()
-    if config.load(path) != OK:
-        return
-    for key in DEFAULTS:
-        var value: Variant = config.get_value("settings", key, DEFAULTS[key])
-        if typeof(value) == typeof(DEFAULTS[key]) or (DEFAULTS[key] is float and value is int):
-            values[key] = value
-    values["sensitivity"] = clampf(float(values["sensitivity"]), 0.25, 2.0)
-    values["dead_zone"] = clampf(float(values["dead_zone"]), 0.05, 0.4)
-    values["ui_scale"] = clampf(float(values["ui_scale"]), 0.75, 1.5)
-    if values["gesture_mode"] not in GESTURE_MODES:
-        values["gesture_mode"] = DEFAULTS["gesture_mode"]
-    if values["locale"] not in LOCALES:
-        values["locale"] = "en"
+    if config.load(path) == OK:
+        for key in SAVED:
+            var value: Variant = config.get_value("settings", key, DEFAULTS[key])
+            if typeof(value) == typeof(DEFAULTS[key]):
+                values[key] = value
+    for arg in OS.get_cmdline_user_args():
+        match arg:
+            "--high-contrast":
+                values["high_contrast"] = true
+            "--reduced-motion":
+                values["reduced_motion"] = true
+            "--no-mirror":
+                values["camera_mirror"] = false
+        if arg.begins_with("--sensitivity="):
+            values["sensitivity"] = clampf(float(arg.trim_prefix("--sensitivity=")), 0.25, 2.0)
+        elif arg.begins_with("--dead-zone="):
+            values["dead_zone"] = clampf(float(arg.trim_prefix("--dead-zone=")), 0.05, 0.4)
 
 
 func save_settings() -> void:
     var config := ConfigFile.new()
-    for key in values:
+    for key in SAVED:
         config.set_value("settings", key, values[key])
     var error := config.save(path)
     if error != OK:
@@ -72,17 +77,11 @@ func get_value(key: String) -> Variant:
 
 func set_value(key: String, value: Variant) -> void:
     values[key] = value
-    save_settings()
+    if key in SAVED:
+        save_settings()
     apply()
     changed.emit()
 
 
-## Apply the language and the scale of the interface.
 func apply() -> void:
     TranslationServer.set_locale(str(values["locale"]))
-    if is_inside_tree():
-        get_tree().root.content_scale_factor = float(values["ui_scale"])
-
-
-func body_controls() -> bool:
-    return values["input_source"] == "body" and bool(values["camera_consent"])

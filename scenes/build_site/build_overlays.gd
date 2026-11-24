@@ -65,6 +65,17 @@ func show_pause(reason_key: String, body_controls: bool) -> void:
     resume.grab_focus.call_deferred()
 
 
+## Ask for what the body controls need: the camera or the calibration.
+func show_needs_body(waiting: String, message: String) -> void:
+    _open(tr("NEEDS_BODY_TITLE"))
+    _box.add_child(Ui.label(tr("NEEDS_" + waiting.to_upper()), Ui.FONT_SIZE, true))
+    if message != "" and waiting == "camera":
+        _box.add_child(Ui.label(message, 16, true))
+    var first := _add_button("MENU_CALIBRATION", "calibrate")
+    _add_button("PAUSE_SAVE_AND_LEAVE", "leave")
+    first.grab_focus.call_deferred()
+
+
 ## The review: every objective with its state and hint; complete only if valid.
 func show_review(report: MissionEvaluator.Report, revisit: bool) -> void:
     _open(tr("REVIEW_TITLE"))
