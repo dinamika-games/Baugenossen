@@ -14,7 +14,7 @@ func build(high_contrast: bool) -> void:
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     theme = Ui.make_theme(high_contrast)
     mouse_filter = Control.MOUSE_FILTER_IGNORE
-    _box = Ui.vbox(12)
+    _box = Ui.vbox(Ui.BUTTON_GAP / 2)
     _panel = Ui.panel(_box)
     _panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
     _panel.grow_horizontal = Control.GROW_DIRECTION_BOTH

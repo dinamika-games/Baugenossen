@@ -9,7 +9,13 @@
         "vera"
       ],
       "prerequisite_ids": [],
-      "available_catalogue_ids": [],
+      "available_catalogue_ids": [
+        "bench_basic",
+        "chair_basic",
+        "tree_small",
+        "grass_patch",
+        "flower_bed"
+      ],
       "estimated_placements": 6,
       "tutorial": true,
       "thanks": "What a lovely spot. Come and sit with me sometime!",

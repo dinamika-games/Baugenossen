@@ -148,7 +148,7 @@ func _test_unknown_objective_type() -> void:
     )
     check(problems.size() == 1 and "zone" in problems[0], "an unknown zone is rejected")
     var broken := ContentDb.new()
-    var directory := "user://test_content_%d" % Time.get_ticks_usec()
+    var directory := "user://tests/content_%d" % Time.get_ticks_usec()
     DirAccess.make_dir_recursive_absolute(directory)
     for file in DirAccess.get_files_at("res://data"):
         var text := FileAccess.get_file_as_string("res://data/" + file)

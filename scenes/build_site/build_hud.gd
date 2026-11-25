@@ -1,29 +1,26 @@
 class_name BuildHud
 extends Control
 ## Show the build interface (DESIGN.md, 7): the top bar with the mission, the
-## tool, the input status and the large buttons (undo, redo, remove, review,
-## pause), the checklist of the objectives, the row of five blocks to choose
-## from at the bottom (see [BlockQueue]), and the message about the preview. The overlays (pause,
+## tool, the input status and the pause button, the checklist of the
+## objectives, and the message about what the hook would do at the bottom.
+## The blocks wait in the yard of the site itself (see [SiteView]). The overlays (pause,
 ## review, completion) are built by [BuildOverlays].
 ##
 ## The HUD only shows and forwards; the build site decides.
 
 signal action_requested(action: String)
-signal slot_clicked(index: int)
 
 var content: ContentDb
+## The camera inset, and its frame, which moves out of the hook's way.
+var camera_view: CameraView
+var camera_frame: Panel
 
 var _title: Label
 var _tool: Label
 var _status: Label
 var _message: Label
 var _checklist: VBoxContainer
-var _row: HBoxContainer
 var _tutorial: Label
-var _undo: Button
-var _redo: Button
-var _remove: Button
-var _slots: Array[PartIcon] = []
 
 
 func build(db: ContentDb, high_contrast: bool) -> void:
@@ -51,14 +48,6 @@ func _build_top_bar() -> void:
     bar.add_child(_tool)
     _status = Ui.label("", 18)
     bar.add_child(_status)
-    _undo = Ui.button(tr("Undo"), action_requested.emit.bind("undo"), 100)
-    _redo = Ui.button(tr("Redo"), action_requested.emit.bind("redo"), 100)
-    _remove = Ui.button(Texts.of("HUD_REMOVE"), action_requested.emit.bind("toggle_remove"), 120)
-    _remove.toggle_mode = true
-    bar.add_child(_undo)
-    bar.add_child(_redo)
-    bar.add_child(_remove)
-    bar.add_child(Ui.button(tr("Review"), action_requested.emit.bind("submit_mission"), 120))
     # NOTE (mristin):
     # The pause button is always visible (DESIGN.md, 7).
     bar.add_child(Ui.button(tr("Pause"), action_requested.emit.bind("pause"), 110))
@@ -75,7 +64,9 @@ func _build_camera() -> void:
     frame.position = Vector2(8, 72)
     frame.size = Vector2(248, 188)
     add_child(frame)
+    camera_frame = frame
     var camera := CameraView.new()
+    camera_view = camera
     camera.position = Vector2(4, 4)
     camera.size = Vector2(240, 180)
     camera.cover = true
@@ -105,37 +96,11 @@ func _build_row() -> void:
     var box := Ui.vbox(4)
     var panel := Ui.panel(box)
     panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-    panel.offset_top = -176
+    panel.offset_top = -56
     add_child(panel)
-    _message = Ui.label("", 18)
+    _message = Ui.label("", 20)
     _message.clip_text = true
     box.add_child(_message)
-    _row = Ui.hbox(12)
-    _row.alignment = BoxContainer.ALIGNMENT_CENTER
-    box.add_child(_row)
-    for index in range(BlockQueue.SIZE):
-        var button := Button.new()
-        button.custom_minimum_size = Vector2(150, 124)
-        button.focus_mode = Control.FOCUS_NONE
-        var icon := PartIcon.new()
-        icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-        icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-        button.add_child(icon)
-        button.pressed.connect(slot_clicked.emit.bind(index))
-        _row.add_child(button)
-        _slots.append(icon)
-
-
-## Show the row of blocks, the chosen one, and how soon the oldest leaves.
-func set_queue(parts: Array[String], selected: int, progress: float) -> void:
-    for index in range(_slots.size()):
-        var icon := _slots[index]
-        var definition := content.part(parts[index]) if index < parts.size() else null
-        icon.definition = definition
-        icon.label = tr(definition.name) if definition != null else ""
-        icon.selected = index == selected
-        icon.leaving = progress if index == 0 else -1.0
-        icon.queue_redraw()
 
 
 func release_focus_all() -> void:
@@ -166,12 +131,6 @@ func set_tutorial(text: String) -> void:
     _tutorial.visible = text != ""
 
 
-func set_history(can_undo: bool, can_redo: bool, removing: bool) -> void:
-    _undo.disabled = not can_undo
-    _redo.disabled = not can_redo
-    _remove.set_pressed_no_signal(removing)
-
-
 ## Show the objectives: a symbol and the text for each, mandatory first.
 func set_checklist(report: MissionEvaluator.Report) -> void:
     for child in _checklist.get_children():
@@ -191,3 +150,15 @@ static func _objective_label(result: Dictionary, optional: bool) -> Label:
     var colour := Ui.OK_COLOUR if result["satisfied"] else (Ui.INK if optional else Ui.BAD_COLOUR)
     line.add_theme_color_override("font_color", colour)
     return line
+
+
+## Move the camera inset out of the way of a point of the screen (the hook):
+## from the top left to the top, left of the checklist, and back.
+func avoid(point: Vector2) -> void:
+    if camera_frame == null:
+        return
+    if not camera_frame.get_rect().grow(48.0).has_point(point):
+        return
+    var left := Vector2(8, 72)
+    var right := Vector2(get_viewport_rect().size.x - 340 - camera_frame.size.x - 8, 72)
+    camera_frame.position = right if camera_frame.position.is_equal_approx(left) else left

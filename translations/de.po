@@ -10,21 +10,6 @@ msgstr ""
 
 #: scenes/build_site/build_hud.gd
 #, fuzzy
-msgid "Undo"
-msgstr "Rückgängig"
-
-#: scenes/build_site/build_hud.gd
-#, fuzzy
-msgid "Redo"
-msgstr "Wiederholen"
-
-#: scenes/build_site/build_hud.gd scenes/build_site/build_overlays.gd
-#, fuzzy
-msgid "Review"
-msgstr "Prüfen"
-
-#: scenes/build_site/build_hud.gd
-#, fuzzy
 msgid "Pause"
 msgstr "Pause"
 
@@ -45,6 +30,11 @@ msgstr "Pause"
 
 #: scenes/build_site/build_overlays.gd
 #, fuzzy
+msgid "Review"
+msgstr "Prüfen"
+
+#: scenes/build_site/build_overlays.gd
+#, fuzzy
 msgid "Some needs are still open; you can keep building as long as you like."
 msgstr "Noch ist nicht alles erfüllt; du kannst so lange weiterbauen, wie du magst."
 
@@ -55,38 +45,48 @@ msgstr "Einzug!"
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "Remove {part}: dip down, or press Space."
-msgstr "{part} entfernen: geh runter (Liegestütz) oder drück die Leertaste."
+msgid "Go down to grab {part}."
+msgstr "Geh runter, um {part} zu greifen."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "Move the hook over a part to remove it."
-msgstr "Fahr mit dem Haken über ein Teil, um es zu entfernen."
+msgid "Go down to lift {part} up again."
+msgstr "Geh runter, um {part} wieder hochzuheben."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "Choose a block in the row below: a short dip takes the next one."
-msgstr "Wähle einen Block in der Reihe unten: Kurz runter nimmt den nächsten."
+msgid "Everything is ready: go down to ring the bell and hand it over."
+msgstr "Alles ist bereit: Geh runter, läute die Glocke und übergib es."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "{part} lands here: do a push-up to place it."
-msgstr "{part} landet hier: Mach einen Liegestütz, um es zu setzen."
+msgid "Go down to throw {part} into the skip."
+msgstr "Geh runter, um {part} in die Mulde zu werfen."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "Removing"
-msgstr "Entfernen"
+msgid "{part} lands here: go down to put it there."
+msgstr "{part} landet hier: Geh runter, um es abzusetzen."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "Moving: {part}"
-msgstr "Verschieben: {part}"
+msgid "Lean over a block in the yard on the left, then go down to grab it."
+msgstr "Lehn dich über einen Block im Lager links, dann geh runter, um ihn zu greifen."
+
+#: scenes/build_site/build_site.gd
+#, fuzzy
+msgid "Carry {part} over the site, then go down to put it there."
+msgstr "Trag {part} über die Baustelle, dann geh runter, um es abzusetzen."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
 msgid "Carrying: {part}"
 msgstr "Am Haken: {part}"
+
+#: scenes/build_site/build_site.gd
+#, fuzzy
+msgid "The empty hook"
+msgstr "Der leere Haken"
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
@@ -192,8 +192,8 @@ msgstr "Unter dem Haken ist nichts zum Landen: Fahr über den Boden oder einen F
 #. message PAUSE_BODY_RESUME_HINT
 #: scenes/languages/texts.gd
 #, fuzzy
-msgid "To go on, hold your neutral posture, then do a push-up, or press P."
-msgstr "Zum Weitermachen: Halt deine Grundhaltung, dann mach einen Liegestütz, oder drück P."
+msgid "To go on, hold your posture, then do a push-up, or press P."
+msgstr "Zum Weitermachen: Halt deine Haltung, dann mach einen Liegestütz, oder drück P."
 
 #. message CREDITS_TEXT
 #: scenes/languages/texts.gd
@@ -413,30 +413,6 @@ msgstr "dieser Ort muss frei bleiben"
 msgid "nobody can get there yet"
 msgstr "noch kommt niemand dorthin"
 
-#. message HUD_COLOUR
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Colour"
-msgstr "Farbe"
-
-#. message HUD_MIRROR
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Mirror"
-msgstr "Spiegeln"
-
-#. message HUD_MOVE
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Move"
-msgstr "Verschieben"
-
-#. message HUD_REMOVE
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Remove"
-msgstr "Entfernen"
-
 #. message NEEDS_BODY_TITLE
 #: scenes/languages/texts.gd
 #, fuzzy
@@ -633,6 +609,13 @@ msgstr "aus den Augen verloren"
 msgid "tracking"
 msgstr "sieht dich"
 
+#. message TUTORIAL_GRAB
+#: scenes/languages/texts.gd
+#, fuzzy
+msgid "Grab a block: go down over it in the yard (the lower you go, the lower the hook)"
+msgstr ""
+"Einen Block greifen: Im Lager über ihm runtergehen (je tiefer du gehst, desto tiefer der Haken)"
+
 #. message TUTORIAL_MOVE
 #: scenes/languages/texts.gd
 #, fuzzy
@@ -642,14 +625,8 @@ msgstr "Den Haken bewegen: nach links und rechts lehnen"
 #. message TUTORIAL_PLACE
 #: scenes/languages/texts.gd
 #, fuzzy
-msgid "Place the block: do a push-up"
-msgstr "Den Block setzen: einen Liegestütz machen"
-
-#. message TUTORIAL_SELECT
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Choose a block: a short dip (down a little, and back up) takes the next one"
-msgstr "Einen Block wählen: kurz runter (ein wenig runter und wieder hoch) nimmt den nächsten"
+msgid "Put it down: carry it over the site, go down until it sits"
+msgstr "Absetzen: Über die Baustelle tragen, runtergehen, bis er aufsitzt"
 
 #. message TUTORIAL_TITLE
 #: scenes/languages/texts.gd
@@ -1305,6 +1282,90 @@ msgstr "Die Wiese"
 #, fuzzy
 msgid "The flat plot"
 msgstr "Das flache Grundstück"
+
+#, fuzzy
+#~ msgid "Hand over"
+#~ msgstr "Übergeben"
+
+#, fuzzy
+#~ msgid "Everything the residents need is there: do a push-up to hand it over."
+#~ msgstr "Alles, was die Bewohner brauchen, ist da: Mach einen Liegestütz, um es zu übergeben."
+
+#, fuzzy
+#~ msgid "Lift {part} up again: do a push-up."
+#~ msgstr "{part} wieder hochheben: Mach einen Liegestütz."
+
+#, fuzzy
+#~ msgid "Move the empty hook over a part to lift it up again."
+#~ msgstr "Fahr mit dem leeren Haken über ein Teil, um es wieder hochzuheben."
+
+#, fuzzy
+#~ msgid "Choose a block in the row below: a short dip takes the next one."
+#~ msgstr "Wähle einen Block in der Reihe unten: Kurz runter nimmt den nächsten."
+
+#, fuzzy
+#~ msgid "{part} lands here: do a push-up to place it."
+#~ msgstr "{part} landet hier: Mach einen Liegestütz, um es zu setzen."
+
+#, fuzzy
+#~ msgid "{part} lands here: a push-up puts it down, a short dip takes it away."
+#~ msgstr "{part} landet hier: Ein Liegestütz setzt es ab, kurz runter nimmt es weg."
+
+#, fuzzy
+#~ msgid "Lifted: {part}"
+#~ msgstr "Hochgehoben: {part}"
+
+#, fuzzy
+#~ msgid "To go on, hold your neutral posture, then do a push-up, or press P."
+#~ msgstr "Zum Weitermachen: Halt deine Grundhaltung, dann mach einen Liegestütz, oder drück P."
+
+#, fuzzy
+#~ msgid "Place the block: do a push-up"
+#~ msgstr "Den Block setzen: einen Liegestütz machen"
+
+#, fuzzy
+#~ msgid "Choose a block: a short dip (down a little, and back up) takes the next one"
+#~ msgstr "Einen Block wählen: kurz runter (ein wenig runter und wieder hoch) nimmt den nächsten"
+
+#, fuzzy
+#~ msgid "Colour"
+#~ msgstr "Farbe"
+
+#, fuzzy
+#~ msgid "Mirror"
+#~ msgstr "Spiegeln"
+
+#, fuzzy
+#~ msgid "Move"
+#~ msgstr "Verschieben"
+
+#, fuzzy
+#~ msgid "Remove"
+#~ msgstr "Entfernen"
+
+#, fuzzy
+#~ msgid "Undo"
+#~ msgstr "Rückgängig"
+
+#, fuzzy
+#~ msgid "Redo"
+#~ msgstr "Wiederholen"
+
+#, fuzzy
+#~ msgid "Remove {part}: dip down, or press Space."
+#~ msgstr "{part} entfernen: geh runter (Liegestütz) oder drück die Leertaste."
+
+#, fuzzy
+#~ msgid "Move the hook over a part to remove it."
+#~ msgstr "Fahr mit dem Haken über ein Teil, um es zu entfernen."
+
+#, fuzzy
+#~ msgid "Removing"
+#~ msgstr "Entfernen"
+
+#, fuzzy
+#~ msgid "Moving: {part}"
+#~ msgstr "Verschieben: {part}"
 
 #, fuzzy
 #~ msgid "{part} is locked: it needs {needs}."

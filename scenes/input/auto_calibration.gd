@@ -18,7 +18,7 @@ const STILLNESS := 0.06
 ## the body brings the elbows from about 0.8 to 0.2–0.5 below the shoulders,
 ## but with straight arms the body rises only about 0.1 more.
 const LEAN_RANGE := 0.25
-const DOWN_RANGE := 0.4
+const DOWN_RANGE := 0.3
 const UP_RANGE := 0.15
 
 ## "", "hold_still" while the player moves.

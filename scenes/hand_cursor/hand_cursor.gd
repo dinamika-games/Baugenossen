@@ -2,7 +2,9 @@ extends CanvasLayer
 ## Point and click with the raised hand on every screen (the autoload
 ## HandCursor), as in Steppe Rescue: the hand detector (YOLOX) finds the
 ## hands, the pose tells where the shoulders are, below which a hand rests and
-## does not count. Every raised hand has its own cursor.
+## does not count. Every raised hand has its own cursor, which sits on the
+## middle of the hand in the mirrored camera picture behind the menus (see
+## [method picture_to_screen]).
 ##
 ## A hand clicks a button by holding its cursor over it for
 ## [constant DWELL_SECONDS]: a ring fills around the button meanwhile. The
@@ -13,24 +15,16 @@ extends CanvasLayer
 ##
 ## It works with the ordinary Godot buttons (a toggle button toggles), so the
 ## screens need nothing special; the mouse keeps working as always. The build
-## site switches it off while the player builds (see [member enabled]), since
-## the raised hands are the gestures of the crane there.
+## site switches it off while the player builds (see [member enabled]): the
+## hands stay on the floor there.
 
 ## The hand holds still this long to click.
 const DWELL_SECONDS := 2.0
 
-## The part of the mirrored camera picture, normalized, which maps onto the
-## whole screen, so that the player reaches every corner without stretching.
-## Its bottom follows the shoulders (see [method _follow_shoulders]).
-const REACH := Rect2(0.15, 0.1, 0.7, 0.6)
-
-## The bottom of the screen lies this far below the shoulders, normalized.
-const BELOW_SHOULDERS := 0.04
-
-## A hand lower than this below the bottom of the reach rests and does not count.
-const BELOW_REACH := 0.08
-
-const REACH_FOLLOW := 2.0
+## A hand lower than this below the shoulders, normalized, rests and does not
+## count (also without the shoulders: below 0.8 of the picture).
+const BELOW_SHOULDERS := 0.12
+const LOWEST_WITHOUT_SHOULDERS := 0.8
 
 ## A cursor on a button leaves it only when the hand is this far beyond its
 ## edge, in pixels, but at most this share of the smaller side of the button.
@@ -70,7 +64,11 @@ var cursors: Array[Vector2] = []
 ## The points of the tests, which replace the hands when not empty.
 var test_points: Array[Vector2] = []
 
-var reach := REACH
+## How far down a hand counts, normalized in the picture (see
+## [constant BELOW_SHOULDERS]).
+var lowest := LOWEST_WITHOUT_SHOULDERS
+## The size of the camera picture, for the mapping onto the screen.
+var _picture := Vector2(4, 3)
 var _hands: Array[Hand] = []
 var _canvas: Control
 var _dwell_button: BaseButton = null
@@ -117,9 +115,7 @@ func _move_cursors(delta: float) -> void:
     var screen := _canvas.get_viewport_rect().size
     cursors.clear()
     for hand in _hands:
-        var target := ((hand.smoothed - reach.position) / reach.size * screen).clamp(
-            Vector2.ZERO, screen
-        )
+        var target := picture_to_screen(hand.smoothed, _picture, screen).clamp(Vector2.ZERO, screen)
         hand.cursor = target if hand.fresh else _glide(hand, target, delta)
         hand.fresh = false
         cursors.append(hand.cursor)
@@ -235,8 +231,16 @@ func _scroll(delta: float) -> void:
                 scroll.scroll_vertical += int(SCROLL_SPEED * delta)
 
 
-## Let the bottom of the reach follow the shoulders, so that the hand reaches
-## the bottom of the screen while it is still raised.
+## Where a point of the mirrored picture, normalized, is on the screen: the
+## same place as in the camera picture behind the menus (a [CameraView] which
+## covers the screen), so that the cursor sits on the player's hand there.
+static func picture_to_screen(point: Vector2, picture: Vector2, screen: Vector2) -> Vector2:
+    var scale := maxf(screen.x / picture.x, screen.y / picture.y)
+    var drawn := picture * scale
+    return (screen - drawn) / 2.0 + point * drawn
+
+
+## A hand lower than a little below the shoulders rests and does not count.
 func _follow_shoulders(points: Array, scores: Array) -> void:
     var shoulders := 0.0
     var count := 0
@@ -244,11 +248,7 @@ func _follow_shoulders(points: Array, scores: Array) -> void:
         if float(scores[i]) >= THRESHOLD:
             shoulders += (points[i] as Vector2).y
             count += 1
-    if count == 0:
-        return
-    var bottom := clampf(shoulders / count + BELOW_SHOULDERS, REACH.position.y + 0.25, 0.95)
-    var step := minf(1.0, get_process_delta_time() * REACH_FOLLOW)
-    reach.size.y = lerpf(reach.size.y, bottom - REACH.position.y, step)
+    lowest = (shoulders / count + BELOW_SHOULDERS if count > 0 else LOWEST_WITHOUT_SHOULDERS)
 
 
 ## Follow the raised hands in the mirrored picture, normalized and smoothed;
@@ -258,7 +258,9 @@ func _follow_hands(service: Node) -> void:
     var scores: Array = service.GetKeypointScores()
     if keypoints.size() > RIGHT_SHOULDER:
         _follow_shoulders(keypoints, scores)
-    var lowest := reach.end.y + BELOW_REACH
+    var texture: Texture2D = service.GetCameraTexture()
+    if texture != null and texture.get_width() > 0:
+        _picture = Vector2(texture.get_width(), texture.get_height())
     var now := Time.get_ticks_msec() / 1000.0
     var found: Array[Vector2] = []
     for hand in service.GetHands():
@@ -351,41 +353,10 @@ class Hand:
     var cursor := Vector2.ZERO
     var fresh := true
     var stuck: BaseButton = null
-    var _x := OneEuro.new()
-    var _y := OneEuro.new()
+    var _x := OneEuroFilter.new(1.2, 4.0)
+    var _y := OneEuroFilter.new(1.2, 4.0)
 
     func see(point: Vector2, now: float) -> void:
         raw = point
         seen_at = now
         smoothed = Vector2(_x.filter(point.x, now), _y.filter(point.y, now))
-
-
-## Smooth a noisy signal with little lag: the faster it moves, the less we
-## smooth (Casiez, Roussel and Vogel, "1€ Filter", CHI 2012), as in Steppe Rescue.
-class OneEuro:
-    extends RefCounted
-    var min_cutoff := 1.2
-    var beta := 4.0
-    var derivative_cutoff := 1.0
-    var _value := 0.0
-    var _derivative := 0.0
-    var _last := -1.0
-
-    func filter(value: float, time: float) -> float:
-        if _last < 0.0:
-            _value = value
-            _last = time
-            return value
-        var dt := time - _last
-        if dt <= 0.000001:
-            return _value
-        _last = time
-        var derivative := (value - _value) / dt
-        _derivative += _alpha(derivative_cutoff, dt) * (derivative - _derivative)
-        var cutoff := min_cutoff + beta * absf(_derivative)
-        _value += _alpha(cutoff, dt) * (value - _value)
-        return _value
-
-    func _alpha(cutoff: float, dt: float) -> float:
-        var tau := 1.0 / (TAU * cutoff)
-        return 1.0 / (1.0 + tau / dt)

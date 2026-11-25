@@ -31,6 +31,8 @@ func _initialize() -> void:
             every = int(arg.trim_prefix("--every="))
     var auto := AutoCalibration.new()
     var controller := PoseController.new()
+    controller.height_control = true
+    controller.hand_gestures = false
     var line_number := 0
     var printed := 0
     var hook := Vector2.ZERO
@@ -68,13 +70,13 @@ func _initialize() -> void:
             var m := PoseMeasure.measure(frame) if PoseMeasure.confident(frame, 0.3) else {}
             print(
                 (
-                    "t=%7.2f h=%+.2f v=%+.2f s=(%+.2f, dip %.2f) vel=(%+5.1f, %+5.1f) hook=(%+6.1f, %+6.1f) %s %s"
+                    "t=%7.2f h=%+.2f v=%+.2f s=(%+.2f, height %.2f) vel=(%+5.1f, %+5.1f) hook=(%+6.1f, %+6.1f) %s %s"
                     % [
                         now,
                         float(m.get("h", NAN)),
                         float(m.get("v", NAN)),
                         controller.smoothed.x,
-                        controller.dip,
+                        controller.height,
                         velocity.x,
                         velocity.y,
                         hook.x,

@@ -4,11 +4,11 @@
 
 The game is made with [Godot] 4.6 (.NET), in GDScript and C#, like the other Dinamika games.
 
-* **The construction model** (`scenes/construction/`) is pure GDScript without nodes: `WorldGrid` (the parts and their slots: cells, edges, background), `PartDef` and `PartInstance`, `Placement` (validation: offer, mass, geometry, support), `EditCommand` and `CommandHistory` (atomic edits, undo/redo), `SupportEvaluator`, `RoomDetector`, `NavigationGraph`, and `BlockQueue` (the row of five blocks, first in, first out).
+* **The construction model** (`scenes/construction/`) is pure GDScript without nodes: `WorldGrid` (the parts and their slots: cells, edges, background), `PartDef` and `PartInstance`, `Placement` (validation: offer, mass, geometry, support), `EditCommand` and `CommandHistory` (atomic edits, undo/redo), `SupportEvaluator`, `RoomDetector`, `NavigationGraph`, and `BlockQueue` (the yard of five blocks, first in, first out).
 * **The missions** (`scenes/missions/`): `Objectives` (validation and the predicates), `SiteAnalysis` (support, rooms and reachability once per edit), `MissionEvaluator` and `MissionText`.
 * **The progress** (`scenes/progression/`): `Progress` (the completed missions and wishes) and `Progression` (missions open in order, completions count once).
 * **The saves** (`scenes/session/`): `SaveRepository` (atomic JSON with backup and migration), `GameSession` (the progress and every mission's site), and the `Game` autoload, which holds them for the screens.
-* **The input** (`scenes/input/`): `InputDispatcher` (the semantic commands and the input states), `InputActions` (the keyboard), and the body controls: `PoseProvider` (with `VisionPoseProvider` and `SyntheticPoseProvider`), `PoseMeasure`, `PoseCalibration`, `PoseController` (smoothing, dead zone, velocity, freezing, short and full dips, hand lifts, which the build site switches off) and `DwellSelector`.
+* **The input** (`scenes/input/`): `InputDispatcher` (the semantic commands and the input states), `InputActions` (the keys: pause and Escape), and the body controls: `PoseProvider` (with `VisionPoseProvider` and `SyntheticPoseProvider`), `PoseMeasure`, `PoseCalibration`, `PoseController` (smoothing, dead zone, velocity, the height of the body, dips, hand lifts, which the build site switches off) and `DwellSelector`.
 * **The vision** (`scenes/vision/`, C#), taken over from Drunken Vikings: `VisionService` runs the camera and `PoseFollower` (RTMO finds the builder, RTMPose-t follows them) on a background thread. The core (`scenes/vision/core/`) does not depend on Godot and is unit-tested with plain .NET in `tests/Baugenossen.Tests/`.
 * **The content** is data: `data/parts.json`, `sites.json`, `residents.json` and `missions.json`, with their texts in English, loaded and validated by `ContentDb` (`scenes/content/`).
 * **The screens**: `main_menu/`, `city_map/`, `build_site/` (`SiteView` draws, `BuildHud` and `BuildOverlays` show, `build_site.gd` decides), `mission_results/` and `settings/` (the settings store, no screen). `scenes/art/part_art.gd` draws every part as placeholder vector art; `scenes/ui/ui.gd` builds the interface.
@@ -73,10 +73,10 @@ The Godot tests:
 
 * `test_construction.gd`: edges, footprints, layers, atomic placement, support chains and floating cycles, overhangs, undo/redo, protected parts, windows, moves, mass, serialization;
 * `test_missions.gd`: rooms and doors, roof gaps, stairs, green area, distinct-room matching, unknown objective types, and every initial mission with several valid layouts (`sample_builds.gd`) and the failures of DESIGN.md, 11, M2;
-* `test_progression.gd`: missions open in order, every mission solvable, completions once, the row of blocks (take, first in first out, offered and wanted parts);
+* `test_progression.gd`: missions open in order, every mission solvable, completions once, the yard of blocks (take, first in first out, offered and wanted parts);
 * `test_persistence.gd`: roundtrip, incomplete sites, backup after corruption, unknown versions, migration, invalid values, a completion counts once after a restart;
-* `test_input.gd`: synthetic pose sequences: calibration, neutral, the lean, a short dip is the next block and a push-up one placement, tracking loss, reacquisition, the catalogue, concurrent confirms, dwell;
-* `test_body_loop.gd`: plays the tutorial with a synthetic body (short dips pick the blocks, leaning, push-ups place), and checks that neither the keys nor the mouse move the hook; `test_hand_cursor.gd`: the dwell clicks, toggles, disabled and scrolled-away buttons, and scrolling;
+* `test_input.gd`: synthetic pose sequences: calibration, neutral, the lean, dips, tracking loss, reacquisition, the catalogue, concurrent confirms, dwell;
+* `test_body_loop.gd`: plays the tutorial with a synthetic body (leaning, going down and up: grabbing in the yard, putting down, lifting up again, the skip, the bell), and checks that neither the keys nor the mouse move the hook; `test_hand_cursor.gd`: the dwell clicks, toggles, disabled and scrolled-away buttons, and scrolling;
 * `test_screens.gd`: starts every screen; `test_localization.gd`: the translation coverage.
 
 Run one with `$GODOT --headless --fixed-fps 60 --path . --script tests/godot/test_missions.gd`. The tests write only into `user://tests/`.
@@ -112,7 +112,7 @@ Both scripts check on the page that each source is still under its license. List
 
 The game is written in English and translated with gettext: `translations/<code>.po` for every language of `translations/languages.json` (German so far).
 
-* **In the code,** every text a player sees goes through `tr("...")` with the whole sentence and named placeholders, filled by `Grammar.format(tr("Remove {part}: press Space or click."), {"part": name})`. Never glue a sentence together from pieces, and keep the literal in one piece (the extraction reads it from the code). A comment `# TRANSLATORS: ...` right above the call reaches the translators, e.g., `# TRANSLATORS: a button, at most 20 characters` (the check enforces the limit).
+* **In the code,** every text a player sees goes through `tr("...")` with the whole sentence and named placeholders, filled by `Grammar.format(tr("Lift {part} up again: do a push-up."), {"part": name})`. Never glue a sentence together from pieces, and keep the literal in one piece (the extraction reads it from the code). A comment `# TRANSLATORS: ...` right above the call reaches the translators, e.g., `# TRANSLATORS: a button, at most 20 characters` (the check enforces the limit).
 * **Messages with an ID** (the reasons of the placement, the hints, the messages of the saves, the ranks, the input states) live in `Texts.MESSAGES` (`scenes/languages/texts.gd`) and are shown with `Texts.of(id)`; the long texts live there, too.
 * **The content** in `data/*.json` holds English texts in the fields `name`, `description`, `title`, `brief`, `thanks` and `text`, translated when shown (`tr(definition.name)`).
 * **Collect the messages** after changing texts:

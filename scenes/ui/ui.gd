@@ -4,6 +4,9 @@ extends RefCounted
 ## the keyboard and the dwell of the hand (DESIGN.md, 7). Every text is a
 ## translation key, translated where shown.
 
+## The gap between the buttons of a dialogue: wide, so that the hand cursor
+## never takes the neighbour of the button it aims at.
+const BUTTON_GAP := 48
 const FONT_SIZE := 20
 const TITLE_SIZE := 40
 const BUTTON_HEIGHT := 52

@@ -7,18 +7,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: scenes/build_site/build_hud.gd
-msgid "Undo"
-msgstr ""
-
-#: scenes/build_site/build_hud.gd
-msgid "Redo"
-msgstr ""
-
-#: scenes/build_site/build_hud.gd scenes/build_site/build_overlays.gd
-msgid "Review"
-msgstr ""
-
-#: scenes/build_site/build_hud.gd
 msgid "Pause"
 msgstr ""
 
@@ -35,6 +23,10 @@ msgid "Paused"
 msgstr ""
 
 #: scenes/build_site/build_overlays.gd
+msgid "Review"
+msgstr ""
+
+#: scenes/build_site/build_overlays.gd
 msgid "Some needs are still open; you can keep building as long as you like."
 msgstr ""
 
@@ -43,31 +35,39 @@ msgid "Moving in!"
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "Remove {part}: dip down, or press Space."
+msgid "Go down to grab {part}."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "Move the hook over a part to remove it."
+msgid "Go down to lift {part} up again."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "Choose a block in the row below: a short dip takes the next one."
+msgid "Everything is ready: go down to ring the bell and hand it over."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "{part} lands here: do a push-up to place it."
+msgid "Go down to throw {part} into the skip."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "Removing"
+msgid "{part} lands here: go down to put it there."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "Moving: {part}"
+msgid "Lean over a block in the yard on the left, then go down to grab it."
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "Carry {part} over the site, then go down to put it there."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
 msgid "Carrying: {part}"
+msgstr ""
+
+#: scenes/build_site/build_site.gd
+msgid "The empty hook"
 msgstr ""
 
 #: scenes/build_site/build_site.gd
@@ -153,7 +153,7 @@ msgstr ""
 
 #. message PAUSE_BODY_RESUME_HINT
 #: scenes/languages/texts.gd
-msgid "To go on, hold your neutral posture, then do a push-up, or press P."
+msgid "To go on, hold your posture, then do a push-up, or press P."
 msgstr ""
 
 #. message CREDITS_TEXT
@@ -333,26 +333,6 @@ msgstr ""
 msgid "nobody can get there yet"
 msgstr ""
 
-#. message HUD_COLOUR
-#: scenes/languages/texts.gd
-msgid "Colour"
-msgstr ""
-
-#. message HUD_MIRROR
-#: scenes/languages/texts.gd
-msgid "Mirror"
-msgstr ""
-
-#. message HUD_MOVE
-#: scenes/languages/texts.gd
-msgid "Move"
-msgstr ""
-
-#. message HUD_REMOVE
-#: scenes/languages/texts.gd
-msgid "Remove"
-msgstr ""
-
 #. message NEEDS_BODY_TITLE
 #: scenes/languages/texts.gd
 msgid "The crane listens to your body"
@@ -511,6 +491,11 @@ msgstr ""
 msgid "tracking"
 msgstr ""
 
+#. message TUTORIAL_GRAB
+#: scenes/languages/texts.gd
+msgid "Grab a block: go down over it in the yard (the lower you go, the lower the hook)"
+msgstr ""
+
 #. message TUTORIAL_MOVE
 #: scenes/languages/texts.gd
 msgid "Move the hook: lean left and right"
@@ -518,12 +503,7 @@ msgstr ""
 
 #. message TUTORIAL_PLACE
 #: scenes/languages/texts.gd
-msgid "Place the block: do a push-up"
-msgstr ""
-
-#. message TUTORIAL_SELECT
-#: scenes/languages/texts.gd
-msgid "Choose a block: a short dip (down a little, and back up) takes the next one"
+msgid "Put it down: carry it over the site, go down until it sits"
 msgstr ""
 
 #. message TUTORIAL_TITLE

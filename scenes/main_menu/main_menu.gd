@@ -9,7 +9,7 @@ var _message: Label
 func _ready() -> void:
     var column := Ui.screen(self, _settings.get_value("high_contrast"))
     column.alignment = BoxContainer.ALIGNMENT_CENTER
-    column.add_theme_constant_override("separation", 10)
+    column.add_theme_constant_override("separation", Ui.BUTTON_GAP / 2)
     for title in [Ui.label("Baugenossen", 60), Ui.label(tr("A City Built Together"), 26)]:
         title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         column.add_child(title)

@@ -1,8 +1,9 @@
 extends "res://tests/godot/godot_test.gd"
 ## Play the tutorial with the body, as a player does (DESIGN.md, 12): the
 ## crane calibrates itself while the body holds still, then a synthetic body
-## picks blocks from the row with short dips, leans to move the hook and places
-## with push-ups. Check that neither the keys nor the mouse move the hook, that
+## leans to move the hook and goes down and up to lower and raise it: it grabs
+## blocks in the yard, puts them down, lifts one up again, throws one into the
+## skip and rings the bell. Check that neither the keys nor the mouse move the hook, that
 ## the mission is completed and saved, and that the results follow.
 
 const GameFixture := preload("res://tests/godot/game_fixture.gd")
@@ -35,41 +36,58 @@ func _run() -> void:
     check(site.hook.distance_to(start) < 0.01, "nor does the mouse")
 
     # NOTE (mristin):
-    # The row is random; the test lays it out, and stops it from moving on.
+    # The yard is random; the test lays it out, and stops it from moving on.
     site.queue.shift_seconds = 1.0e9
     site.queue.slots.assign(
-        ["grass_patch", "bench_basic", "tree_small", "grass_patch", "bench_basic"]
+        ["bench_basic", "tree_small", "grass_patch", "lamp_basic", "bench_basic"]
     )
-    site._choose_slot(0)
-    check_equal(site.carried, "grass_patch", "the hook carries the first block")
-    await _short_dip()
-    check_equal(site.carried, "bench_basic", "a short dip takes the next block")
-    check_equal(site.grid.instances.size(), 0, "without placing")
+    check(site.hook.y > 10.0, "with straight arms, the hook is at the top")
+    await _move_hook_to(_yard_x(0))
+    await _down_and_up()
+    check_equal(site.carried, "bench_basic", "going down over the bench grabs it")
+    check_equal(site.queue.slots[0], "tree_small", "and the yard moves up")
     await _move_hook_to(6.5)
-    await _dip()
-    check_equal(site.grid.instances.size(), 1, "a push-up places the bench where it lands")
-    check_equal(site.carried, "tree_small", "and the next block of the row comes up")
-    await _move_hook_to(12.5)
-    await _dip()
-    check_equal(site.carried, "grass_patch", "the grass comes next")
-    await _dip()
+    await _down_and_up()
+    check_equal(site.grid.instances.size(), 1, "going down with the bench puts it there")
+    check_equal(site.carried, "", "and the hook is empty again")
+
+    for x in [12.5, 12.5]:
+        await _move_hook_to(_yard_x(0))
+        await _down_and_up()
+        await _move_hook_to(x)
+        await _down_and_up()
     check_equal(site.grid.instances.size(), 3, "the tree and the grass are placed")
     check(site.report.can_submit(), "the tutorial is solved")
 
-    await _tap(KEY_ENTER)
-    check_equal(site.dispatcher.state, InputDispatcher.REVIEW, "Enter opens the review")
-    await _tap(KEY_SPACE)
-    check_equal(site.dispatcher.state, InputDispatcher.COMPLETE, "Space hands it over")
+    await _move_hook_to(_yard_x(0))
+    await _down_and_up()
+    check_equal(site.carried, "lamp_basic", "the lamp is not needed")
+    await _move_hook_to(site.yard_left() + 1.5)
+    await _down_and_up()
+    check_equal(site.carried, "", "going down over the skip throws it away")
+    check_equal(site.grid.instances.size(), 3, "without placing it")
+
+    await _move_hook_to(6.5)
+    await _down_and_up()
+    check_equal(site.carried, "bench_basic", "going down onto a placed bench lifts it up again")
+    check_equal(site.grid.instances.size(), 2, "off the site")
+    await _move_hook_to(4.5)
+    await _down_and_up()
+    check_equal(site.grid.instances.size(), 3, "and it can be put down elsewhere")
+
+    await _move_hook_to(site.bell_left() + 1.0)
+    await _down_and_up()
+    check_equal(site.dispatcher.state, InputDispatcher.COMPLETE, "the bell hands it over")
     await _frames(240)
     check(game.session.progress.has_completed("place_to_sit"), "completed")
     var saved := GameSession.new(game.content, game.session.repository)
     check(saved.continue_game() and saved.progress.has_completed("place_to_sit"), "and saved")
-    await _tap(KEY_SPACE)
+    site.overlays.action_requested.emit("results")
     await _frames(3)
     check_equal(
         current_scene.scene_file_path if current_scene != null else "",
         game.SCREENS["mission_results"],
-        "Space goes on to the results"
+        "the results follow"
     )
 
 
@@ -88,20 +106,18 @@ func _move_hook_to(x: float) -> void:
     await _frames(60)
 
 
-## A short dip: down a little and up again.
-func _short_dip() -> void:
-    body.rise = -0.12
-    await _frames(30)
-    body.rise = 0.0
-    await _frames(40)
+## The middle of the yard's place of the block with the index.
+func _yard_x(index: int) -> float:
+    return site.yard_left() + site.SLOT_WIDTH * (index + 1.5)
 
 
-## A push-up: down and up again.
-func _dip() -> void:
-    body.rise = -0.2
-    await _frames(30)
+## Go down to the bottom of a push-up, and up again: the hook goes down as far
+## as it can, and up.
+func _down_and_up() -> void:
+    body.rise = -0.22
+    await _frames(45)
     body.rise = 0.0
-    await _frames(40)
+    await _frames(45)
 
 
 func _key(keycode: Key, seconds: float) -> void:
@@ -115,10 +131,6 @@ func _key(keycode: Key, seconds: float) -> void:
     release.pressed = false
     Input.parse_input_event(release)
     await _frames(2)
-
-
-func _tap(keycode: Key) -> void:
-    await _key(keycode, 2.0 / 60.0)
 
 
 func _frames(count: int) -> void:

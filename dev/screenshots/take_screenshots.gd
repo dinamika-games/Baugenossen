@@ -52,8 +52,13 @@ func _shoot(game: Node, screen: String, path: String) -> void:
     for i in range(10):
         await process_frame
     if screen == "build_site":
-        scene.dispatcher.dispatch("select_part", "bed_single")
-        scene._set_hook(Vector2(30, 0))
+        # NOTE (mristin):
+        # The hook carries a bed over the site, low enough to show where it
+        # lands.
+        scene.carried = "bed_single"
+        scene._delta = 1.0
+        scene._move_hook(30.0 - scene.hook.x, 14.0)
+        scene._show_hook()
         for i in range(3):
             await process_frame
     await RenderingServer.frame_post_draw

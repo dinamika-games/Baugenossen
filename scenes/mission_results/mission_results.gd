@@ -49,7 +49,7 @@ func _ready() -> void:
         var warning := Ui.label(Texts.of("SAVE_ERROR_WRITE"), 18, true)
         warning.add_theme_color_override("font_color", Ui.BAD_COLOUR)
         column.add_child(warning)
-    var buttons := Ui.hbox()
+    var buttons := Ui.hbox(Ui.BUTTON_GAP)
     var next := Ui.button(tr("Choose another project"), func() -> void: _game.go("city_map"), 280)
     buttons.add_child(next)
     buttons.add_child(

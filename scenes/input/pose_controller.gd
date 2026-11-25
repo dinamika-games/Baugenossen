@@ -41,9 +41,18 @@ const DIP_RELEASE := 0.15
 ## up at once, down slowly (and not at all during a dip).
 const BASELINE_UP_SECONDS := 0.5
 const BASELINE_DOWN_SECONDS := 4.0
+## With the height control, the baseline follows a sinking posture only near
+## the top, and slowly, since the player holds low positions on purpose.
+const HEIGHT_BASELINE_DOWN_SECONDS := 8.0
+## With the height control, the baseline rises over this time, so that a
+## brief peak of the straight arms does not lower the hook for long.
+const HEIGHT_BASELINE_UP_SECONDS := 1.5
+const HEIGHT_BASELINE_NEAR_TOP := 0.5
+## The hook reaches the ground at this share of the dip's range already, so
+## that the player need not do the full push-up every time.
+const GROUND_DIP := 0.7
 
 var calibration: Dictionary = {}
-var alpha := 0.2
 var dead_zone := 0.15
 var max_speed := 10.0
 var sensitivity := 1.0
@@ -63,6 +72,17 @@ var release_threshold := 0.3
 ## Whether a lifted hand gives events (the catalogue); the build site plays
 ## with push-ups only and switches them off.
 var hand_gestures := true
+## Whether the height of the body sets the height of the hook (see
+## [member height]): then the hook keeps moving sideways while the player is
+## low.
+var height_control := false
+## How high the body is, smoothed: 1 with straight arms, 0 at the bottom of a
+## push-up (one minus [member dip]).
+var height := 1.0
+## The 1€ filters of the lean and of the height: calm at rest, quick when the
+## player moves.
+var lean_filter := OneEuroFilter.new(0.8, 1.5)
+var height_filter := OneEuroFilter.new(0.8, 2.0)
 
 ## The smoothed signal in [-1, 1]^2.
 var smoothed := Vector2.ZERO
@@ -136,8 +156,7 @@ func update(frame: Dictionary, now: float, input_state: String) -> Dictionary:
         ),
         0.0
     )
-    var weight := 1.0 - pow(1.0 - alpha, dt * 30.0)
-    smoothed += (target - smoothed) * weight
+    smoothed = Vector2(lean_filter.filter(target.x, now), 0.0)
 
     # NOTE (mristin):
     # Raising or lowering the torso moves both wrists relative to the shoulders
@@ -157,6 +176,7 @@ func update(frame: Dictionary, now: float, input_state: String) -> Dictionary:
     var lifting: bool = both_up or _hands["left"]["phase"] in ["rising", "qualified", "returning"]
     lifting = lifting or _hands["right"]["phase"] in ["rising", "qualified", "returning"]
     _update_dip(float(measures["v"]), dt, input_state, [] as Array[String] if lifting else events)
+    height = clampf(height_filter.filter(1.0 - minf(dip / GROUND_DIP, 1.0), now), 0.0, 1.0)
 
     var resting: bool = (
         _hands["left"]["phase"] in ["rest", "blocked"]
@@ -173,7 +193,7 @@ func update(frame: Dictionary, now: float, input_state: String) -> Dictionary:
     else:
         _neutral_since = -1.0
 
-    var still := _dip_phase != ""
+    var still := _dip_phase != "" and not height_control
     if input_state == InputDispatcher.BUILD and resting and not needs_neutral and not still:
         output["velocity"] = Vector2(_curve(smoothed.x), 0.0) * max_speed * sensitivity
     return output
@@ -187,8 +207,16 @@ func _update_dip(v: float, dt: float, input_state: String, events: Array[String]
     if is_nan(_baseline):
         _baseline = float(calibration.get("v", v))
     if v > _baseline:
-        _baseline += (v - _baseline) * minf(1.0, dt / BASELINE_UP_SECONDS)
-    elif _dip_phase == "" and _baseline - v < DIP_RELEASE * depth_range:
+        var up := HEIGHT_BASELINE_UP_SECONDS if height_control else BASELINE_UP_SECONDS
+        _baseline += (v - _baseline) * minf(1.0, dt / up)
+    elif height_control:
+        var near_top := (_baseline - v) / depth_range < HEIGHT_BASELINE_NEAR_TOP
+        if near_top:
+            _baseline += (v - _baseline) * minf(1.0, dt / HEIGHT_BASELINE_DOWN_SECONDS)
+    elif _dip_phase == "":
+        # NOTE (mristin):
+        # The posture sinks while playing (0.93 to 0.78 in the pose logs);
+        # the baseline follows it slowly, so that a quick dip still counts.
         _baseline += (v - _baseline) * minf(1.0, dt / BASELINE_DOWN_SECONDS)
     dip = clampf((_baseline - v) / depth_range, 0.0, 1.0)
     match _dip_phase:
@@ -232,6 +260,7 @@ func _lose(now: float, events: Array[String]) -> void:
         _bad_since = now
     tracking = "lost" if now - _bad_since >= lost_seconds else "frozen"
     smoothed = Vector2.ZERO
+    lean_filter.reset()
     cursor = Vector2(-1, -1)
     var pending := false
     for hand in _hands.values():
@@ -323,3 +352,30 @@ func _event_for(input_state: String) -> String:
             return "gesture_cancelled"
         _:
             return "open_catalogue"
+
+
+## The guide lines of the camera picture, where the limits are, as the player
+## sees them (mirrored like the picture, normalized to [0, 1]): "x", where the
+## middle of the shoulders starts and reaches the full speed of the hook to
+## each side; "y", where the shoulders hold the hook at the top and bring it to
+## the ground; "shoulders", the middle of the shoulders now. Empty without
+## measures or a calibration.
+func guides() -> Dictionary:
+    var m := last_measures
+    if m.is_empty() or not calibration.has("h") or not m.has("size"):
+        return {}
+    var size: Vector2 = m["size"]
+    var unit := float(m["unit"])
+    var h := float(calibration["h"])
+    var left := float(calibration.get("left", h - 0.25))
+    var right := float(calibration.get("right", h + 0.25))
+    var xs: Array[float] = []
+    for lean in [left, h + (left - h) * dead_zone, h + (right - h) * dead_zone, right]:
+        xs.append((float(m["elbows_x"]) + lean * unit) / size.x)
+    var depth_range := float(calibration["v"]) - float(calibration.get("down", 0.0))
+    var top := _baseline if not is_nan(_baseline) else float(calibration["v"])
+    var ys: Array[float] = []
+    for v in [top, top - depth_range * GROUND_DIP]:
+        ys.append((float(m["lower_elbow_y"]) - v * unit) / size.y)
+    var shoulders: Vector2 = m["shoulders"]
+    return {"x": xs, "y": ys, "shoulders": Vector2(shoulders.x / size.x, shoulders.y / size.y)}

@@ -10,7 +10,7 @@ extends RefCounted
 
 const MESSAGES := {
     "ERROR_NO_LANDING": "Nothing to land on below the hook: move it over the ground or a floor.",
-    "PAUSE_BODY_RESUME_HINT": "To go on, hold your neutral posture, then do a push-up, or press P.",
+    "PAUSE_BODY_RESUME_HINT": "To go on, hold your posture, then do a push-up, or press P.",
     "CREDITS_TEXT":
     "Baugenossen is made by Dinamika Games and its contributors, under the MIT License.\n\nMade with Godot Engine. The body tracking uses RTMO and RTMPose by OpenMMLab (Apache License 2.0) through ONNX Runtime (MIT); the camera runs only on this computer and nothing is recorded or sent.\n\nThe pictures are placeholder drawings made in code. See THIRD_PARTY_NOTICES.md for all the licenses.",
     "AUTO_CALIBRATING":
@@ -48,10 +48,6 @@ const MESSAGES := {
     "HINT_ZONES_NOT_CONNECTED": "the places are not connected",
     "HINT_ZONE_MUST_STAY_FREE": "this place must stay free",
     "HINT_ZONE_UNREACHABLE": "nobody can get there yet",
-    "HUD_COLOUR": "Colour",
-    "HUD_MIRROR": "Mirror",
-    "HUD_MOVE": "Move",
-    "HUD_REMOVE": "Remove",
     "NEEDS_BODY_TITLE": "The crane listens to your body",
     "NEEDS_CAMERA":
     "The hook moves only when you move, and the camera does not work. Connect a camera and allow it.",
@@ -87,10 +83,10 @@ const MESSAGES := {
     "TRACKING_FROZEN": "hold on…",
     "TRACKING_LOST": "tracking lost",
     "TRACKING_OK": "tracking",
+    "TUTORIAL_GRAB":
+    "Grab a block: go down over it in the yard (the lower you go, the lower the hook)",
     "TUTORIAL_MOVE": "Move the hook: lean left and right",
-    "TUTORIAL_PLACE": "Place the block: do a push-up",
-    "TUTORIAL_SELECT":
-    "Choose a block: a short dip (down a little, and back up) takes the next one",
+    "TUTORIAL_PLACE": "Put it down: carry it over the site, go down until it sits",
     "TUTORIAL_TITLE": "How to build:",
 }
 

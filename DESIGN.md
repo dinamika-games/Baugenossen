@@ -11,7 +11,7 @@ Read this entire document before implementing. Inspect the existing repository, 
 
 ## 1. Vision and non-negotiable requirements
 
-Baugenossen is a nonviolent, mission-based, motion-controlled 2D construction game, played with push-ups. It is very simple: five blocks wait in a row, the player picks the one they want and puts it where they want, in a cross-sectional view of the buildings. There is no character to build and no RPG: the game is the building. The player works for a housing cooperative. Future residents and community members request useful things: houses, parks, bridges, schools, workshops, gardens and public spaces. The player designs and constructs them, rather than buying a predefined building. Residents have secure ownership or collective control through the cooperative; buildings are never speculative assets, sold for profit or used to extract rent in the game.
+Baugenossen is a nonviolent, mission-based, motion-controlled 2D construction game, played with push-ups. It is very simple: the buildings are seen from the side, the blocks wait in a yard on the left, and the player takes the one they want with a crane and puts it wherever they want on the site, and lifts it again to put it elsewhere. There is no character to build and no RPG: the game is the building. The player works for a housing cooperative. Future residents and community members request useful things: houses, parks, bridges, schools, workshops, gardens and public spaces. The player designs and constructs them, rather than buying a predefined building. Residents have secure ownership or collective control through the cooperative; buildings are never speculative assets, sold for profit or used to extract rent in the game.
 
 Design source: [Dinamika Games Manifesto](https://github.com/dinamika-games), consulted 2026-11-24. Apply its emphasis on movement, cooperation, nonviolent challenges, open-ended rules and sessions that are easy to stop. No ads, loot boxes, streak pressure, leaderboards, competitive scoring or monetization. No combat. No city management simulation (taxes, zoning, rent, traffic, elections, stock market). The city grows through completed projects, not passive economic optimization.
 
@@ -19,10 +19,10 @@ Design source: [Dinamika Games Manifesto](https://github.com/dinamika-games), co
 
 1. Accept a construction request from named residents.
 2. Inspect the site and the checklist (the needs and the optional wishes).
-3. Pick a block from the row of five with a short dip; move the crane by leaning; see where the block lands.
-4. Place it with a push-up. A new block comes into the row; now and then the oldest block leaves it (first in, first out).
-5. Repeat; a helper may remove, move or undo with the keyboard and the mouse; inspect live objective feedback.
-6. Submit the construction when mandatory objectives are satisfied.
+3. Move the crane's hook by leaning, and raise and lower it with the body: straight arms hold it high, the deeper the push-up, the lower the hook.
+4. Lower the empty hook onto a block in the yard to grab it; carry it over the site and lower it until it sits on something: it is put there. A new block comes into the yard; now and then the oldest block leaves it (first in, first out).
+5. Repeat; lower the empty hook onto a placed block to lift it up again, and put it down elsewhere or throw it into the skip; inspect live objective feedback.
+6. Hand the construction over: once the mandatory objectives are satisfied, a bell appears right of the site; lower the hook onto it.
 7. Watch residents use the result, and select a new project. Stop or save at any point.
 
 Every mission specifies a problem, not a blueprint. No image matching or scoring against a canonical layout. At least two meaningfully different valid designs should be possible for each ordinary mission. Tutorials may suggest one design but should not require it unless teaching a single action.
@@ -33,7 +33,7 @@ Every mission specifies a problem, not a blueprint. No image matching or scoring
 
 Use a true 2D orthographic side elevation/cutaway, not isometric or 3D. Interior rooms and inhabitants are visible like a dollhouse. X increases rightwards, grid Y increases upwards; rendering converts Y to Godot's downward screen coordinates. Each grid cell is initially 32 px, representing roughly half a metre; a standard storey is 6 cells high. MVP site is 40×24 cells above a flat ground row at y=0. Coordinates outside the grid are invalid. Camera pan and zoom must not affect saved geometry. Future sites support terrain, underground and water via explicit cell properties, not a new coordinate system.
 
-Show crane mast, horizontal trolley, cable and hook. The hook runs along the top of the site and moves only sideways; the carried part drops onto the levels below it (every height in the column under the hook at which it can be placed, from the top down) and the ghost shows where it lands. The crane is a visual representation of input, not a physical simulation: no swinging load, inertia, collisions while transporting or punishment for dropping a block. Default crane reach covers the whole site; character upgrades expand load capacity, not essential accessibility.
+Show crane mast, horizontal trolley, cable and hook. The hook moves sideways and up and down; the carried block hangs under it, and a ghost shows where it would land. The crane is a visual representation of input, not a physical simulation: no swinging load, inertia, collisions while transporting or punishment for dropping a block. Default crane reach covers the whole site; character upgrades expand load capacity, not essential accessibility.
 
 ### 2.2 Grid layers and components
 
@@ -73,9 +73,11 @@ Windows live in their own slot (`window`) over the back wall and conflict only w
 
 ### 2.4 Placement and editing
 
-**The row of blocks** (`BlockQueue`): five blocks wait in a row at the bottom of the screen, oldest first. A short dip (or Up/Down, or a click of a helper) chooses the next one, and the hook carries it. Placing a block takes it from the row, and a new block comes in at the end. Every 15 s the oldest block leaves and a new one comes in (first in, first out; a bar under the oldest block shows how soon), so that the choice changes while the player builds, a little like falling-block games, but with a bigger choice and no hurry: nothing is lost and nothing fails when a block leaves. The new blocks are drawn at random from the parts which the mission offers: the structure more often, and 4 times more often the parts with the tags which the unmet objectives ask for (a home gets its stove before long).
+**The yard** (`BlockQueue`): five blocks wait on the ground in a yard left of the site, oldest first, each in a place of 3 cells, with a skip at the far left. Grabbing a block takes it from the yard, the others move up, and a new block comes in at the end. Every 15 s the oldest block leaves and a new one comes in (first in, first out; not while the hook is over the yard), so that the choice changes while the player builds, a little like falling-block games, but with a bigger choice and no hurry: nothing is lost and nothing fails when a block leaves. The new blocks are drawn at random from the parts which the mission offers: the structure more often, and 4 times more often the parts with the tags which the unmet objectives ask for (a home gets its stove before long).
 
-The hook moves continuously sideways along the top of the site; the block drops: it lands at the first height, from the top down, at which it can be placed in the column under the hook (so the furniture goes in before the roof, as on a real site). The remove and the move tool of a helper point at the top part of the column the same way. Green outline for valid, red outline plus localized reason for invalid (out of bounds, overlap, unsupported, protected). A confirm action commits one atomic command; invalid confirm leaves the world unchanged. Keep selected part for repeated placements. No resource loss for mistakes. Remove tool selects an instance; moving is an atomic remove/place transaction. Undo/redo includes additions, removals and moves, with a bounded history of 100 commands, which is not saved (it starts empty whenever a site opens). New edit after undo clears redo. Initial site objects may be marked protected. Do not allow deleting terrain, protected items or mission boundaries. Design may be unfinished; missing enclosing walls are allowed during construction.
+**The hook** (as in a tower crane, the hook only touches): its height follows the body (see section 3.3), but it never goes below what is under it. When the player brings it down onto what is under it (within 0.3 cells), it acts once, and acts again only after rising 1.5 cells: the empty hook grabs a block of the yard, or lifts the top part of the column under it up again (to put it elsewhere); the hook with a block puts it down where it lands, or throws it into the skip; the empty hook rings the bell (right of the site, only once the needs are met), which hands the building over. There is no other tool: no review screen, no separate remove, move, undo, mirror or colour.
+
+Where a carried block lands: in the column under the hook, from the top down, the first height where it can stand (furniture on a floor, a wall on a support...), or it stops on a part in its way. Back walls and windows need no support; they fall until they stand on the ground, a floor or a part, and a window keeps a sill of one cell. The hook can go down only to that height, and the block is put there when the hook reaches it.
 
 ### 2.5 Simplified structural rules
 
@@ -85,20 +87,18 @@ Not an engineering simulator. For MVP validate all new non-background parts have
 
 ### 3.1 Unified semantic actions
 
-All inputs emit the same normalized commands, regardless of backend: `move_hook(Vector2)`, `next_block`, `previous_block`, `select_slot(index)`, `confirm`, `cancel`, `open_catalogue`, `toggle_remove`, `undo`, `redo`, `pause`, `resume`, `pan_camera`, `zoom_camera`, `submit_mission`. Do not couple game rules to pose estimation.
+All inputs emit the same normalized commands, regardless of backend: `move_hook(Vector2)`, `next_block`, `previous_block`, `confirm`, `cancel`, `pause`, `resume` (the dispatcher keeps a few older commands, e.g., `open_catalogue`, for its tests). Do not couple game rules to pose estimation.
 
-**The player plays with push-ups only: leaning moves the hook, a short dip picks the next block, a push-up places it.** The hands stay on the floor while building. The keyboard and the mouse never move the hook; they help with everything else (placing, choosing a block, removing, undo, pause, the camera of the view), e.g., for a helper next to the player. Without a camera, the build site says so.
+**The player plays with push-ups only: leaning moves the hook sideways, the height of the body is the height of the hook.** The hands stay on the floor while building. **There is no helper:** the keyboard only pauses, and the mouse does nothing on the build site. Without a camera, the build site says so.
 
-| Action | Body | Keyboard/mouse (helper) |
+| Action | Body | Keyboard |
 |---|---|---|
 | Hook horizontal velocity | Lean the torso left/right over the arms | — |
-| Hook vertical | None: the block drops and lands | — |
-| Next block of the row | A short dip (half a push-up, and back up) | Up/Down, a click on the block |
-| Place the block (or remove the pointed part) | A full dip (a push-up) | Space, left click |
-| Cancel | — | Escape, right click |
-| Remove/move/undo/redo | — | X / G / Ctrl+Z / Ctrl+Y and the buttons |
-| Pause | Tracking lost; the pause button | P / Escape |
-| Menus | The hand cursor (section 7) | Mouse |
+| Hook height | The height of the body: straight arms = top, the bottom of a push-up = the ground | — |
+| Grab a block / lift a part up / put it down / throw it away / hand over | Lower the hook onto it (the yard, a part, the landing, the skip, the bell) | — |
+| Pause | Tracking lost (e.g., getting up) | P / Escape |
+| Resume | A push-up after holding the posture | P / Escape |
+| Menus | The hand cursor (section 7) | — (the mouse works) |
 | Music / sound effects | — | M / S |
 | Quit | — | Escape twice within 2 s |
 
@@ -115,11 +115,11 @@ Interface `PoseProvider`: `start()`, `stop()`, `latest_frame()`; frame includes 
 Camera angle is empirical: the camera in front of the player, a bit to the side, seeing the shoulders and the elbows (and, deep in a push-up, still the elbows: the first pose logs showed them at the bottom edge). The camera does not see the hands on the floor (they are at the bottom edge of the picture or below it), so the controls rest on the shoulders and the elbows only:
 
 - **Lean** = the shoulder midpoint relative to the elbow midpoint, horizontally, in shoulder widths, sign adjusted for mirroring (about ±0.25 when leaning, in the logs).
-- **Dip** = how far the lower elbow is below the shoulders, in shoulder widths: about 0.8 with straight arms, down to 0.2–0.5 in a push-up (the lower elbow, so that a lifted arm does not look like a dip). It is measured against a baseline of the straight arms which follows the player's posture (up at once, down over 4 s, not during a dip), since the straight-arm posture drifts while playing. A short dip is 0.45 of the range (0.4 shoulder widths) and back up; a full dip 0.75. A lean lowers the shoulders a little, too (0.2–0.3 of the range), which is not a dip.
+- **Dip** = how far the lower elbow is below the shoulders, in shoulder widths: about 0.8 with straight arms, down to 0.2–0.5 in a push-up (the lower elbow, so that a lifted arm does not look like a dip). It is measured against a baseline of the straight arms which follows the player's posture (up over 1.5 s; down over 8 s, and only in the upper half), since the straight-arm posture drifts while playing. **The height of the hook** is one minus the dip, over a range of 0.3 shoulder widths, and the hook reaches the ground at 0.7 of that range already, so that the player need not do the full push-up every time (0.4 without slack was too deep: in the second pose log, several push-ups ended at 0.52 instead of 0.36, and the hook stayed 1 to 3 cells above the blocks); a 1€ filter smooths it (cutoff 0.8 Hz, beta 2): straight arms put the hook at the top of the site (one cell above it), the bottom of a push-up on the ground; it follows at most 30 cells a second. The hook keeps moving sideways while the player is low. A lean lowers the shoulders a little, too (0.2–0.3 of the range), which lowers the hook a little. A full dip (0.75 of the range) still resumes a pause.
 - **Lifts** = each elbow's height relative to its shoulder, relative to the other elbow (a lifted arm lifts its elbow; the body's own movement lifts both alike).
 - A key point counts from confidence 0.4 (the logs showed well-placed shoulders at 0.5); an unsure elbow is mirrored from the other one across the shoulders.
 
-**There is no calibration screen: the body controls calibrate themselves.** On every visit of a build site, the hook waits until the camera sees the player holding still for 2 s in the push-up position (or on the knees); the median posture becomes neutral, the lean gets a range of ±0.25 shoulder widths to full speed, and the dip a range of 0.4. These come from the first pose logs; tune them with more. "Learn my posture again" (in the pause, or Home) calibrates anew. Apply EMA smoothing to the lean (alpha 0.2 at 30 Hz, time-adjusted), dead zone 0.15, clamp to [-1,1]. Hook velocity = sign(s) * max(0,(abs(s)-0.15)/0.85)^1.5 * max_speed; initial max_speed 10 cells/s. Zero in neutral; the hook stands still during a dip and a lift. Recentre the calibration only on an explicit action, never continuously while the player leans. `dev/pose/replay_pose_log.gd` replays a pose log through the controls, to tune them on real movements.
+**There is no calibration screen: the body controls calibrate themselves.** On every visit of a build site, the hook waits until the camera sees the player holding still for 2 s in the push-up position (or on the knees); the median posture becomes neutral, the lean gets a range of ±0.25 shoulder widths to full speed, and the dip a range of 0.3. These come from the first pose logs; tune them with more. "Learn my posture again" (in the pause) calibrates anew. Smooth the lean with a 1€ filter (cutoff 0.8 Hz, beta 1.5; calm at rest, quick when moving), dead zone 0.15, clamp to [-1,1]. Hook velocity = sign(s) * max(0,(abs(s)-0.15)/0.85)^1.5 * max_speed; initial max_speed 10 cells/s. Zero in neutral; the hook stands still during a lift. Recentre the calibration only on an explicit action, never continuously while the player leans. `dev/pose/replay_pose_log.gd` replays a pose log through the controls, to tune them on real movements.
 
 Hand lift detector: threshold and hysteresis configurable (0.6 and 0.3 shoulder widths). Initial gesture qualification 200 ms, return to neutral 150 ms, cooldown 350 ms; no dip counts while a hand is lifted. These are debounce defaults, not exercise targets. Detect one event per lift; no repeats from held hand. Freeze hook during gesture recognition to prevent placement drift; capture target and validate on commit. In catalogue mode freeze crane; map active hand position to UI coordinates with calibration, dwell 650 ms, visible dwell progress; returning hand completes selection, then require stable neutral before resuming movement. A required joint below confidence 0.4 or frames older than 250 ms: freeze immediately; after 500 ms show paused tracking overlay. Reacquisition requires stable neutral and explicit resume (the pause button, P, or, after 0.5 s of neutral, a full dip, which then only resumes); never trigger queued placement. In the catalogue, the raised hand's offset from its shoulder (the wrist, which comes into the picture when raised, else the elbow; ±2 shoulder widths across, ±1.5 up and down) points at the entries. Prefer conservative false-negative behavior.
 
@@ -129,7 +129,7 @@ States: `CALIBRATION`, `BUILD`, `CATALOGUE`, `GESTURE_PENDING`, `PAUSED`, `REVIE
 
 ## 4. Progress
 
-There is no character, no XP, no karma, no levels, no attributes and no perks: the first versions had them, and they made the game too complicated for a game played with push-ups. The cooperative's progress is the completed missions and the fulfilled wishes (`Progress`, saved). A mission opens when its prerequisites are completed. A completed mission may be revisited and edited; its completion counts once. Every part is available from the start; a mission may offer only some of them (the tutorial: the bench, the tree and the grass).
+There is no character, no XP, no karma, no levels, no attributes and no perks: the first versions had them, and they made the game too complicated for a game played with push-ups. The cooperative's progress is the completed missions and the fulfilled wishes (`Progress`, saved). A mission opens when its prerequisites are completed. A completed mission may be revisited and edited; its completion counts once. Every part is available from the start; a mission may offer only some of them (the tutorial: the bench, chairs, trees, grass and flowers).
 
 ## 5. Mission evaluation
 
@@ -164,9 +164,9 @@ All initial tasks use only universal parts. Explicit completion button, enabled 
 
 **M01 — A Place to Sit** (tutorial). A neighbour wants a pleasant spot to rest. Flat 20×12 site. Mandatory: reachable seats for 2 (a bench or two chairs), 1 tree, 2 cells of green area, no unsupported parts. Optional: 2 flower beds (+5 XP, +5 karma). Teach catalogue, hook movement, preview, place, remove and undo. This is a suggested small tutorial, not a mandatory blueprint.
 
-**M02 — The First Home** (after M01). Two residents need a weatherproof home. Site 40×24. Mandatory: at least one accessible enclosed room of ≥24 cells; two reachable beds inside enclosed rooms; one reachable table and two seats, stove, sink and toilet, all inside accessible enclosed rooms; no unsupported components. Optional: two distinct sleeping rooms (+20 XP, +20 karma), two windows facing enclosed cells (+10/+10), outdoor bench and four green cells (+10/+10). No requirement for separate kitchens/bathrooms in this simplified first mission. A single-storey house and a two-storey house with stairs should both be valid. Starting entry is at left ground edge; ground is walkable unless blocked. Ensure enough plot space for both designs. Residents move in after submission and use reachable fixtures.
+**M02 — The First Home** (after M01). Two residents need a weatherproof home. Site 40×24. Mandatory: at least one accessible enclosed room of ≥24 cells; two reachable beds inside enclosed rooms; one reachable table and two seats, stove, sink and toilet, all inside accessible enclosed rooms; no unsupported components. Optional: two distinct sleeping rooms, two windows facing enclosed cells, outdoor bench and four green cells. No requirement for separate kitchens/bathrooms in this simplified first mission. A single-storey house and a two-storey house with stairs should both be valid. Starting entry is at left ground edge; ground is walkable unless blocked. Ensure enough plot space for both designs. Residents move in after submission and use reachable fixtures.
 
-**M03 — A Garden for Everyone** (after M02). Mandatory: 4 accessible seats, 12 unique green cells, 2 trees, reachable garden zone; optional 4 flower beds (+20/+20), seating in two separate zones (+10/+10). Different seating and planting layouts accepted. Do not require ponds until available.
+**M03 — A Garden for Everyone** (after M02). Mandatory: 4 accessible seats, 12 unique green cells, 2 trees, reachable garden zone; optional 4 flower beds (+20/+20), seating in two separate zones. Different seating and planting layouts accepted. Do not require ponds until available.
 
 **M04 — The Neighbourhood Workshop** (after M03). Mandatory: 2 distinct reachable enclosed rooms ≥18 cells each, each with a table, seat and lamp; no unsupported parts. Optional garden/bench (+20/+20). Use existing furniture definitions; later add workbenches.
 
@@ -203,17 +203,18 @@ Residents are fictional NPCs with stable IDs, name keys, appearance, preferences
 
 Persistent city map: a list of the projects (locked, available, in progress, completed, needs repair: a completed site edited into an invalid state; nothing is taken back). All sites persist. Later show a continuous side-scrolling city if useful, but do not require it for MVP. Site revisits support editing. The progress is global; site geometry, undo session and camera are local. Session end: after a mission show results and explicit options to save and exit, revisit or choose another project. No automatically starting the next mission. Pause any time.
 
-Local cooperation: the first version permits a second person to click the blocks of the row, remove and undo with the mouse while the builder operates the crane with the body, with one shared project. Later add explicit architect/operator roles, turn taking and optional role swapping. No individual competitive scoring. Do not require networking or multiple webcams.
+Local cooperation: none in the first version (there is no helper; one player plays with the body). Later maybe turn taking. No individual competitive scoring. Do not require networking or multiple webcams.
 
 ## 7. Interface and art direction
 
 - The game runs full screen (`--windowed` for a window). There is no settings screen: the camera starts with the game, M switches the music, S the sound effects, Escape twice within 2 s quits, and the rest is chosen on the command line (`--high-contrast`, `--reduced-motion`, `--no-mirror`, `--sensitivity=`, `--dead-zone=`, `--mute`, `--no-music`). The calibration is remembered.
-- **The hand cursor.** In the menus, a raised hand moves a cursor (the hand detector finds it; the shoulders tell where a resting hand is, which does not count). The cursor glides, sticks to the button under it (drawn towards its middle, leaving only beyond its edge), and clicks after the hand holds still for 2 s while a ring fills around the button; it clicks once until the hand leaves. No screen scrolls: everything fits on one screen of 1280×720, in every language (a test checks it). Choices are big ◀/▶ choosers, never drop-down lists, which a hand can not open. The build site switches the cursor off while building: the hands stay on the floor there.
-- **The player sees themselves**: the mirrored camera picture dimly behind every menu (without the skeleton: only the hands count there), and as an inset on the build site with the key points (green: sure, red: unsure).
+- **The hand cursor.** In the menus, a raised hand moves a cursor (the hand detector finds it; the shoulders tell where a resting hand is, which does not count). The cursor sits on the middle of the hand where the player sees it in the mirrored camera picture behind the menu (1:1, the picture covers the screen), not on the wrist. The cursor glides, sticks to the button under it (drawn towards its middle, leaving only beyond its edge), and clicks after the hand holds still for 2 s while a ring fills around the button; it clicks once until the hand leaves. No screen scrolls: everything fits on one screen of 1280×720, in every language (a test checks it). Choices are big ◀/▶ choosers, never drop-down lists, which a hand can not open. The build site switches the cursor off while building: the hands stay on the floor there.
+- **The player sees themselves**: the mirrored camera picture dimly behind every menu (without the skeleton: only the hands count there), and as an inset on the build site with the key points (green: sure, red: unsure) and the limits as lines: vertical, where the middle of the shoulders (an orange dot) starts moving the hook and reaches its full speed; horizontal, where the shoulders hold the hook at the top (▲) and bring it to the ground (▼). The inset moves out of the hook's way (top left, or left of the checklist).
 - Main menu: big signboard buttons (a cream board in a wooden frame with nail heads; the main one orange; they grow a little under the mouse): Continue, New game, Credits, Quit.
 - New game goes straight to the city map. City map: the projects as compact cards on one screen (title, state, residents, problem); the needs and the wishes are on the build site's checklist.
-- Build HUD: site viewport, crane, selected part/ghost, the camera inset, the row of five big blocks at the bottom (the chosen one framed, a bar under the oldest one), right mission checklist, undo/redo/remove/review and an always visible pause button. Show a clear tracking status and current input state.
-- Review: mandatory/optional objectives with hints, highlight unmet locations, return to editing or complete. No submission if invalid.
+- The dialogues keep their buttons far apart (48 px in a row, 24 px in a column), so that the hand cursor never takes the neighbour.
+- Build HUD: the site from the side, following the hook sideways, with the yard on the left and the bell on the right, the crane with the carried block and the ghost where it lands, the camera inset, the message of what the hook would do at the bottom, the mission checklist on the right, and an always visible pause button. Show a clear tracking status and current input state.
+- No review screen: the checklist shows the needs all the time, and the bell appears when they are met.
 - Results: resident response and the wishes fulfilled; then another project, back to the site, or save and exit. Nothing starts automatically.
 
 Art: warm hand-drawn 2D cutaway, readable silhouettes, visible residents and interiors. Side-view perspective consistent across parts. Use separate transparent sprites and grid footprint metadata; no baked English text into assets. Placeholder vector art is used until the sprites arrive. Valid/invalid state must be indicated by icon/text as well as colour. UI must scale to 1280×720 and larger without overlapping the site or hiding pause.
@@ -243,11 +244,11 @@ README.md, CONTRIBUTING.md, CLAUDE.md, DESIGN.md, THIRD_PARTY_NOTICES.md
 data/                     # parts, missions, sites, residents (JSON, English texts)
 translations/             # languages.json, messages.pot, <code>.po (gettext)
 scenes/
-  construction/           # grid, part definitions, placement, commands, support, rooms, navigation, the row of blocks
+  construction/           # grid, part definitions, placement, commands, support, rooms, navigation, the yard of blocks
   missions/               # objectives, site analysis, evaluator, texts
   progression/            # the cooperative's progress and its rules
   languages/              # languages, grammar, the texts with an ID
-  input/                  # dispatcher, keyboard helpers, pose providers, measures, auto-calibration, controller, pose log
+  input/                  # dispatcher, the keys (pause), pose providers, measures, auto-calibration, controller, pose log
   session/                # save repository, game session, the Game autoload
   vision/                 # C#: camera, RTMO, RTMPose, YOLOX (core/ without Godot)
   hand_cursor/, sound/, settings/, content/, art/, ui/
@@ -297,19 +298,19 @@ Implement grid layers, catalogue, hook preview, placement, removal, move, undo/r
 Implement room detection, navigation, objective engine, M01 and M02, basic residents, review and results, persistence. Acceptance: two distinct M02 layouts (single-storey and multi-storey) pass; an open roof, inaccessible bed and unsupported roof fail with specific feedback. Completing M01 unlocks M02; both persist after restart; no duplicate reward when resubmitted. Player can quit from results or mid-build.
 
 ### M3 — Simplification
-The first versions had a character (attributes, perks, XP, karma, levels) and a catalogue opened by lifting a hand; both were removed in favour of the row of five blocks and the push-ups only (section 4). Old saves migrate: their completed missions stay.
+The first versions had a character (attributes, perks, XP, karma, levels) and a catalogue opened by lifting a hand; both were removed in favour of the yard of five blocks and the push-ups only (section 4). A row of blocks picked with short dips and a drop-and-place with push-ups followed, and were replaced by the crane seen from the side, whose hook follows the height of the body. Old saves migrate: their completed missions stay.
 
 ### M4 — Motion controls
-Inspect and integrate existing pose provider or implement suitable adapter. Add calibration, smoothing, input state machine, gesture recognition and accessible fallbacks. Use synthetic pose sequences before webcam testing. Acceptance: hold neutral with no motion, left/right move the hook, a short dip takes the next block and one push-up produces exactly one placement, loss of tracking freezes within stale-frame threshold, reacquisition cannot auto-place, the keyboard and the mouse never move the hook. Test real camera positioning across users/devices; record measured false-trigger rates and tuning decisions. Do not assume gesture approach works before real-world trials.
+Inspect and integrate existing pose provider or implement suitable adapter. Add calibration, smoothing, input state machine, gesture recognition and accessible fallbacks. Use synthetic pose sequences before webcam testing. Acceptance: hold neutral with no motion, left/right move the hook, the body's height sets the hook's height, lowering the hook onto something acts exactly once, loss of tracking freezes within stale-frame threshold, reacquisition cannot auto-place, the keyboard and the mouse never move the hook. Test real camera positioning across users/devices; record measured false-trigger rates and tuning decisions. Do not assume gesture approach works before real-world trials.
 
 ### M5 — Polish and expanded campaign
 Improve original art, animation, accessibility, localization and content. Add at least one new construction mechanic and associated objective tests before its mission. Optional local co-op roles. Validate platform exports and document actual supported cameras/OS versions. End each session with explicit stopping point.
 
 ## 12. Required tests
 
-Unit tests: edge canonicalization; coordinate transforms; multi-cell footprint; compatible layers; invalid placement atomicity; support chain vs floating cycle; remove support warning; undo/redo roundtrip and branching; protected instances; window replacement; stair links; closed-door room seal vs navigation; roof gaps; separate regions; accessible fixtures; no double-count in distinct-room matching; green area unique coverage; objective unknown-type rejection; the row of blocks (take, first in first out, offered and wanted parts); completion counted once; save roundtrip/migration/corruption fallback; localization key coverage.
+Unit tests: edge canonicalization; coordinate transforms; multi-cell footprint; compatible layers; invalid placement atomicity; support chain vs floating cycle; remove support warning; undo/redo roundtrip and branching; protected instances; window replacement; stair links; closed-door room seal vs navigation; roof gaps; separate regions; accessible fixtures; no double-count in distinct-room matching; green area unique coverage; objective unknown-type rejection; the yard of blocks (take, first in first out, offered and wanted parts); completion counted once; save roundtrip/migration/corruption fallback; localization key coverage.
 
-Integration tests: M01 complete from clean state; M02 two valid layouts and invalid variations; save/reload incomplete site; resume complete mission without counting it twice; change locale without altering IDs; keyboard-only full loop; synthetic pose sequence (neutral, lean, short dip, push-up, tracking drop, resume); concurrent keyboard/pose confirm deduplicated. Content test validates all active missions are solvable using allowed capabilities and sample layouts. Test expected values, not just absence of crashes.
+Integration tests: M01 complete from clean state; M02 two valid layouts and invalid variations; save/reload incomplete site; resume complete mission without counting it twice; change locale without altering IDs; keyboard-only full loop; synthetic pose sequence (neutral, lean, going down and up: grab, put down, lift again, skip, bell; tracking drop, resume); concurrent keyboard/pose confirm deduplicated. Content test validates all active missions are solvable using allowed capabilities and sample layouts. Test expected values, not just absence of crashes.
 
 Manual tests: camera setup, different body proportions and lighting, mirrored feed, reduced-range posture, the plank and the knees, rest/pause, input latency, no unintended crane movement when selecting, long UI translations, readability, resident paths, large builds. Prefer comfort over maximum exercise intensity. Record what has and has not been tested.
 
@@ -320,11 +321,11 @@ Not required: real structural engineering, material economics, fluid/heat/electr
 Open questions:
 
 - The camera position, the gesture thresholds and the dwell of the hand cursor need trials with children and adults, in the plank and on the knees; nothing about false triggers, lighting or body proportions has been measured yet. The calibration, the thresholds and the gestures are tested with synthetic pose sequences only.
-- How long a block may wait in the row (15 s), and whether a block should leave at all while the player is in a push-up, needs trials; also whether the random row ever blocks a mission for too long (the wanted parts come 4 times more often).
+- How long a block may wait in the yard (15 s), the range of the height control (0.3 shoulder widths from the top to the ground), the touch (0.3 cells) and the re-arm (1.5 cells) need trials; also whether the random yard ever blocks a mission for too long (the wanted parts come 4 times more often).
 - The cut points of the sound effects were chosen from their loudness envelopes, not by ear.
 - Packaging (export presets, the publish workflow) is not set up; the exports for Windows and macOS are untested.
 
 
 ## 14. Definition of first release
 
-A user can complete at least four creative construction tasks with push-ups (and a helper's keyboard), save and resume, and observe residents use the projects. The player can stop comfortably at any time. Each mandatory mission has multiple solutions and no dependency on real-world physical performance. All UI text is English and localizable. Project runs without network and fails gracefully without camera.
+A user can complete at least four creative construction tasks with push-ups only, save and resume, and observe residents use the projects. The player can stop comfortably at any time. Each mandatory mission has multiple solutions and no dependency on real-world physical performance. All UI text is English and localizable. Project runs without network and fails gracefully without camera.

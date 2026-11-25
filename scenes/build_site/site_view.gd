@@ -17,7 +17,20 @@ var hook := Vector2(4, 8)
 ## What the hook carries: {"definition": PartDef, "anchor": Vector2i,
 ## "mirrored": bool, "variant": int, "ok": bool}, or {}.
 var preview: Dictionary = {}
+## Whether the empty hook would lift the [member pointed] part.
 var remove_mode := false
+## What hangs under the hook: {"definition", "mirrored", "variant"}, or {}.
+var carried: Dictionary = {}
+## The yard left of the site: the part IDs of its blocks, its left edge, the
+## width of a place, the height of the blocks, and the place the hook is over
+## (0-based block index, -1 for none).
+var yard: Array[String] = []
+var yard_left := -19.0
+var slot_width := 3.0
+var item_top := 2.0
+var yard_pointed := -1
+## The left edge of the bell, or NAN while it does not show.
+var bell_left := NAN
 ## The instance the remove or move tool points at (0 for none).
 var pointed := 0
 ## The instances and cells to highlight (unmet objectives, problems).
@@ -96,6 +109,8 @@ func _draw() -> void:
     _draw_highlights()
     if show_guides:
         _draw_guides(size)
+    _draw_yard()
+    _draw_bell()
     _draw_preview()
     _draw_crane(size)
     for resident in residents:
@@ -197,6 +212,67 @@ func _draw_preview() -> void:
     draw_circle(hook_screen, 3.0, Color(0.2, 0.2, 0.2, 0.6))
 
 
+## The skip and the blocks of the yard, each scaled into its place.
+func _draw_yard() -> void:
+    var skip := Rect2(
+        to_screen(Vector2(yard_left + 0.2, 1.0)), Vector2(slot_width - 0.4, 1.0) * CELL
+    )
+    draw_rect(skip, Color("c9a227"))
+    draw_rect(skip, Color("3a3a3a"), false, 2.0)
+    for index in range(yard.size()):
+        var definition := grid.content.part(yard[index]) if grid.content != null else null
+        if definition == null:
+            continue
+        var left := yard_left + slot_width * (index + 1)
+        var box := Rect2(
+            to_screen(Vector2(left + 0.2, item_top)), Vector2(slot_width - 0.4, item_top) * CELL
+        )
+        draw_rect(box, Color(1, 1, 1, 0.35))
+        var footprint := Vector2(maxi(definition.footprint.x, 1), maxi(definition.footprint.y, 1))
+        var cell := minf(box.size.x / footprint.x, box.size.y / footprint.y)
+        var drawn := footprint * cell
+        match definition.layer:
+            "edge_h":
+                drawn = Vector2(definition.footprint.x * cell, 8)
+            "edge_v":
+                drawn = Vector2(8, definition.footprint.y * cell)
+        var rect := Rect2(
+            box.position + Vector2((box.size.x - drawn.x) / 2.0, box.size.y - drawn.y), drawn
+        )
+        PartArt.draw_part(self, definition.visual_id, rect, false, 0, 1.0)
+        if index == yard_pointed:
+            draw_rect(box.grow(3), Ui.ACCENT, false, 4.0)
+
+
+## The bell which hands the building over, once the needs are met.
+func _draw_bell() -> void:
+    if is_nan(bell_left):
+        return
+    var base := to_screen(Vector2(bell_left + 1.0, 0.0))
+    draw_rect(
+        Rect2(base + Vector2(-3, -item_top * CELL), Vector2(6, item_top * CELL)), Color("5a4632")
+    )
+    var top := base + Vector2(0, -item_top * CELL)
+    var bell := PackedVector2Array(
+        [top + Vector2(-14, 20), top + Vector2(-9, 0), top + Vector2(9, 0), top + Vector2(14, 20)]
+    )
+    draw_colored_polygon(bell, Color("e0a030"))
+    draw_circle(top + Vector2(0, 22), 4.0, Color("5a4632"))
+
+
+## Where the carried block hangs under the hook: its top at the hook.
+func hanging_rect() -> Rect2:
+    var definition: PartDef = carried["definition"]
+    var size := Vector2(maxi(definition.footprint.x, 1), maxi(definition.footprint.y, 1)) * CELL
+    var top := to_screen(hook)
+    match definition.layer:
+        "edge_h":
+            return Rect2(top + Vector2(-size.x / 2.0, 0), Vector2(size.x, 8))
+        "edge_v":
+            return Rect2(top + Vector2(-4, 0), Vector2(8, definition.footprint.y * CELL))
+    return Rect2(top + Vector2(-size.x / 2.0, 0), size)
+
+
 func _draw_crane(size: Vector2) -> void:
     var mast_x := size.x + CELL * 1.5
     var jib_y := -CELL * 2.0
@@ -206,32 +282,34 @@ func _draw_crane(size: Vector2) -> void:
     for i in range(int((size.y - jib_y) / 24.0)):
         var y := jib_y + i * 24.0
         draw_line(Vector2(mast_x - 8, y), Vector2(mast_x + 8, y + 24), dark, 1.5)
-    draw_rect(Rect2(-CELL, jib_y - 10, mast_x + CELL * 3.0, 14), steel)
+    var jib_left := (yard_left - 1.0) * CELL
+    var jib_right := (bell_left if not is_nan(bell_left) else float(grid.width) + 3.0) * CELL
+    draw_rect(
+        Rect2(jib_left, jib_y - 10, maxf(mast_x, jib_right) + CELL * 3.0 - jib_left, 14), steel
+    )
     draw_rect(Rect2(mast_x + CELL, jib_y - 10, CELL * 1.5, 34), dark)
     var hook_screen := to_screen(hook)
-    if not preview.is_empty():
-        # NOTE (mristin):
-        # The hook's tip is the bottom of the carried part; the claw holds it
-        # at its top.
-        var carried := part_rect(preview["definition"], preview["anchor"])
-        hook_screen = Vector2(hook_screen.x, minf(hook_screen.y, carried.position.y) - 6.0)
+    if not carried.is_empty():
+        var hanging := hanging_rect()
+        PartArt.draw_part(
+            self,
+            carried["definition"].visual_id,
+            hanging,
+            bool(carried["mirrored"]),
+            int(carried["variant"]),
+            1.0
+        )
+        hook_screen.y -= 6.0
     var trolley := Vector2(hook_screen.x, jib_y + 4)
     draw_rect(Rect2(trolley + Vector2(-14, -2), Vector2(28, 12)), dark)
     draw_line(trolley + Vector2(0, 10), hook_screen, dark, 2.0)
-    var claw := Color("d0342c") if remove_mode else dark
+    var claw := Ui.ACCENT if remove_mode else dark
     draw_arc(hook_screen + Vector2(0, 8), 8.0, 0.0, PI, 10, claw, 3.0)
     draw_circle(hook_screen, 4.0, claw)
     if remove_mode and pointed != 0 and grid.instances.has(pointed):
         var instance: PartInstance = grid.instances[pointed]
         var rect := part_rect(grid.definition_of(instance), instance.anchor).grow(4)
-        draw_rect(rect, Color("d0342c"), false, 4.0)
-        draw_line(rect.position, rect.end, Color("d0342c"), 3.0)
-        draw_line(
-            Vector2(rect.position.x, rect.end.y),
-            Vector2(rect.end.x, rect.position.y),
-            Color("d0342c"),
-            3.0
-        )
+        draw_rect(rect, Ui.ACCENT, false, 4.0)
 
 
 func _draw_bubble() -> void:

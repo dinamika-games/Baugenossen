@@ -29,7 +29,7 @@ func _ready() -> void:
         return
     var content: ContentDb = _game.content
     var column := Ui.screen(self, _settings.get_value("high_contrast"))
-    var header := Ui.hbox(24)
+    var header := Ui.hbox(Ui.BUTTON_GAP)
     var title := Ui.label(tr("The cooperative's projects"), Ui.TITLE_SIZE)
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.add_child(title)
@@ -37,8 +37,8 @@ func _ready() -> void:
     column.add_child(header)
     var grid := GridContainer.new()
     grid.columns = 2
-    grid.add_theme_constant_override("h_separation", 16)
-    grid.add_theme_constant_override("v_separation", 16)
+    grid.add_theme_constant_override("h_separation", Ui.BUTTON_GAP / 2)
+    grid.add_theme_constant_override("v_separation", Ui.BUTTON_GAP)
     column.add_child(grid)
     var first_button: Button = null
     for id in content.mission_order:
@@ -55,14 +55,14 @@ func _mission_card(content: ContentDb, id: String) -> Array:
     var mission := content.mission(id)
     var status: String = _game.session.mission_status(id)
     var box := Ui.vbox(4)
-    box.custom_minimum_size = Vector2(560, 0)
+    box.custom_minimum_size = Vector2(550, 0)
     box.add_child(Ui.label(tr(mission["title"]), 24))
     var asked := Grammar.format(
         tr("Asked by {names}"), {"names": MissionText.requesters(mission, content)}
     )
     box.add_child(Ui.label("%s · %s" % [Texts.of(STATUS_KEYS[status]), asked], 16))
     var brief := Ui.label(tr(mission["brief"]), 16, true)
-    brief.custom_minimum_size.x = 560
+    brief.custom_minimum_size.x = 550
     box.add_child(brief)
     var action: Button = null
     if status == "locked":

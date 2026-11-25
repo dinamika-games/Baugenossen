@@ -5,12 +5,14 @@ extends "res://tests/godot/godot_test.gd"
 ## list scrolls; and it does nothing while switched off (the build site).
 
 const STEP := 1.0 / 60.0
+const HandCursorScript := preload("res://scenes/hand_cursor/hand_cursor.gd")
 
 var cursor: Node
 var clicks := 0
 
 
 func _run() -> void:
+    _test_picture_to_screen()
     cursor = root.get_node("HandCursor")
     var screen := Control.new()
     screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -89,3 +91,14 @@ func _seconds(seconds: float) -> void:
 func _frames(count: int) -> void:
     for i in range(count):
         await process_frame
+
+
+func _test_picture_to_screen() -> void:
+    var screen := Vector2(1280, 720)
+    var picture := Vector2(640, 480)
+    var middle := HandCursorScript.picture_to_screen(Vector2(0.5, 0.5), picture, screen)
+    check(middle.distance_to(screen / 2.0) < 0.01, "the middle of the picture is the middle")
+    var corner := HandCursorScript.picture_to_screen(Vector2(0.0, 0.5), picture, screen)
+    check(absf(corner.x) < 0.01, "the left edge of the picture is the left edge (it covers)")
+    var top := HandCursorScript.picture_to_screen(Vector2(0.5, 0.0), picture, screen)
+    check(top.y < 0.0, "the top of a 4:3 picture is above the 16:9 screen (cropped)")

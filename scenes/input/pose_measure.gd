@@ -104,6 +104,12 @@ static func measure(frame: Dictionary) -> Dictionary:
         "lift_right": (right_shoulder.y - right_elbow.y) / unit,
         "left_hand": (left_pointer - left_shoulder) / unit,
         "right_hand": (right_pointer - right_shoulder) / unit,
+        # NOTE (mristin):
+        # In pixels, as the player sees the picture, for the guide lines.
+        "size": Vector2(float(frame["width"]), float(frame["height"])),
+        "elbows_x": elbows.x,
+        "lower_elbow_y": maxf(left_elbow.y, right_elbow.y),
+        "shoulders": shoulders,
     }
 
 
