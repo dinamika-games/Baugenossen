@@ -58,6 +58,12 @@ func _shoot(game: Node, screen: String, path: String) -> void:
         scene.carried = "bed_single"
         scene._delta = 1.0
         scene._move_hook(30.0 - scene.hook.x, 14.0)
+        if path.ends_with("05_build_garden.png"):
+            # NOTE (mristin):
+            # The garden shows the yard with the parts of the level.
+            scene.carried = ""
+            scene._move_hook(scene.yard_left() + 4.5 - scene.hook.x, 14.0)
+            scene._fit_camera()
         scene._show_hook()
         for i in range(3):
             await process_frame

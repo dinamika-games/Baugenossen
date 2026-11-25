@@ -21,16 +21,15 @@ var preview: Dictionary = {}
 var remove_mode := false
 ## What hangs under the hook: {"definition", "mirrored", "variant"}, or {}.
 var carried: Dictionary = {}
-## The yard left of the site: the part IDs of its blocks, its left edge, the
-## width of a place, the height of the blocks, and the place the hook is over
-## (0-based block index, -1 for none).
+## The yard left of the site: the kinds of the level's parts, and the card
+## the hook is over (-1 for none).
 var yard: Array[String] = []
-var yard_left := -19.0
-var slot_width := 3.0
-var item_top := 2.0
+## How many of each kind are left: part ID -> count (see [PartSupply]).
+var yard_counts: Dictionary = {}
+## The cards of the yard: Rect2(left, 0, width, height) in cells, one for
+## each kind, as large as the part.
+var yard_cards: Array[Rect2] = []
 var yard_pointed := -1
-## The left edge of the bell, or NAN while it does not show.
-var bell_left := NAN
 ## The instance the remove or move tool points at (0 for none).
 var pointed := 0
 ## The instances and cells to highlight (unmet objectives, problems).
@@ -110,7 +109,6 @@ func _draw() -> void:
     if show_guides:
         _draw_guides(size)
     _draw_yard()
-    _draw_bell()
     _draw_preview()
     _draw_crane(size)
     for resident in residents:
@@ -212,52 +210,46 @@ func _draw_preview() -> void:
     draw_circle(hook_screen, 3.0, Color(0.2, 0.2, 0.2, 0.6))
 
 
-## The skip and the blocks of the yard, each scaled into its place.
+## The cards of the yard: each kind of the level's parts at its real size on
+## its card, with how many are left (greyed when none).
 func _draw_yard() -> void:
-    var skip := Rect2(
-        to_screen(Vector2(yard_left + 0.2, 1.0)), Vector2(slot_width - 0.4, 1.0) * CELL
-    )
-    draw_rect(skip, Color("c9a227"))
-    draw_rect(skip, Color("3a3a3a"), false, 2.0)
-    for index in range(yard.size()):
+    for index in range(mini(yard.size(), yard_cards.size())):
         var definition := grid.content.part(yard[index]) if grid.content != null else null
         if definition == null:
             continue
-        var left := yard_left + slot_width * (index + 1)
+        var card := yard_cards[index]
         var box := Rect2(
-            to_screen(Vector2(left + 0.2, item_top)), Vector2(slot_width - 0.4, item_top) * CELL
+            to_screen(Vector2(card.position.x + 0.1, card.size.y)),
+            Vector2(card.size.x - 0.2, card.size.y) * CELL
         )
+        var left_over := int(yard_counts.get(yard[index], 0))
         draw_rect(box, Color(1, 1, 1, 0.35))
-        var footprint := Vector2(maxi(definition.footprint.x, 1), maxi(definition.footprint.y, 1))
-        var cell := minf(box.size.x / footprint.x, box.size.y / footprint.y)
-        var drawn := footprint * cell
+        draw_rect(box, Color(1, 1, 1, 0.8), false, 2.0)
+        var drawn := (
+            Vector2(maxi(definition.footprint.x, 1), maxi(definition.footprint.y, 1)) * CELL
+        )
         match definition.layer:
             "edge_h":
-                drawn = Vector2(definition.footprint.x * cell, 8)
+                drawn = Vector2(definition.footprint.x * CELL, 8)
             "edge_v":
-                drawn = Vector2(8, definition.footprint.y * cell)
+                drawn = Vector2(8, definition.footprint.y * CELL)
         var rect := Rect2(
             box.position + Vector2((box.size.x - drawn.x) / 2.0, box.size.y - drawn.y), drawn
         )
-        PartArt.draw_part(self, definition.visual_id, rect, false, 0, 1.0)
+        PartArt.draw_part(
+            self, definition.visual_id, rect, false, 0, 1.0 if left_over > 0 else 0.25
+        )
+        draw_string(
+            ThemeDB.fallback_font,
+            box.position + Vector2(0, -6),
+            "×%d" % left_over,
+            HORIZONTAL_ALIGNMENT_CENTER,
+            box.size.x,
+            22,
+            Ui.INK if left_over > 0 else Color(Ui.INK, 0.4)
+        )
         if index == yard_pointed:
             draw_rect(box.grow(3), Ui.ACCENT, false, 4.0)
-
-
-## The bell which hands the building over, once the needs are met.
-func _draw_bell() -> void:
-    if is_nan(bell_left):
-        return
-    var base := to_screen(Vector2(bell_left + 1.0, 0.0))
-    draw_rect(
-        Rect2(base + Vector2(-3, -item_top * CELL), Vector2(6, item_top * CELL)), Color("5a4632")
-    )
-    var top := base + Vector2(0, -item_top * CELL)
-    var bell := PackedVector2Array(
-        [top + Vector2(-14, 20), top + Vector2(-9, 0), top + Vector2(9, 0), top + Vector2(14, 20)]
-    )
-    draw_colored_polygon(bell, Color("e0a030"))
-    draw_circle(top + Vector2(0, 22), 4.0, Color("5a4632"))
 
 
 ## Where the carried block hangs under the hook: its top at the hook.
@@ -282,8 +274,8 @@ func _draw_crane(size: Vector2) -> void:
     for i in range(int((size.y - jib_y) / 24.0)):
         var y := jib_y + i * 24.0
         draw_line(Vector2(mast_x - 8, y), Vector2(mast_x + 8, y + 24), dark, 1.5)
-    var jib_left := (yard_left - 1.0) * CELL
-    var jib_right := (bell_left if not is_nan(bell_left) else float(grid.width) + 3.0) * CELL
+    var jib_left := ((yard_cards[0].position.x if not yard_cards.is_empty() else 0.0) - 1.0) * CELL
+    var jib_right := (float(grid.width) + 3.0) * CELL
     draw_rect(
         Rect2(jib_left, jib_y - 10, maxf(mast_x, jib_right) + CELL * 3.0 - jib_left, 14), steel
     )

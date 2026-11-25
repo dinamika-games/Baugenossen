@@ -168,7 +168,7 @@ func _load_residents(data: Dictionary) -> void:
 
 func _load_missions(data: Dictionary) -> void:
     var fields := ["id", "title", "brief", "site_id", "requester_ids", "prerequisite_ids"]
-    fields.append("thanks")
+    fields.append_array(["thanks", "parts"])
     fields.append_array(["mandatory_objectives", "optional_objectives", "npc_spawn_defs"])
     for record in data.get("missions", []):
         var context := "mission %s" % record.get("id", "?")
@@ -176,8 +176,6 @@ func _load_missions(data: Dictionary) -> void:
             continue
         if not record.has("zones"):
             record["zones"] = {}
-        if not record.has("available_catalogue_ids"):
-            record["available_catalogue_ids"] = []
         if str(record["site_id"]) not in sites:
             _error("%s uses the unknown site %s" % [context, record["site_id"]])
         for resident in record["requester_ids"]:
@@ -186,9 +184,17 @@ func _load_missions(data: Dictionary) -> void:
         for spawn in record["npc_spawn_defs"]:
             if str(spawn.get("resident_id", "")) not in residents:
                 _error("%s spawns the unknown resident %s" % [context, spawn])
-        for part_id in record["available_catalogue_ids"]:
-            if part_id not in parts:
-                _error("%s offers the unknown part %s" % [context, part_id])
+        # NOTE (mristin):
+        # A level is a puzzle: it gives its parts, part ID -> how many.
+        if not record["parts"] is Dictionary or record["parts"].is_empty():
+            _error("%s gives no parts" % context)
+        else:
+            for part_id in record["parts"]:
+                if part_id not in parts:
+                    _error("%s gives the unknown part %s" % [context, part_id])
+                elif int(record["parts"][part_id]) < 1:
+                    _error("%s gives %s of %s" % [context, record["parts"][part_id], part_id])
+            record["available_catalogue_ids"] = record["parts"].keys()
         var ids := {}
         for objective in record["mandatory_objectives"] + record["optional_objectives"]:
             var id := str(objective.get("id", ""))

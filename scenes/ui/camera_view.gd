@@ -14,12 +14,15 @@ var picture_alpha := 1.0
 ## Whether the picture covers the whole control (cropped), or fits in it.
 var cover := false
 var show_skeleton := true
-## The guide lines of the limits (see [method PoseController.guides]): "x"
-## and "y" in the picture as the player sees it, normalized, and the middle of
-## the shoulders now; {} for none.
+## The guides (see [method PoseController.guides]): "shoulders", the middle of
+## the shoulders in the picture as the player sees it, normalized; {} for
+## none.
 var guides: Dictionary = {}
 ## A frame around the view, hidden while the camera does not run.
 var frame: Control = null
+## Whether the view is hidden on purpose (e.g., the inset of the build site
+## while the camera covers the whole screen behind a dialogue).
+var suppressed := false
 
 
 func _ready() -> void:
@@ -29,7 +32,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     if frame != null:
         var service := _service()
-        frame.visible = service != null and service.IsRunning()
+        frame.visible = service != null and service.IsRunning() and not suppressed
     queue_redraw()
 
 
@@ -68,36 +71,14 @@ func _draw() -> void:
     _draw_guides(rect)
 
 
-## The limits as lines: the outer vertical ones are the full speed of the
-## hook, the inner ones the start; the upper horizontal one holds the hook at
-## the top, the lower one brings it to the ground. The dot is the middle of
-## the shoulders.
+## The middle of the shoulders as a yellow dot, so that the player sees that
+## the camera follows them (no lines, no skeleton: they only clutter).
 func _draw_guides(rect: Rect2) -> void:
     if guides.is_empty():
         return
-    var xs: Array = guides["x"]
-    for i in range(xs.size()):
-        var x := rect.position.x + float(xs[i]) * rect.size.x
-        var outer := i == 0 or i == xs.size() - 1
-        var colour := Color(0.95, 0.55, 0.1, 0.9) if outer else Color(1, 1, 1, 0.7)
-        draw_line(Vector2(x, rect.position.y), Vector2(x, rect.end.y), colour, 2.0)
-    var ys: Array = guides["y"]
-    var labels := ["▲", "▼"]
-    for i in range(ys.size()):
-        var y := rect.position.y + float(ys[i]) * rect.size.y
-        var colour := Color(0.2, 0.6, 1.0, 0.9)
-        draw_line(Vector2(rect.position.x, y), Vector2(rect.end.x, y), colour, 2.0)
-        draw_string(
-            ThemeDB.fallback_font,
-            Vector2(rect.position.x + 4, y - 4),
-            labels[mini(i, 1)],
-            HORIZONTAL_ALIGNMENT_LEFT,
-            -1,
-            14,
-            colour
-        )
     var at: Vector2 = guides["shoulders"]
-    draw_circle(rect.position + at * rect.size, 6.0, Color(0.95, 0.55, 0.1))
+    draw_circle(rect.position + at * rect.size, 8.0, Color(1.0, 0.8, 0.1))
+    draw_arc(rect.position + at * rect.size, 8.0, 0.0, TAU, 16, Color.BLACK, 2.0)
 
 
 func _draw_skeleton(service: Node, rect: Rect2, mirror: bool) -> void:

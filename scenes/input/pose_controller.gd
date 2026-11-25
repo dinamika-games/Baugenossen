@@ -51,6 +51,17 @@ const HEIGHT_BASELINE_NEAR_TOP := 0.5
 ## The hook reaches the ground at this share of the dip's range already, so
 ## that the player need not do the full push-up every time.
 const GROUND_DIP := 0.7
+## With the height control, the neutral lean follows the player's resting
+## posture over this time, while they do not lean clearly (below this share of
+## the full lean), since the resting lean drifts (0.4 in the pose logs).
+const LEAN_ADAPT_SECONDS := 8.0
+const LEAN_ADAPT_LIMIT := 0.45
+## With the height control, the elbows staying farther than this from where
+## they were at the calibration (in shoulder widths) for this long ask for a new
+## calibration ("recalibrate"): the player moved their hands. In the pose
+## logs, the elbows stayed within 0.3 of their place 95 % of the time.
+const ELBOWS_OFF := 0.6
+const ELBOWS_OFF_SECONDS := 1.5
 
 var calibration: Dictionary = {}
 var dead_zone := 0.15
@@ -82,7 +93,7 @@ var height := 1.0
 ## The 1€ filters of the lean and of the height: calm at rest, quick when the
 ## player moves.
 var lean_filter := OneEuroFilter.new(0.8, 1.5)
-var height_filter := OneEuroFilter.new(0.8, 2.0)
+var height_filter := OneEuroFilter.new(0.4, 0.8)
 
 ## The smoothed signal in [-1, 1]^2.
 var smoothed := Vector2.ZERO
@@ -100,6 +111,7 @@ var _bad_since := -1.0
 var _neutral_since := -1.0
 var _hands := {"left": _new_hand(), "right": _new_hand()}
 var _baseline := NAN
+var _elbows_off_since := -1.0
 ## "", "short" (deeper than a short dip) or "full" (placed) during a dip.
 var _dip_phase := ""
 var _both_lifted := false
@@ -129,7 +141,7 @@ func reset_gestures() -> void:
 ## Process the latest frame in the given input state; return
 ## {"velocity": Vector2 (cells per second, y up), "events": Array[String]}.
 ## The events: "gesture_started", "gesture_cancelled", "confirm", "level",
-## "open_catalogue", "catalogue_release" and "resume".
+## "open_catalogue", "catalogue_release", "resume" and "recalibrate".
 func update(frame: Dictionary, now: float, input_state: String) -> Dictionary:
     var events: Array[String] = []
     var output := {"velocity": Vector2.ZERO, "events": events}
@@ -147,6 +159,8 @@ func update(frame: Dictionary, now: float, input_state: String) -> Dictionary:
 
     _bad_since = -1.0
     tracking = "ok"
+    if height_control and calibration.has("elbows"):
+        _check_elbows(measures, now, events)
     var target := Vector2(
         PoseCalibration.normalize(
             float(measures["h"]),
@@ -157,6 +171,13 @@ func update(frame: Dictionary, now: float, input_state: String) -> Dictionary:
         0.0
     )
     smoothed = Vector2(lean_filter.filter(target.x, now), 0.0)
+    if height_control and absf(smoothed.x) < LEAN_ADAPT_LIMIT:
+        var shift := (
+            (float(measures["h"]) - float(calibration["h"])) * minf(1.0, dt / LEAN_ADAPT_SECONDS)
+        )
+        for key in ["h", "left", "right"]:
+            if calibration.has(key):
+                calibration[key] = float(calibration[key]) + shift
 
     # NOTE (mristin):
     # Raising or lowering the torso moves both wrists relative to the shoulders
@@ -230,6 +251,8 @@ func _update_dip(v: float, dt: float, input_state: String, events: Array[String]
                     events.append("confirm")
                 elif input_state == InputDispatcher.PAUSED and not needs_neutral:
                     events.append("resume")
+                elif input_state == InputDispatcher.COMPLETE:
+                    events.append("resume")
             elif dip < DIP_RELEASE:
                 _dip_phase = ""
                 if input_state == InputDispatcher.BUILD:
@@ -268,7 +291,13 @@ func _lose(now: float, events: Array[String]) -> void:
     if pending:
         events.append("gesture_cancelled")
     reset_gestures()
-    rearm()
+    # NOTE (mristin):
+    # With the height control, a frame or two without the player (a freeze)
+    # does not ask for the neutral posture again: the pose logs showed the
+    # hook stuck for 12 s after one bad frame, since the player's resting lean
+    # had drifted out of the dead zone. A lost tracking pauses anyway.
+    if not height_control or tracking == "lost":
+        rearm()
 
 
 func _update_cursor(measures: Dictionary, lifts: Dictionary, input_state: String) -> void:
@@ -355,27 +384,33 @@ func _event_for(input_state: String) -> String:
 
 
 ## The guide lines of the camera picture, where the limits are, as the player
-## sees them (mirrored like the picture, normalized to [0, 1]): "x", where the
-## middle of the shoulders starts and reaches the full speed of the hook to
-## each side; "y", where the shoulders hold the hook at the top and bring it to
-## the ground; "shoulders", the middle of the shoulders now. Empty without
-## measures or a calibration.
+## sees them (mirrored like the picture, normalized to [0, 1]): "y", where the
+## shoulders hold the hook at the top and bring it to the ground; "shoulders",
+## the middle of the shoulders now. Empty without measures
+## or a calibration.
 func guides() -> Dictionary:
     var m := last_measures
     if m.is_empty() or not calibration.has("h") or not m.has("size"):
         return {}
     var size: Vector2 = m["size"]
     var unit := float(m["unit"])
-    var h := float(calibration["h"])
-    var left := float(calibration.get("left", h - 0.25))
-    var right := float(calibration.get("right", h + 0.25))
-    var xs: Array[float] = []
-    for lean in [left, h + (left - h) * dead_zone, h + (right - h) * dead_zone, right]:
-        xs.append((float(m["elbows_x"]) + lean * unit) / size.x)
     var depth_range := float(calibration["v"]) - float(calibration.get("down", 0.0))
     var top := _baseline if not is_nan(_baseline) else float(calibration["v"])
     var ys: Array[float] = []
     for v in [top, top - depth_range * GROUND_DIP]:
         ys.append((float(m["lower_elbow_y"]) - v * unit) / size.y)
     var shoulders: Vector2 = m["shoulders"]
-    return {"x": xs, "y": ys, "shoulders": Vector2(shoulders.x / size.x, shoulders.y / size.y)}
+    return {"y": ys, "shoulders": Vector2(shoulders.x / size.x, shoulders.y / size.y)}
+
+
+func _check_elbows(measures: Dictionary, now: float, events: Array[String]) -> void:
+    var calibrated: Vector2 = calibration["elbows"]
+    var elbows := Vector2(float(measures["elbows_x"]), float(measures["lower_elbow_y"]))
+    var off := elbows.distance_to(calibrated) / maxf(1.0, float(calibration["unit"]))
+    if off <= ELBOWS_OFF:
+        _elbows_off_since = -1.0
+    elif _elbows_off_since < 0.0:
+        _elbows_off_since = now
+    elif now - _elbows_off_since >= ELBOWS_OFF_SECONDS:
+        _elbows_off_since = -1.0
+        events.append("recalibrate")

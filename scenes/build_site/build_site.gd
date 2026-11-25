@@ -1,29 +1,37 @@
 extends Node2D
 ## Build a mission's site with the crane, seen from the side (DESIGN.md, 2
-## and 3). The blocks wait in the yard left of the site (see [BlockQueue]),
-## with a skip for the blocks not wanted. The player leans to move the hook
+## and 3). Every level is a puzzle: it gives its parts, which wait in the yard
+## left of the site (see [PartSupply]), and the checklist names the relations
+## which must hold; any layout which fulfils them solves the level. The player
+## leans to move the hook
 ## sideways, and the height of their body is the height of the hook: straight
 ## arms hold it at the top, the bottom of a push-up brings it to the ground.
-## Lowered onto a block, the empty hook grabs it (in the yard, or a placed one,
-## to put it elsewhere); lowered until its block sits on something, the hook
-## puts the block there. Once the needs are met, a bell right of the site
-## hands the building over when the hook rings it. Only the body plays; the
+## Lowered onto a part, the empty hook grabs it (in the yard, or a placed one,
+## to put it elsewhere); lowered until its part sits on something, the hook
+## puts the part there; lowered onto the yard, it gives the part back. The
+## level is solved as soon as its conditions hold: the residents move in (on a
+## revisit, when a new wish is fulfilled). Only the body plays; the
 ## keyboard only pauses. Without a camera, the site asks for it.
 ##
 ## The grid, the history and the mission are the truth; the view and the HUD
 ## only show them.
 
 const AUTOSAVE_DELAY := 2.0
-## The yard: each place is this wide, in cells; the blocks stand this high.
-const SLOT_WIDTH := 3.0
-const ITEM_TOP := 2.0
-const SKIP_TOP := 1.0
+## A solved puzzle shows the residents moving in this long before a push-up
+## goes on to the next level.
+const COMPLETE_PAUSE := 1.5
+## After this long, the next level starts by itself.
+const COMPLETE_SECONDS := 15.0
 ## The hook acts when it is this close above what is below it, in cells.
 const TOUCH := 0.3
 ## After an action, the hook must rise this far before the next one.
 const REARM := 1.5
 ## How fast the hook follows the body up and down, in cells a second.
 const HOOK_SPEED_Y := 30.0
+## The hook's height follows the body only when the body moved more than this,
+## in cells, so that it stands still while the player holds still; at the top
+## and at the ground, it follows at once.
+const HOOK_DEAD_BAND := 0.8
 ## The top of the hook's way lies this far above the site.
 const ABOVE_SITE := 1.0
 
@@ -46,26 +54,34 @@ var variant := 0
 ## The hook in cells (x along the site, y up from the ground).
 var hook := Vector2(4, 8)
 var report: MissionEvaluator.Report
-## The blocks in the yard.
-var queue: BlockQueue
+## The parts of the level in the yard.
+var supply: PartSupply
 ## What the hook would touch below it now: {"kind": "yard" (with "index"),
-## "part" (with "id"), "bell", "skip", "place" or "blocked" (with "anchor" and
+## "part" (with "id"), "return", "place" or "blocked" (with "anchor" and
 ## "result"), or "none"}.
 var touch: Dictionary = {"kind": "none"}
 ## The lowest the hook can go where it is.
 var hook_floor := 0.0
 
 var _context := Placement.Context.new()
+## A part lifted from the site can always be put down again, also one which
+## the mission does not offer (e.g., from an older version of the game).
+var _lifted_context := Placement.Context.new()
+var _lifted := false
 ## After an action, the hook acts again only once it rose above this height.
 var _rearm_y := -INF
 var _armed := true
+## The height the hook goes to, held within the dead band.
+var _held_y := INF
 var _autosave_at := -1.0
 var _delta := 0.0
 var _walk: ResidentWalk = null
-var _revisit := false
-var _tutorial: Dictionary = {}
-var _hook_travel := 0.0
 var _pause_reason := ""
+var _completed_at := 0.0
+## Whether the site goes on to the next level (once).
+var _leaving := false
+## Whether the crane calibrates anew since the elbows moved away.
+var _recalibrating := false
 ## Whether the body was tracked in this visit: only then a loss pauses.
 var _body_seen := false
 ## What the site waits for before the hook can move: "" or "camera".
@@ -85,18 +101,15 @@ func _ready() -> void:
         return
     mission = content.mission(mission_id)
     grid = _game.session.open_site(mission_id)
-    _revisit = _game.session.progress.has_completed(mission_id)
     _context.offered = mission["available_catalogue_ids"]
-    queue = BlockQueue.new(content, _context.offered)
-    if mission.get("tutorial", false):
-        _tutorial = {"move": false, "grab": false, "place": false}
+    supply = PartSupply.for_level(mission["parts"], grid)
 
     dispatcher.command.connect(_on_command)
     dispatcher.state_changed.connect(func(_state: String) -> void: _refresh_status())
     # NOTE (mristin):
-    # Every visit calibrates anew: the player may be on the knees today and
-    # in the plank tomorrow.
-    pose.calibration = {}
+    # The calibration carries over from level to level (it is learned anew
+    # when the elbows move away, or on request in the pause).
+    pose.calibration = _game.pose_calibration.duplicate()
     pose.dead_zone = float(_settings.get_value("dead_zone"))
     pose.sensitivity = float(_settings.get_value("sensitivity"))
     pose.hand_gestures = false
@@ -173,7 +186,6 @@ func _process(delta: float) -> void:
     var hook_before := hook
     _check_body()
     _process_pose()
-    _advance_queue(delta)
     _show_hook()
     _sound_loop("crane", hook.distance_to(hook_before) > 0.001)
     if _walk != null:
@@ -184,26 +196,14 @@ func _process(delta: float) -> void:
         if arrived and view.bubble.is_empty() and not _walk.walkers.is_empty():
             view.bubble = {"text": tr(mission["thanks"]), "position": _walk.walkers[0]["position"]}
         view.queue_redraw()
+    if dispatcher.state == InputDispatcher.COMPLETE:
+        var left: float = COMPLETE_SECONDS - (_game.pose_provider.now() - _completed_at)
+        overlays.set_countdown(ceili(maxf(left, 0.0)))
+        if left <= 0.0:
+            _go_next()
     if _autosave_at > 0.0 and Time.get_ticks_msec() / 1000.0 >= _autosave_at:
         _autosave_at = -1.0
         _game.session.save()
-
-
-## Let the yard move on while the player builds: now and then the oldest block
-## leaves and a new one comes (first in, first out), but not while the hook is
-## over the yard.
-func _advance_queue(delta: float) -> void:
-    if dispatcher.state != InputDispatcher.BUILD or not pose.calibration.has("h"):
-        return
-    if yard_place(hook.x) >= 0:
-        return
-    if queue.advance(delta):
-        view.queue_redraw()
-
-
-## Whether the bell hands over: the needs of the mission are met.
-func can_hand_over() -> bool:
-    return report != null and report.can_submit()
 
 
 ## Ask for the camera while the body can not move the hook.
@@ -279,8 +279,17 @@ func _on_pose_event(event: String) -> void:
     # NOTE (mristin):
     # The dips do not place: the height of the hook does. A full dip only
     # resumes a pause.
-    if event == "resume":
+    if event == "resume" and dispatcher.state == InputDispatcher.COMPLETE:
+        # NOTE (mristin):
+        # A push-up goes on to the next level, after a moment to see the
+        # residents move in.
+        if _game.pose_provider.now() - _completed_at >= COMPLETE_PAUSE:
+            _go_next()
+    elif event == "resume":
         dispatcher.dispatch("resume")
+    elif event == "recalibrate":
+        _recentre()
+        _recalibrating = true
 
 
 ## The keyboard only pauses (P or Escape): the body plays.
@@ -317,25 +326,42 @@ func top_height() -> float:
     return grid.height + ABOVE_SITE
 
 
-## The left edge of the yard: the skip, then the places of the blocks.
+## The cards of the yard, one for each kind of the level's parts, as large as
+## the part (a tree has a tall card, a floor a flat one), side by side, ending
+## one cell left of the site: Rect2(left, 0, width, height) in cells.
+func yard_cards() -> Array[Rect2]:
+    var cards: Array[Rect2] = []
+    var widths: Array[float] = []
+    var total := 0.0
+    for id in supply.kinds:
+        var definition := content.part(id)
+        var width := float(maxi(definition.footprint.x, 1) + 1)
+        if definition.layer == "edge_v":
+            width = 2.0
+        widths.append(width)
+        total += width
+    var left := -1.0 - total
+    for i in range(supply.kinds.size()):
+        var definition := content.part(supply.kinds[i])
+        var height := float(maxi(definition.footprint.y, 1))
+        cards.append(Rect2(left, 0.0, widths[i], height))
+        left += widths[i]
+    return cards
+
+
+## The left edge of the yard.
 func yard_left() -> float:
-    return -SLOT_WIDTH * (BlockQueue.SIZE + 1) - 1.0
+    var cards := yard_cards()
+    return cards[0].position.x if not cards.is_empty() else -1.0
 
 
-## The place of the yard under x: 0 for the skip, 1 to [constant BlockQueue.SIZE]
-## for the blocks, -1 outside the yard.
+## The card of the yard under x (the index of the kind), or -1 outside it.
 func yard_place(x: float) -> int:
-    var index := floori((x - yard_left()) / SLOT_WIDTH)
-    return index if index >= 0 and index <= BlockQueue.SIZE else -1
-
-
-## The left edge of the bell, right of the site (the crane's mast is between).
-func bell_left() -> float:
-    return grid.width + 3.0
-
-
-func over_bell(x: float) -> bool:
-    return x >= bell_left() and x < bell_left() + 2.0
+    var cards := yard_cards()
+    for i in range(cards.size()):
+        if x >= cards[i].position.x and x < cards[i].end.x:
+            return i
+    return -1
 
 
 ## How far the carried block hangs below the hook (its height).
@@ -351,8 +377,16 @@ func hang() -> float:
 ## under it, the hook acts (see [method _act]).
 func _move_hook(dx: float, target_y: float) -> void:
     var before := hook
-    hook.x = clampf(hook.x + dx, yard_left(), bell_left() + 2.0)
+    hook.x = clampf(hook.x + dx, yard_left(), float(grid.width))
     _update_touch()
+    if (
+        is_inf(_held_y)
+        or absf(target_y - _held_y) > HOOK_DEAD_BAND
+        or target_y <= 0.0
+        or target_y >= top_height()
+    ):
+        _held_y = target_y
+    target_y = _held_y
     hook.y = maxf(move_toward(hook.y, target_y, HOOK_SPEED_Y * _delta), hook_floor)
     if hook.y >= _rearm_y:
         _armed = true
@@ -365,11 +399,11 @@ func _move_hook(dx: float, target_y: float) -> void:
         _act()
         _update_touch()
         hook.y = maxf(hook.y, hook_floor)
-        _rearm_y = hook_floor + REARM
+        # NOTE (mristin):
+        # From where the hook is: after giving a part back, the hook is above
+        # the yard's parts, and must rise before it grabs one.
+        _rearm_y = maxf(hook.y, hook_floor) + REARM
         _armed = false
-    _hook_travel += absf(hook.x - before.x)
-    if _hook_travel > 3.0:
-        _tutorial_step("move")
     _follow_hook()
 
 
@@ -378,19 +412,14 @@ func _update_touch() -> void:
     touch = {"kind": "none"}
     hook_floor = hang()
     var place := yard_place(hook.x)
-    if place == 0:
-        hook_floor = SKIP_TOP + hang()
+    if place >= 0:
+        hook_floor = yard_cards()[place].size.y + hang()
         if carried != "":
-            touch = {"kind": "skip"}
-    elif place > 0:
-        hook_floor = ITEM_TOP + hang()
-        if carried == "" and place - 1 < queue.slots.size():
-            touch = {"kind": "yard", "index": place - 1}
-    elif over_bell(hook.x):
-        if can_hand_over():
-            hook_floor = ITEM_TOP + hang()
-            if carried == "":
-                touch = {"kind": "bell"}
+            touch = {"kind": "return"}
+        elif supply.count(place) > 0:
+            touch = {"kind": "yard", "index": place}
+        else:
+            hook_floor = hang()
     elif hook.x >= 0.0 and hook.x <= grid.width:
         if carried == "":
             var column := column_parts()
@@ -408,7 +437,7 @@ func _find_landing() -> void:
     var x := _column_anchor_x(definition)
     for y in range(grid.height, -1, -1):
         var anchor := Vector2i(x, y)
-        var result := Placement.validate(grid, definition, anchor, mirrored, _context)
+        var result := Placement.validate(grid, definition, anchor, mirrored, _placing_context())
         if result.ok and rests(definition, anchor):
             hook_floor = y + hang()
             touch = {"kind": "place", "anchor": anchor, "result": result}
@@ -448,16 +477,16 @@ func rests(definition: PartDef, anchor: Vector2i) -> bool:
     return false
 
 
-## Do what the hook was lowered onto: grab a block of the yard, lift a placed
-## part, put the carried block down, throw it into the skip, or ring the bell.
+## Do what the hook was lowered onto: grab a part of the yard, lift a placed
+## part, put the carried part down, or give it back to the yard.
 func _act() -> void:
     match touch["kind"]:
         "yard":
-            carried = queue.take(int(touch["index"]))
+            carried = supply.take(int(touch["index"]))
+            _lifted = false
             mirrored = false
             variant = 0
             _sound("click")
-            _tutorial_step("grab")
         "part":
             var instance: PartInstance = grid.instances[int(touch["id"])]
             var command := Placement.remove_command(grid, instance.id)
@@ -465,36 +494,40 @@ func _act() -> void:
                 _sound("invalid")
                 return
             carried = instance.definition_id
+            _lifted = true
             mirrored = instance.mirrored
             variant = instance.colour_variant
             _sound("remove", randf_range(0.95, 1.05))
-            _tutorial_step("grab")
             _after_edit()
         "place":
             var definition := content.part(carried)
             var command := Placement.place_command(
-                grid, definition, touch["anchor"], mirrored, variant, _context
+                grid, definition, touch["anchor"], mirrored, variant, _placing_context()
             )
             if command == null or not history.execute(command, grid):
                 _sound("invalid")
                 return
             _sound(_place_sound(definition), randf_range(0.95, 1.05))
             carried = ""
-            _tutorial_step("place")
             _after_edit()
-        "skip":
+        "return":
+            supply.give_back(carried)
             carried = ""
             _sound("remove", 0.8)
-        "bell":
-            _submit()
         "blocked":
             _sound("invalid")
+
+
+## The rules for putting the carried block down (see [member _lifted_context]).
+func _placing_context() -> Placement.Context:
+    return _lifted_context if _lifted else _context
 
 
 ## Show the hook, what it carries, where it would land, and what it would do.
 func _show_hook() -> void:
     view.hook = hook
     hud.camera_view.guides = pose.guides()
+    hud.camera_view.suppressed = overlays.is_showing()
     var hook_screen := get_viewport().get_canvas_transform() * view.to_screen(hook)
     hud.avoid(hook_screen)
     if carried != "":
@@ -502,11 +535,9 @@ func _show_hook() -> void:
             get_viewport().get_canvas_transform() * view.to_screen(hook - Vector2(0, hang()))
         )
         hud.avoid(hanging)
-    view.yard = queue.slots
-    view.yard_left = yard_left()
-    view.slot_width = SLOT_WIDTH
-    view.item_top = ITEM_TOP
-    view.bell_left = bell_left() if can_hand_over() else NAN
+    view.yard = supply.kinds
+    view.yard_counts = supply.counts
+    view.yard_cards = yard_cards()
     view.carried = (
         {}
         if carried == ""
@@ -532,7 +563,7 @@ func _show_message() -> void:
     var name := tr(content.part(carried).name) if carried != "" else ""
     match touch["kind"]:
         "yard":
-            var part := content.part(queue.slots[int(touch["index"])])
+            var part := content.part(supply.kinds[int(touch["index"])])
             hud.set_message(
                 Grammar.format(tr("Go down to grab {part}."), {"part": tr(part.name)}), Ui.INK
             )
@@ -542,13 +573,10 @@ func _show_message() -> void:
                 Grammar.format(tr("Go down to lift {part} up again."), {"part": tr(part.name)}),
                 Ui.INK
             )
-        "bell":
+        "return":
             hud.set_message(
-                tr("Everything is ready: go down to ring the bell and hand it over."), Ui.OK_COLOUR
-            )
-        "skip":
-            hud.set_message(
-                Grammar.format(tr("Go down to throw {part} into the skip."), {"part": name}), Ui.INK
+                Grammar.format(tr("Go down to give {part} back to the yard."), {"part": name}),
+                Ui.INK
             )
         "place":
             var result: PlacementResult = touch["result"]
@@ -569,8 +597,7 @@ func _show_message() -> void:
         _:
             if carried == "":
                 hud.set_message(
-                    tr("Lean over a block in the yard on the left, then go down to grab it."),
-                    Ui.INK
+                    tr("Lean over a part in the yard on the left, then go down to grab it."), Ui.INK
                 )
             else:
                 hud.set_message(
@@ -616,6 +643,11 @@ func _sound_loop(name: String, on: bool) -> void:
 
 
 func _exit_tree() -> void:
+    # NOTE (mristin):
+    # The neutral lean followed the player's posture while they played; the
+    # next level starts from there.
+    if pose.calibration.has("h"):
+        _game.pose_calibration = pose.calibration.duplicate()
     _sound_loop("crane", false)
     var hand_cursor := get_node_or_null("/root/HandCursor")
     if hand_cursor != null:
@@ -627,42 +659,37 @@ func _after_edit() -> void:
     _game.session.store_site(mission_id, grid)
     _autosave_at = Time.get_ticks_msec() / 1000.0 + AUTOSAVE_DELAY
     _evaluate()
+    if solved():
+        _submit()
+
+
+## Whether the puzzle is solved: its conditions hold.
+func solved() -> bool:
+    return report != null and report.can_submit()
+
+
+## Go on to the next level (or to the map, if every open level is solved).
+func _go_next() -> void:
+    if _leaving:
+        return
+    _leaving = true
+    _game.session.save()
+    var next: String = _game.session.next_mission(mission_id)
+    if next == "":
+        _game.go("city_map")
+        return
+    _game.mission_id = next
+    _game.go("build_site")
 
 
 func _evaluate() -> void:
     report = MissionEvaluator.evaluate(mission, grid)
-    queue.wanted_tags = wanted_tags(mission, report)
     hud.set_checklist(report)
     var highlighted: Array = []
     for id in report.analysis.support.problem_ids():
         highlighted.append(id)
     view.highlighted = highlighted
-    _refresh_tutorial()
     view.queue_redraw()
-
-
-## The tags which the unmet objectives of the mission ask for (as keys), so
-## that the row brings their parts more often.
-static func wanted_tags(of_mission: Dictionary, of_report: MissionEvaluator.Report) -> Dictionary:
-    var unmet := {}
-    for result in of_report.mandatory + of_report.optional:
-        if not result["satisfied"]:
-            unmet[str(result["id"])] = true
-    var tags := {}
-    for objective in of_mission["mandatory_objectives"] + of_mission["optional_objectives"]:
-        if unmet.has(str(objective["id"])):
-            _collect_tags(objective, tags)
-    return tags
-
-
-static func _collect_tags(objective: Dictionary, tags: Dictionary) -> void:
-    if objective.has("tag"):
-        tags[str(objective["tag"])] = true
-    for tag in objective.get("tags", []):
-        tags[str(tag)] = true
-    for nested in objective.get("requirements", []) + objective.get("objectives", []):
-        if nested is Dictionary:
-            _collect_tags(nested, tags)
 
 
 ## The anchor column of the part under the hook.
@@ -718,25 +745,10 @@ func _refresh_status() -> void:
     hud.set_status("%s · %s" % [source, Texts.of("STATE_" + dispatcher.state)])
 
 
-func _tutorial_step(step: String) -> void:
-    if _tutorial.has(step) and not _tutorial[step]:
-        _tutorial[step] = true
-        _refresh_tutorial()
-
-
-func _refresh_tutorial() -> void:
-    if _tutorial.is_empty():
-        hud.set_tutorial("")
-        return
-    var lines: Array[String] = [Texts.of("TUTORIAL_TITLE")]
-    for step in ["move", "grab", "place"]:
-        lines.append(("✓ " if _tutorial[step] else "○ ") + Texts.of("TUTORIAL_" + step.to_upper()))
-    hud.set_tutorial("\n".join(lines))
-
-
 ## Calibrate anew: the next posture the player holds still becomes neutral.
 func _recentre() -> void:
     pose.calibration = {}
+    _game.pose_calibration = {}
     _auto_calibration.reset()
     _body_seen = false
     pose.rearm()
@@ -749,13 +761,14 @@ func _auto_calibrate(provider: PoseProvider, frame: Dictionary) -> void:
     if fresh and PoseMeasure.confident(frame, pose.min_confidence):
         measures = PoseMeasure.measure(frame)
     var calibration := _auto_calibration.feed(measures, provider.now())
-    hud.set_message(
-        Texts.of("AUTO_CALIBRATING" if not measures.is_empty() else "AUTO_CALIBRATING_NOT_SEEN"),
-        Ui.INK
-    )
+    var asked := "AUTO_RECALIBRATING" if _recalibrating else "AUTO_CALIBRATING"
+    hud.set_calibrating(Texts.of(asked if not measures.is_empty() else "AUTO_CALIBRATING_NOT_SEEN"))
     var events: Array = []
     if not calibration.is_empty():
         pose.calibration = calibration
+        _game.pose_calibration = calibration.duplicate()
+        hud.set_calibrating("")
+        _recalibrating = false
         pose.rearm()
         # NOTE (mristin):
         # The player has just held still in the posture: that was the
@@ -795,16 +808,16 @@ func _on_overlay_action(action: String) -> void:
             _evaluate()
         "complete":
             _submit()
-        "results":
-            _game.go("mission_results")
+        "next":
+            _go_next()
 
 
 func _submit() -> void:
     var summary: Dictionary = _game.session.submit(mission_id, grid)
     if not summary.get("submitted", false):
         return
-    _game.last_summary = summary
     dispatcher.set_state(InputDispatcher.COMPLETE)
+    _completed_at = _game.pose_provider.now()
     overlays.hide_all()
     carried = ""
     view.preview = {}

@@ -12,6 +12,8 @@ var shift := 0.0
 ## How far the shoulders are raised above neutral (picture units, up is +).
 var rise := 0.0
 ## How far each wrist is lifted above its resting place (picture units).
+## How far the hands (and with them the elbows) moved sideways, normalized.
+var hands_shift := 0.0
 var lift_left := 0.0
 var lift_right := 0.0
 ## The confidence of every key point; set low to lose the tracking.
@@ -58,8 +60,8 @@ func latest_frame() -> Dictionary:
     # NOTE (mristin):
     # As in the pose logs: the elbows stay above the hands while the shoulders
     # lean, sink less than the shoulders, and a lifted arm lifts its elbow.
-    points[LEFT_ELBOW] = Vector2(0.6, (shoulder_y + 0.7) / 2.0 - lift_left)
-    points[RIGHT_ELBOW] = Vector2(0.4, (shoulder_y + 0.7) / 2.0 - lift_right)
+    points[LEFT_ELBOW] = Vector2(0.6 + hands_shift, (shoulder_y + 0.7) / 2.0 - lift_left)
+    points[RIGHT_ELBOW] = Vector2(0.4 + hands_shift, (shoulder_y + 0.7) / 2.0 - lift_right)
     points[LEFT_WRIST] = Vector2(0.6, 0.7 - lift_left)
     points[RIGHT_WRIST] = Vector2(0.4, 0.7 - lift_right)
     points[LEFT_HIP] = Vector2(cx + 0.08, shoulder_y + 0.05)

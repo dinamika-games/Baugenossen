@@ -2,11 +2,15 @@ class_name BuildOverlays
 extends Control
 ## Show the overlays of the build site: the pause (also when the tracking was
 ## lost), the review before the submission, and the completion with the
-## residents. Each forwards the player's choice as an action.
+## residents. Each forwards the player's choice as an action. Behind an open
+## overlay, the camera picture covers the screen (as in the menus), so that the
+## player sees their hand and points with it (the hand cursor).
 
 signal action_requested(action: String)
 
 var _panel: PanelContainer
+var _camera: CameraView
+var _countdown: Label
 var _box: VBoxContainer
 
 
@@ -14,6 +18,12 @@ func build(high_contrast: bool) -> void:
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     theme = Ui.make_theme(high_contrast)
     mouse_filter = Control.MOUSE_FILTER_IGNORE
+    _camera = CameraView.new()
+    _camera.cover = true
+    _camera.picture_alpha = 0.45
+    _camera.show_skeleton = false
+    _camera.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    add_child(_camera)
     _box = Ui.vbox(Ui.BUTTON_GAP / 2)
     _panel = Ui.panel(_box)
     _panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -26,6 +36,7 @@ func build(high_contrast: bool) -> void:
 
 func hide_all() -> void:
     _panel.visible = false
+    _camera.visible = false
     for child in _box.get_children():
         child.queue_free()
 
@@ -40,6 +51,7 @@ func _open(title: String) -> void:
         child.queue_free()
     _box.add_child(Ui.label(title, 30))
     _panel.visible = true
+    _camera.visible = true
     _panel.reset_size()
 
 
@@ -108,13 +120,27 @@ func _line(result: Dictionary, optional: bool) -> String:
 
 
 ## The thanks of the residents, with the button to the results.
+## The puzzle is solved: the residents' thanks and one button to the next level
+## (a push-up goes on, too, and after a while the next level starts by itself).
 func show_completion(thanks: String) -> void:
-    _open(tr("Moving in!"))
+    _open(tr("Solved!"))
     _box.add_child(Ui.label(thanks, Ui.FONT_SIZE, true))
-    _add_button("COMPLETE_CONTINUE", "results").grab_focus.call_deferred()
+    var button := Ui.button(tr("Hurrah!"), action_requested.emit.bind("next"), 420)
+    _box.add_child(button)
+    _countdown = Ui.label("", 18)
+    _box.add_child(_countdown)
+    button.grab_focus.call_deferred()
     _panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
     _panel.offset_top = 80
 
 
 func move_to_centre() -> void:
     _panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+
+
+## Show how many seconds are left before the next level starts by itself.
+func set_countdown(seconds: int) -> void:
+    if _countdown != null and is_instance_valid(_countdown):
+        _countdown.text = Grammar.format(
+            tr("The next level starts in {seconds} {seconds|second|seconds}."), {"seconds": seconds}
+        )

@@ -18,6 +18,10 @@ msgstr ""
 msgid "Wishes"
 msgstr ""
 
+#: scenes/build_site/build_hud.gd
+msgid "Calibrating…"
+msgstr ""
+
 #: scenes/build_site/build_overlays.gd
 msgid "Paused"
 msgstr ""
@@ -31,7 +35,15 @@ msgid "Some needs are still open; you can keep building as long as you like."
 msgstr ""
 
 #: scenes/build_site/build_overlays.gd
-msgid "Moving in!"
+msgid "Solved!"
+msgstr ""
+
+#: scenes/build_site/build_overlays.gd
+msgid "Hurrah!"
+msgstr ""
+
+#: scenes/build_site/build_overlays.gd
+msgid "The next level starts in {seconds} {seconds|second|seconds}."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
@@ -43,11 +55,7 @@ msgid "Go down to lift {part} up again."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "Everything is ready: go down to ring the bell and hand it over."
-msgstr ""
-
-#: scenes/build_site/build_site.gd
-msgid "Go down to throw {part} into the skip."
+msgid "Go down to give {part} back to the yard."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
@@ -55,7 +63,7 @@ msgid "{part} lands here: go down to put it there."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
-msgid "Lean over a block in the yard on the left, then go down to grab it."
+msgid "Lean over a part in the yard on the left, then go down to grab it."
 msgstr ""
 
 #: scenes/build_site/build_site.gd
@@ -86,7 +94,7 @@ msgstr ""
 msgid "Body: hold still…"
 msgstr ""
 
-#: scenes/build_site/build_site.gd scenes/mission_results/mission_results.gd
+#: scenes/build_site/build_site.gd
 msgid "{names}: “{thanks}”"
 msgstr ""
 
@@ -94,7 +102,7 @@ msgstr ""
 msgid "The cooperative's projects"
 msgstr ""
 
-#: scenes/city_map/city_map.gd scenes/mission_results/mission_results.gd
+#: scenes/city_map/city_map.gd
 msgid "Save and exit"
 msgstr ""
 
@@ -130,18 +138,6 @@ msgstr ""
 msgid "Quit"
 msgstr ""
 
-#: scenes/mission_results/mission_results.gd
-msgid "Well built!"
-msgstr ""
-
-#: scenes/mission_results/mission_results.gd
-msgid "Choose another project"
-msgstr ""
-
-#: scenes/mission_results/mission_results.gd
-msgid "Back to this site"
-msgstr ""
-
 #: scenes/session/game.gd
 msgid "Press Esc again to quit."
 msgstr ""
@@ -173,9 +169,16 @@ msgid ""
 "the crane learns your posture."
 msgstr ""
 
+#. message AUTO_RECALIBRATING
+#: scenes/languages/texts.gd
+msgid ""
+"Your elbows moved away: hold still in your push-up position, and the crane learns your posture "
+"anew."
+msgstr ""
+
 #. message AUTO_CALIBRATING_NOT_SEEN
 #: scenes/languages/texts.gd
-msgid "Move into the camera picture, so that it sees your shoulders, elbows and wrists."
+msgid "Move into the camera picture, so that it sees your shoulders and elbows."
 msgstr ""
 
 #. message CITY_CONTINUE
@@ -183,24 +186,14 @@ msgstr ""
 msgid "Continue building"
 msgstr ""
 
-#. message CITY_REPAIR
+#. message CITY_REPLAY
 #: scenes/languages/texts.gd
-msgid "Repair"
-msgstr ""
-
-#. message CITY_REVISIT
-#: scenes/languages/texts.gd
-msgid "Visit and edit"
+msgid "Play again"
 msgstr ""
 
 #. message CITY_START
 #: scenes/languages/texts.gd
 msgid "Start"
-msgstr ""
-
-#. message COMPLETE_CONTINUE
-#: scenes/languages/texts.gd
-msgid "See the results"
 msgstr ""
 
 #. message CREATE_LOOK_CLOTHING
@@ -471,11 +464,6 @@ msgstr ""
 msgid "not yet open"
 msgstr ""
 
-#. message STATUS_NEEDS_REPAIR
-#: scenes/languages/texts.gd
-msgid "needs repair"
-msgstr ""
-
 #. message TRACKING_FROZEN
 #: scenes/languages/texts.gd
 msgid "hold on…"
@@ -489,26 +477,6 @@ msgstr ""
 #. message TRACKING_OK
 #: scenes/languages/texts.gd
 msgid "tracking"
-msgstr ""
-
-#. message TUTORIAL_GRAB
-#: scenes/languages/texts.gd
-msgid "Grab a block: go down over it in the yard (the lower you go, the lower the hook)"
-msgstr ""
-
-#. message TUTORIAL_MOVE
-#: scenes/languages/texts.gd
-msgid "Move the hook: lean left and right"
-msgstr ""
-
-#. message TUTORIAL_PLACE
-#: scenes/languages/texts.gd
-msgid "Put it down: carry it over the site, go down until it sits"
-msgstr ""
-
-#. message TUTORIAL_TITLE
-#: scenes/languages/texts.gd
-msgid "How to build:"
 msgstr ""
 
 #. the title of a project, a few words

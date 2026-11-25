@@ -25,9 +25,6 @@ func _all_screens() -> void:
     for id in game.content.mission_order:
         game.mission_id = id
         await _show(game, "build_site")
-    game.last_summary = {"wishes": [], "first": true, "saved": true}
-    game.mission_id = "place_to_sit"
-    await _show(game, "mission_results")
     check(fixture.directory != "", "the fixture has its own directory")
 
 

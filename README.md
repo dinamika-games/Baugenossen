@@ -1,10 +1,9 @@
 # Baugenossen — A City Built Together
 
-**Baugenossen is a very simple, nonviolent construction game played with push-ups: you work for a housing cooperative, and you build what the residents ask for, seen from the side, with a crane you steer with your body: take a block from the yard, put it wherever you want, lift it again to put it elsewhere.**
+**Baugenossen is a nonviolent construction puzzle game played with push-ups: you work for a housing cooperative, and every level is a puzzle. The level gives you the parts and a few conditions which must hold; you take the parts with a crane you steer with your body, seen from the side, put them wherever you want, and lift them again to put them elsewhere.**
 
-Every project is a problem, not a blueprint: a bench under a tree, a first home, a garden, a workshop.
-Any design that solves it counts.
-Five blocks wait in the yard; when you take one, a new one comes in, and now and then the oldest one leaves (first in, first out), so the choice keeps changing.
+Every level is a problem, not a blueprint: a bench under a tree, a first home, a garden, a workshop.
+The conditions are relations (e.g., two beds in a closed room which one can reach), so every level has many solutions, and any design that fulfils them counts.
 
 See [DESIGN.md](DESIGN.md) for the design and [CONTRIBUTING.md](CONTRIBUTING.md) for how to run, test and develop the game.
 
@@ -17,8 +16,8 @@ The camera starts with the game; its pictures are processed locally, in memory, 
 The first vertical slice is implemented with placeholder vector art:
 
 * the construction model (grid, layers, placement, support, undo/redo, rooms, navigation),
-* the four initial missions with their objectives, residents moving in, review and results,
-* the yard of five blocks (first in, first out), bringing the parts which the mission still needs more often,
+* four puzzle levels with their conditions, residents moving in, and straight on to the next level,
+* puzzle levels, each with its own set of parts in the yard (enough for many solutions),
 * English and a first German translation (gettext, with plural and gender forms),
 * saving and resuming, with backups and migration,
 * the body controls (auto-calibration, smoothing, lean and dips from the shoulders and the elbows) on the RTMO and RTMPose models, and a hand cursor for the menus on the YOLOX hand detector.
@@ -34,10 +33,12 @@ The game runs full screen and is played with the body: **the hook moves only whe
 
 * lean left and right to move the hook;
 * go down and up to lower and raise the hook: straight arms hold it high, the bottom of a push-up brings it to the ground;
-* lower the empty hook onto a block in the yard (on the left) to grab it;
+* lower the empty hook onto a part in the yard (on the left) to grab it;
 * carry it over the site and go down until it sits: it is put there (a ghost shows where it lands);
-* lower the empty hook onto a placed block to lift it up again, and put it elsewhere, or throw it into the skip at the far left of the yard;
-* when everything the residents need is there, a bell appears right of the site: lower the hook onto it to hand the building over.
+* lower the empty hook onto a placed part to lift it up again, and put it elsewhere, or lower it onto the yard to give it back;
+* when all the conditions hold, the puzzle is solved and the residents move in.
+
+While the crane learns your posture, a turning spanner shows in the middle (the hook waits); it learns anew by itself when you move your hands.
 
 Your hands stay on the floor while you build. There is no helper and no keyboard control: the keyboard only pauses (**P**), and **Esc** twice quits.
 

@@ -23,6 +23,11 @@ msgstr "Checkliste"
 msgid "Wishes"
 msgstr "Wünsche"
 
+#: scenes/build_site/build_hud.gd
+#, fuzzy
+msgid "Calibrating…"
+msgstr "Kalibrieren …"
+
 #: scenes/build_site/build_overlays.gd
 #, fuzzy
 msgid "Paused"
@@ -40,8 +45,18 @@ msgstr "Noch ist nicht alles erfüllt; du kannst so lange weiterbauen, wie du ma
 
 #: scenes/build_site/build_overlays.gd
 #, fuzzy
-msgid "Moving in!"
-msgstr "Einzug!"
+msgid "Solved!"
+msgstr "Gelöst!"
+
+#: scenes/build_site/build_overlays.gd
+#, fuzzy
+msgid "Hurrah!"
+msgstr "Hurra!"
+
+#: scenes/build_site/build_overlays.gd
+#, fuzzy
+msgid "The next level starts in {seconds} {seconds|second|seconds}."
+msgstr "Das nächste Level beginnt in {seconds} {seconds|Sekunde|Sekunden}."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
@@ -55,13 +70,8 @@ msgstr "Geh runter, um {part} wieder hochzuheben."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "Everything is ready: go down to ring the bell and hand it over."
-msgstr "Alles ist bereit: Geh runter, läute die Glocke und übergib es."
-
-#: scenes/build_site/build_site.gd
-#, fuzzy
-msgid "Go down to throw {part} into the skip."
-msgstr "Geh runter, um {part} in die Mulde zu werfen."
+msgid "Go down to give {part} back to the yard."
+msgstr "Geh runter, um {part} ins Lager zurückzulegen."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
@@ -70,8 +80,8 @@ msgstr "{part} landet hier: Geh runter, um es abzusetzen."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
-msgid "Lean over a block in the yard on the left, then go down to grab it."
-msgstr "Lehn dich über einen Block im Lager links, dann geh runter, um ihn zu greifen."
+msgid "Lean over a part in the yard on the left, then go down to grab it."
+msgstr "Lehn dich über ein Teil im Lager links, dann geh runter, um es zu greifen."
 
 #: scenes/build_site/build_site.gd
 #, fuzzy
@@ -108,7 +118,7 @@ msgstr "Keine Kamera"
 msgid "Body: hold still…"
 msgstr "Körper: Halt still …"
 
-#: scenes/build_site/build_site.gd scenes/mission_results/mission_results.gd
+#: scenes/build_site/build_site.gd
 #, fuzzy
 msgid "{names}: “{thanks}”"
 msgstr "{names}: „{thanks}“"
@@ -118,7 +128,7 @@ msgstr "{names}: „{thanks}“"
 msgid "The cooperative's projects"
 msgstr "Die Projekte der Genossenschaft"
 
-#: scenes/city_map/city_map.gd scenes/mission_results/mission_results.gd
+#: scenes/city_map/city_map.gd
 #, fuzzy
 msgid "Save and exit"
 msgstr "Speichern und beenden"
@@ -163,21 +173,6 @@ msgstr "Neues Spiel"
 msgid "Quit"
 msgstr "Beenden"
 
-#: scenes/mission_results/mission_results.gd
-#, fuzzy
-msgid "Well built!"
-msgstr "Gut gebaut!"
-
-#: scenes/mission_results/mission_results.gd
-#, fuzzy
-msgid "Choose another project"
-msgstr "Ein anderes Projekt wählen"
-
-#: scenes/mission_results/mission_results.gd
-#, fuzzy
-msgid "Back to this site"
-msgstr "Zurück zu dieser Baustelle"
-
 #: scenes/session/game.gd
 #, fuzzy
 msgid "Press Esc again to quit."
@@ -221,11 +216,21 @@ msgstr ""
 "Geh in die Liegestützhaltung (oder auf die Knie, die Hände am Boden) und halt einen Moment still: "
 "Der Kran lernt deine Haltung."
 
+#. message AUTO_RECALIBRATING
+#: scenes/languages/texts.gd
+#, fuzzy
+msgid ""
+"Your elbows moved away: hold still in your push-up position, and the crane learns your posture "
+"anew."
+msgstr ""
+"Deine Ellbogen sind verrutscht: Halt still in deiner Liegestützhaltung, und der Kran lernt deine "
+"Haltung neu."
+
 #. message AUTO_CALIBRATING_NOT_SEEN
 #: scenes/languages/texts.gd
 #, fuzzy
-msgid "Move into the camera picture, so that it sees your shoulders, elbows and wrists."
-msgstr "Rück ins Kamerabild, sodass sie deine Schultern, Ellbogen und Handgelenke sieht."
+msgid "Move into the camera picture, so that it sees your shoulders and elbows."
+msgstr "Geh ins Kamerabild, damit sie deine Schultern und Ellbogen sieht."
 
 #. message CITY_CONTINUE
 #: scenes/languages/texts.gd
@@ -233,29 +238,17 @@ msgstr "Rück ins Kamerabild, sodass sie deine Schultern, Ellbogen und Handgelen
 msgid "Continue building"
 msgstr "Weiterbauen"
 
-#. message CITY_REPAIR
+#. message CITY_REPLAY
 #: scenes/languages/texts.gd
 #, fuzzy
-msgid "Repair"
-msgstr "Reparieren"
-
-#. message CITY_REVISIT
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Visit and edit"
-msgstr "Besuchen und ändern"
+msgid "Play again"
+msgstr "Nochmal spielen"
 
 #. message CITY_START
 #: scenes/languages/texts.gd
 #, fuzzy
 msgid "Start"
 msgstr "Beginnen"
-
-#. message COMPLETE_CONTINUE
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "See the results"
-msgstr "Zum Ergebnis"
 
 #. message CREATE_LOOK_CLOTHING
 #: scenes/languages/texts.gd
@@ -585,12 +578,6 @@ msgstr "in Arbeit"
 msgid "not yet open"
 msgstr "noch nicht offen"
 
-#. message STATUS_NEEDS_REPAIR
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "needs repair"
-msgstr "braucht Reparatur"
-
 #. message TRACKING_FROZEN
 #: scenes/languages/texts.gd
 #, fuzzy
@@ -608,31 +595,6 @@ msgstr "aus den Augen verloren"
 #, fuzzy
 msgid "tracking"
 msgstr "sieht dich"
-
-#. message TUTORIAL_GRAB
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Grab a block: go down over it in the yard (the lower you go, the lower the hook)"
-msgstr ""
-"Einen Block greifen: Im Lager über ihm runtergehen (je tiefer du gehst, desto tiefer der Haken)"
-
-#. message TUTORIAL_MOVE
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Move the hook: lean left and right"
-msgstr "Den Haken bewegen: nach links und rechts lehnen"
-
-#. message TUTORIAL_PLACE
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "Put it down: carry it over the site, go down until it sits"
-msgstr "Absetzen: Über die Baustelle tragen, runtergehen, bis er aufsitzt"
-
-#. message TUTORIAL_TITLE
-#: scenes/languages/texts.gd
-#, fuzzy
-msgid "How to build:"
-msgstr "So wird gebaut:"
 
 #. the title of a project, a few words
 #: data/missions.json
@@ -1282,6 +1244,75 @@ msgstr "Die Wiese"
 #, fuzzy
 msgid "The flat plot"
 msgstr "Das flache Grundstück"
+
+#, fuzzy
+#~ msgid "Moving in!"
+#~ msgstr "Einzug!"
+
+#, fuzzy
+#~ msgid "Well built!"
+#~ msgstr "Gut gebaut!"
+
+#, fuzzy
+#~ msgid "Choose another project"
+#~ msgstr "Ein anderes Projekt wählen"
+
+#, fuzzy
+#~ msgid "Back to this site"
+#~ msgstr "Zurück zu dieser Baustelle"
+
+#, fuzzy
+#~ msgid "Repair"
+#~ msgstr "Reparieren"
+
+#, fuzzy
+#~ msgid "Visit and edit"
+#~ msgstr "Besuchen und ändern"
+
+#, fuzzy
+#~ msgid "See the results"
+#~ msgstr "Zum Ergebnis"
+
+#, fuzzy
+#~ msgid "needs repair"
+#~ msgstr "braucht Reparatur"
+
+#, fuzzy
+#~ msgid "Everything is ready: go down to ring the bell and hand it over."
+#~ msgstr "Alles ist bereit: Geh runter, läute die Glocke und übergib es."
+
+#, fuzzy
+#~ msgid "Move into the camera picture, so that it sees your shoulders, elbows and wrists."
+#~ msgstr "Rück ins Kamerabild, sodass sie deine Schultern, Ellbogen und Handgelenke sieht."
+
+#, fuzzy
+#~ msgid "Grab a part: go down over it in the yard (the lower you go, the lower the hook)"
+#~ msgstr "Ein Teil greifen: Im Lager darüber runtergehen (je tiefer du gehst, desto tiefer der Haken)"
+
+#, fuzzy
+#~ msgid "Move the hook: lean left and right"
+#~ msgstr "Den Haken bewegen: nach links und rechts lehnen"
+
+#, fuzzy
+#~ msgid "Put it down: carry it over the site, go down until it sits"
+#~ msgstr "Absetzen: Über die Baustelle tragen, runtergehen, bis er aufsitzt"
+
+#, fuzzy
+#~ msgid "How to build:"
+#~ msgstr "So wird gebaut:"
+
+#, fuzzy
+#~ msgid "Go down to throw {part} into the skip."
+#~ msgstr "Geh runter, um {part} in die Mulde zu werfen."
+
+#, fuzzy
+#~ msgid "Lean over a block in the yard on the left, then go down to grab it."
+#~ msgstr "Lehn dich über einen Block im Lager links, dann geh runter, um ihn zu greifen."
+
+#, fuzzy
+#~ msgid "Grab a block: go down over it in the yard (the lower you go, the lower the hook)"
+#~ msgstr ""
+#~ "Einen Block greifen: Im Lager über ihm runtergehen (je tiefer du gehst, desto tiefer der Haken)"
 
 #, fuzzy
 #~ msgid "Hand over"

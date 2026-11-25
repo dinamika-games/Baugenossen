@@ -15,13 +15,13 @@ const MESSAGES := {
     "Baugenossen is made by Dinamika Games and its contributors, under the MIT License.\n\nMade with Godot Engine. The body tracking uses RTMO and RTMPose by OpenMMLab (Apache License 2.0) through ONNX Runtime (MIT); the camera runs only on this computer and nothing is recorded or sent.\n\nThe pictures are placeholder drawings made in code. See THIRD_PARTY_NOTICES.md for all the licenses.",
     "AUTO_CALIBRATING":
     "Go into your push-up position (or on your knees, hands on the floor) and hold still for a moment: the crane learns your posture.",
+    "AUTO_RECALIBRATING":
+    "Your elbows moved away: hold still in your push-up position, and the crane learns your posture anew.",
     "AUTO_CALIBRATING_NOT_SEEN":
-    "Move into the camera picture, so that it sees your shoulders, elbows and wrists.",
+    "Move into the camera picture, so that it sees your shoulders and elbows.",
     "CITY_CONTINUE": "Continue building",
-    "CITY_REPAIR": "Repair",
-    "CITY_REVISIT": "Visit and edit",
+    "CITY_REPLAY": "Play again",
     "CITY_START": "Start",
-    "COMPLETE_CONTINUE": "See the results",
     "CREATE_LOOK_CLOTHING": "Clothes",
     "CREATE_LOOK_HAIR": "Hair",
     "CREATE_LOOK_SKIN": "Skin",
@@ -79,15 +79,9 @@ const MESSAGES := {
     "STATUS_COMPLETED": "completed",
     "STATUS_IN_PROGRESS": "in progress",
     "STATUS_LOCKED": "not yet open",
-    "STATUS_NEEDS_REPAIR": "needs repair",
     "TRACKING_FROZEN": "hold on…",
     "TRACKING_LOST": "tracking lost",
     "TRACKING_OK": "tracking",
-    "TUTORIAL_GRAB":
-    "Grab a block: go down over it in the yard (the lower you go, the lower the hook)",
-    "TUTORIAL_MOVE": "Move the hook: lean left and right",
-    "TUTORIAL_PLACE": "Put it down: carry it over the site, go down until it sits",
-    "TUTORIAL_TITLE": "How to build:",
 }
 
 

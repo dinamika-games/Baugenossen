@@ -10,17 +10,22 @@ extends Control
 
 signal action_requested(action: String)
 
+## How quickly the camera inset glides out of the hook's way (per second).
+const CAMERA_GLIDE := 6.0
+
 var content: ContentDb
 ## The camera inset, and its frame, which moves out of the hook's way.
 var camera_view: CameraView
 var camera_frame: Panel
+var _camera_target := Vector2(8, 72)
 
 var _title: Label
 var _tool: Label
 var _status: Label
 var _message: Label
 var _checklist: VBoxContainer
-var _tutorial: Label
+var _calibrating: PanelContainer
+var _calibrating_text: Label
 
 
 func build(db: ContentDb, high_contrast: bool) -> void:
@@ -32,6 +37,7 @@ func build(db: ContentDb, high_contrast: bool) -> void:
     _build_checklist()
     _build_camera()
     _build_row()
+    _build_calibrating()
 
 
 func _build_top_bar() -> void:
@@ -70,6 +76,7 @@ func _build_camera() -> void:
     camera.position = Vector2(4, 4)
     camera.size = Vector2(240, 180)
     camera.cover = true
+    camera.show_skeleton = false
     camera.frame = frame
     frame.add_child(camera)
 
@@ -87,9 +94,6 @@ func _build_checklist() -> void:
     box.add_child(Ui.label(tr("Checklist"), 20))
     _checklist = Ui.vbox(4)
     box.add_child(_checklist)
-    _tutorial = Ui.label("", 16, true)
-    _tutorial.custom_minimum_size.x = 300
-    box.add_child(_tutorial)
 
 
 func _build_row() -> void:
@@ -126,11 +130,6 @@ func set_message(text: String, colour: Color) -> void:
     _message.add_theme_color_override("font_color", colour)
 
 
-func set_tutorial(text: String) -> void:
-    _tutorial.text = text
-    _tutorial.visible = text != ""
-
-
 ## Show the objectives: a symbol and the text for each, mandatory first.
 func set_checklist(report: MissionEvaluator.Report) -> void:
     for child in _checklist.get_children():
@@ -153,12 +152,49 @@ static func _objective_label(result: Dictionary, optional: bool) -> Label:
 
 
 ## Move the camera inset out of the way of a point of the screen (the hook):
-## from the top left to the top, left of the checklist, and back.
+## from the top left to the top, left of the checklist, and back. It glides
+## there (see [method _process]).
 func avoid(point: Vector2) -> void:
     if camera_frame == null:
         return
-    if not camera_frame.get_rect().grow(48.0).has_point(point):
+    if not Rect2(_camera_target, camera_frame.size).grow(48.0).has_point(point):
         return
     var left := Vector2(8, 72)
     var right := Vector2(get_viewport_rect().size.x - 340 - camera_frame.size.x - 8, 72)
-    camera_frame.position = right if camera_frame.position.is_equal_approx(left) else left
+    _camera_target = right if _camera_target.is_equal_approx(left) else left
+
+
+func _process(delta: float) -> void:
+    if camera_frame != null:
+        camera_frame.position = camera_frame.position.lerp(
+            _camera_target, 1.0 - exp(-delta * CAMERA_GLIDE)
+        )
+
+
+## The sign that the crane is calibrating: a turning spanner and what to do,
+## in the middle of the site, since the hook does not move meanwhile.
+func _build_calibrating() -> void:
+    var row := Ui.hbox(16)
+    _calibrating = Ui.panel(row)
+    _calibrating.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+    _calibrating.custom_minimum_size = Vector2(560, 0)
+    _calibrating.position = Vector2(-280, -90)
+    _calibrating.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    var icon := SpannerIcon.new()
+    icon.custom_minimum_size = Vector2(96, 96)
+    row.add_child(icon)
+    var column := Ui.vbox(6)
+    column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    column.add_child(Ui.label(tr("Calibrating…"), 30))
+    _calibrating_text = Ui.label("", 18, true)
+    _calibrating_text.custom_minimum_size.x = 420
+    column.add_child(_calibrating_text)
+    row.add_child(column)
+    _calibrating.visible = false
+    add_child(_calibrating)
+
+
+## Show the calibrating sign with what to do, or hide it (empty text).
+func set_calibrating(text: String) -> void:
+    _calibrating.visible = text != ""
+    _calibrating_text.text = text

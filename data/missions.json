@@ -9,13 +9,6 @@
         "vera"
       ],
       "prerequisite_ids": [],
-      "available_catalogue_ids": [
-        "bench_basic",
-        "chair_basic",
-        "tree_small",
-        "grass_patch",
-        "flower_bed"
-      ],
       "estimated_placements": 6,
       "tutorial": true,
       "thanks": "What a lovely spot. Come and sit with me sometime!",
@@ -65,7 +58,14 @@
           "xp": 5,
           "karma": 5
         }
-      ]
+      ],
+      "parts": {
+        "bench_basic": 1,
+        "chair_basic": 2,
+        "tree_small": 1,
+        "grass_patch": 2,
+        "flower_bed": 2
+      }
     },
     {
       "id": "first_home",
@@ -79,7 +79,6 @@
       "prerequisite_ids": [
         "place_to_sit"
       ],
-      "available_catalogue_ids": [],
       "estimated_placements": 45,
       "thanks": "A home of our own, and it is dry and warm. Thank you!",
       "npc_spawn_defs": [
@@ -210,7 +209,24 @@
           "xp": 10,
           "karma": 10
         }
-      ]
+      ],
+      "parts": {
+        "wall_wood": 4,
+        "wall_short": 2,
+        "door_wood": 2,
+        "floor_wood": 8,
+        "roof_flat": 10,
+        "stairs_basic": 1,
+        "bed_single": 2,
+        "table_basic": 1,
+        "chair_basic": 2,
+        "stove_basic": 1,
+        "sink_basic": 1,
+        "toilet_basic": 1,
+        "window_basic": 2,
+        "bench_basic": 1,
+        "grass_patch": 2
+      }
     },
     {
       "id": "garden_for_everyone",
@@ -224,7 +240,6 @@
       "prerequisite_ids": [
         "first_home"
       ],
-      "available_catalogue_ids": [],
       "estimated_placements": 20,
       "thanks": "The neighbours already meet here every evening!",
       "npc_spawn_defs": [
@@ -339,7 +354,15 @@
           "xp": 10,
           "karma": 10
         }
-      ]
+      ],
+      "parts": {
+        "bench_basic": 2,
+        "chair_basic": 2,
+        "tree_small": 3,
+        "grass_patch": 8,
+        "flower_bed": 4,
+        "lamp_basic": 2
+      }
     },
     {
       "id": "neighbourhood_workshop",
@@ -353,7 +376,6 @@
       "prerequisite_ids": [
         "garden_for_everyone"
       ],
-      "available_catalogue_ids": [],
       "estimated_placements": 45,
       "thanks": "Two rooms full of ideas. We will fix the whole street's bicycles here!",
       "npc_spawn_defs": [
@@ -420,7 +442,20 @@
           "xp": 20,
           "karma": 20
         }
-      ]
+      ],
+      "parts": {
+        "wall_wood": 3,
+        "wall_short": 2,
+        "door_wood": 2,
+        "floor_wood": 4,
+        "roof_flat": 10,
+        "stairs_basic": 1,
+        "table_basic": 2,
+        "chair_basic": 3,
+        "bench_basic": 1,
+        "lamp_basic": 2,
+        "grass_patch": 2
+      }
     }
   ]
 }

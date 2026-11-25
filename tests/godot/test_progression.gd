@@ -1,9 +1,8 @@
 extends "res://tests/godot/godot_test.gd"
-## Check the cooperative's progress and the row of blocks (DESIGN.md, 2.4, 4
+## Check the cooperative's progress and the parts of the levels (DESIGN.md, 2.4, 4
 ## and 12): the missions open in order, a completion and its wishes count once,
-## every mission can be completed, and the row offers five blocks, gives a new
-## one for each taken, lets the oldest go after a while, and brings the parts
-## which the mission still needs.
+## every mission can be completed, every level gives enough parts for its
+## sample solutions, and the yard gives and takes back the parts.
 
 const SampleBuilds := preload("res://tests/godot/sample_builds.gd")
 
@@ -15,8 +14,8 @@ func _run() -> void:
     _test_missions_open_in_order()
     _test_missions_solvable()
     _test_completion()
-    _test_queue()
-    _test_wanted_parts()
+    _test_supply()
+    _test_levels_give_enough()
 
 
 func _test_missions_open_in_order() -> void:
@@ -67,43 +66,51 @@ func _test_completion() -> void:
     check(restored.has_completed("first_home") and problems.is_empty(), "the progress is saved")
 
 
-func _test_queue() -> void:
-    var queue := BlockQueue.new(content, [], 7)
-    check_equal(queue.slots.size(), BlockQueue.SIZE, "five blocks wait")
-    var second := queue.slots[2]
-    var last := queue.slots[4]
-    var taken := queue.take(1)
-    check(taken != "", "a block is taken")
-    check_equal(queue.slots.size(), BlockQueue.SIZE, "a new one comes in")
-    check_equal(queue.slots[1], second, "the others move up")
-    check_equal(queue.slots[3], last, "in their order")
-    var oldest := queue.slots[1]
-    queue.shift_seconds = 10.0
-    check(not queue.advance(9.0), "the row waits")
-    check(queue.advance(1.5), "then the oldest leaves")
-    check_equal(queue.slots[0], oldest, "first in, first out")
-    check_equal(queue.slots.size(), BlockQueue.SIZE, "and still five wait")
-    check(queue.take(9) == "", "no block beyond the row")
-    var offered := ["bench_basic", "tree_small", "grass_patch"]
-    var tutorial := BlockQueue.new(content, offered, 3)
-    for i in range(30):
-        check(tutorial.take(0) in offered, "only the offered parts come")
+func _test_supply() -> void:
+    var grid := SampleBuilds.new(content).place_to_sit()
+    var supply := PartSupply.for_level(content.mission("place_to_sit")["parts"], grid)
+    check_equal(supply.kinds[0], "bench_basic", "the yard keeps the order of the level")
+    check_equal(supply.counts["bench_basic"], 0, "the bench on the site is not in the yard")
+    check_equal(supply.counts["chair_basic"], 2, "the chairs are")
+    check_equal(supply.take(0), "", "an empty place gives nothing")
+    check_equal(supply.take(1), "chair_basic", "a chair is taken")
+    check_equal(supply.count(1), 1, "one is left")
+    supply.give_back("chair_basic")
+    check_equal(supply.count(1), 2, "and it comes back")
+    supply.give_back("stove_basic")
+    check_equal(supply.kinds.back(), "stove_basic", "another kind gets a new place")
 
 
-func _test_wanted_parts() -> void:
-    var mission := content.mission("first_home")
-    var report := MissionEvaluator.evaluate(
-        mission, SampleBuilds.new(content).new_site("flat_40_24")
-    )
-    var wanted := preload("res://scenes/build_site/build_site.gd").wanted_tags(mission, report)
-    check(not wanted.is_empty(), "an empty site wants the parts of the objectives")
-    var queue := BlockQueue.new(content, [], 11)
-    queue.wanted_tags = wanted
-    var hits := 0
-    for i in range(200):
-        var definition := content.part(queue.take(0))
-        for tag in definition.tags:
-            if wanted.has(tag):
-                hits += 1
-                break
-    check(hits > 60, "the wanted parts come often: %d of 200" % hits)
+## Every level gives the parts of its sample solutions (both designs of the
+## home), so that many solutions are possible.
+func _test_levels_give_enough() -> void:
+    var builds := SampleBuilds.new(content)
+    var home_single := builds.new_site("flat_40_24")
+    builds.first_home_single(home_single)
+    var home_two := builds.new_site("flat_40_24")
+    builds.first_home_two_storeys(home_two)
+    var garden := builds.new_site("flat_40_24")
+    builds.garden(garden)
+    var workshop := builds.new_site("flat_40_24")
+    builds.workshop(workshop)
+    var solutions := {
+        "place_to_sit": [builds.place_to_sit()],
+        "first_home": [home_single, home_two],
+        "garden_for_everyone": [garden],
+        "neighbourhood_workshop": [workshop],
+    }
+    for id in solutions:
+        var parts: Dictionary = content.mission(id)["parts"]
+        for grid in solutions[id]:
+            var supply := PartSupply.for_level(parts, grid)
+            var used := {}
+            for instance_id in grid.instances:
+                var instance: PartInstance = grid.instances[instance_id]
+                if not instance.protected:
+                    used[instance.definition_id] = int(used.get(instance.definition_id, 0)) + 1
+            for part_id in used:
+                check(
+                    int(parts.get(part_id, 0)) >= int(used[part_id]),
+                    "%s gives enough of %s" % [id, part_id]
+                )
+            check(supply.counts.values().max() >= 0, "%s: the supply is consistent" % id)

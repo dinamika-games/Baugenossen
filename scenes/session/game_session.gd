@@ -111,17 +111,14 @@ func store_site(mission_id: String, grid: WorldGrid) -> void:
     dirty = true
 
 
-## Status of a mission for the city map: "locked", "available", "in_progress",
-## "completed" or "needs_repair" (completed, but no longer valid after edits).
+## Status of a mission for the city map: "locked", "available", "in_progress"
+## or "completed" (a solved puzzle is never changed again, only played anew,
+## see [method replay]).
 func mission_status(mission_id: String) -> String:
     var mission := content.mission(mission_id)
     if progress == null or not Progression.mission_available(progress, mission):
         return "locked"
     if progress.has_completed(mission_id):
-        if missions.has(mission_id):
-            var report := MissionEvaluator.evaluate(mission, open_site(mission_id))
-            if not report.can_submit():
-                return "needs_repair"
         return "completed"
     if (
         missions.has(mission_id)
@@ -129,6 +126,25 @@ func mission_status(mission_id: String) -> String:
     ):
         return "in_progress"
     return "available"
+
+
+## Play a level anew, from an empty site (its completion stays).
+func replay(mission_id: String) -> void:
+    var status := str(missions.get(mission_id, {}).get("status", "in_progress"))
+    missions[mission_id] = {"site": {}, "status": status}
+    dirty = true
+
+
+## The level to play after this one: the next open one not solved yet, in the
+## order of the levels (after this one first); "" if every open one is solved.
+func next_mission(after_id: String) -> String:
+    var order: Array[String] = content.mission_order
+    var start := order.find(after_id) + 1
+    for step in range(order.size()):
+        var id := order[(start + step) % order.size()]
+        if id != after_id and mission_status(id) in ["available", "in_progress"]:
+            return id
+    return ""
 
 
 ## Submit the mission: record its completion (once) and save it with the

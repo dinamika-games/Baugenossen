@@ -49,7 +49,7 @@ func feed(measures: Dictionary, now: float) -> Dictionary:
     # In the mirrored picture, leaning to the player's left moves the shoulders
     # to the left of the elbows (h goes down); rising lifts the shoulders
     # away from the elbows (v goes up).
-    return {
+    var result := {
         "h": h,
         "v": v,
         "lift_left": _mean("lift_left"),
@@ -60,6 +60,13 @@ func feed(measures: Dictionary, now: float) -> Dictionary:
         "up": v + UP_RANGE,
         "auto": true,
     }
+    # NOTE (mristin):
+    # Where the elbows were, in pixels, and the shoulder width, so that the
+    # controller sees when the player moved their hands (and calibrates anew).
+    if _samples[0]["m"].has("elbows_x"):
+        result["elbows"] = Vector2(_median("elbows_x"), _median("lower_elbow_y"))
+        result["unit"] = _median("unit")
+    return result
 
 
 func reset() -> void:

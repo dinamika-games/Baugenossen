@@ -16,16 +16,16 @@ const SCREENS := {
     "main_menu": "res://scenes/main_menu/main_menu.tscn",
     "city_map": "res://scenes/city_map/city_map.tscn",
     "build_site": "res://scenes/build_site/build_site.tscn",
-    "mission_results": "res://scenes/mission_results/mission_results.tscn",
     "credits": "res://scenes/main_menu/credits.tscn",
 }
 
 var content: ContentDb
 var session: GameSession
 var mission_id := ""
-## The result of the last submission, for the results screen.
-var last_summary: Dictionary = {}
 var pose_provider: PoseProvider = null
+## The calibration of the body controls, kept from level to level (see the
+## build site); {} until the crane learned the posture.
+var pose_calibration: Dictionary = {}
 
 var _quit_left := 0.0
 var _quit_hint: Label

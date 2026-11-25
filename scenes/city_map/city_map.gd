@@ -11,13 +11,11 @@ const STATUS_KEYS := {
     "available": "STATUS_AVAILABLE",
     "in_progress": "STATUS_IN_PROGRESS",
     "completed": "STATUS_COMPLETED",
-    "needs_repair": "STATUS_NEEDS_REPAIR",
 }
 const ACTION_KEYS := {
     "available": "CITY_START",
     "in_progress": "CITY_CONTINUE",
-    "completed": "CITY_REVISIT",
-    "needs_repair": "CITY_REPAIR",
+    "completed": "CITY_REPLAY",
 }
 @onready var _game: Node = get_node("/root/Game")
 @onready var _settings: Node = get_node("/root/Settings")
@@ -83,6 +81,10 @@ func _mission_card(content: ContentDb, id: String) -> Array:
 
 
 func _open(id: String) -> void:
+    # NOTE (mristin):
+    # A solved puzzle is not changed again: it is played anew.
+    if _game.session.mission_status(id) == "completed":
+        _game.session.replay(id)
     _game.mission_id = id
     _game.go("build_site")
 

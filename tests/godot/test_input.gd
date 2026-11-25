@@ -25,6 +25,7 @@ func _run() -> void:
     _test_concurrent_confirms()
     _test_dispatcher_states()
     _test_dwell()
+    _test_hands_moved()
 
 
 func _setup() -> void:
@@ -322,3 +323,38 @@ func _test_dwell() -> void:
     check_equal(dwell.point("table_basic", 0.9), 0.4 / 0.65, "another entry starts over")
     dwell.point("table_basic", 1.2)
     check_equal(dwell.selected(), "table_basic", "selected after 650 ms")
+
+
+## With the height control, hands moved far away (the elbows more than 0.6
+## shoulder widths off for 1.5 s) ask for a new calibration; a lean does not.
+func _test_hands_moved() -> void:
+    var body := SyntheticPoseProvider.new()
+    body.start()
+    var crane := PoseController.new()
+    crane.height_control = true
+    var auto := AutoCalibration.new()
+    for i in range(120):
+        body.advance(1.0 / 30.0)
+        if crane.calibration.is_empty():
+            crane.calibration = auto.feed(PoseMeasure.measure(body.latest_frame()), body.now())
+    check(crane.calibration.has("elbows"), "the calibration knows where the elbows were")
+    var events := _events_while(crane, body, 3.0)
+    check(not "recalibrate" in events, "holding still keeps the calibration")
+    body.shift = 0.06
+    events = _events_while(crane, body, 3.0)
+    check(not "recalibrate" in events, "nor does a lean")
+    body.shift = 0.0
+    body.hands_shift = 0.15
+    events = _events_while(crane, body, 1.0)
+    check(not "recalibrate" in events, "moved hands wait a moment")
+    events = _events_while(crane, body, 1.0)
+    check("recalibrate" in events, "then the crane calibrates anew")
+
+
+func _events_while(crane: PoseController, body: SyntheticPoseProvider, seconds: float) -> Array:
+    var events: Array = []
+    for i in range(int(seconds * 30)):
+        body.advance(1.0 / 30.0)
+        var output := crane.update(body.latest_frame(), body.now(), InputDispatcher.BUILD)
+        events.append_array(output["events"])
+    return events

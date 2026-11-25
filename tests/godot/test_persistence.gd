@@ -47,13 +47,9 @@ func _test_roundtrip_and_no_duplicate_rewards() -> void:
     check(again["submitted"], "the tutorial can be resubmitted")
     check(not again["first"], "but counts once")
     check_equal(restarted.progress.completed_missions.size(), 1, "the progress stays")
-    var bench: int = sit.at(WorldGrid.SLOT_CELLS, Vector2i(5, 0))
-    var site := restarted.open_site("place_to_sit")
-    site.remove_instance(bench)
-    restarted.store_site("place_to_sit", site)
-    check_equal(
-        restarted.mission_status("place_to_sit"), "needs_repair", "a broken site needs repair"
-    )
+    restarted.replay("place_to_sit")
+    check(restarted.open_site("place_to_sit").instances.is_empty(), "a replay starts empty")
+    check_equal(restarted.mission_status("place_to_sit"), "completed", "the level stays solved")
     check(restarted.progress.has_completed("place_to_sit"), "without losing the completion")
 
 
